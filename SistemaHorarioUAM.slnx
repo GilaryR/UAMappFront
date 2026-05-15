@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="SistemaHorario.UI/SistemaHorario.UI.csproj" />
+  <Project Path="SistemaHorarios.Application/SistemaHorario.Application.csproj" />
+  <Project Path="SistemaHorarios.Infrastructure/SistemaHorario.Infrastructure.csproj" />
+</Solution>
