@@ -9,6 +9,5 @@
         MinHeight="700"
         Background="#F4F8FB">
 
-    <auth:LoginView/>
+	<auth:LoginView/>
 </Window>
-    
