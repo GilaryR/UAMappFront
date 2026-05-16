@@ -9,8 +9,111 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Assets\Icons\flecha.png" />
+    <None Remove="Assets\Icons\IcAdvertencia.png" />
+    <None Remove="Assets\Icons\IcAdvertenciaR.png" />
+    <None Remove="Assets\Icons\IcAgregar.png" />
+    <None Remove="Assets\Icons\IcAgregarBlc.png" />
+    <None Remove="Assets\Icons\IcCambiar.png" />
+    <None Remove="Assets\Icons\IcCambiarContra.png" />
+    <None Remove="Assets\Icons\IcCerrar.png" />
+    <None Remove="Assets\Icons\IcCerrarsesion.png" />
+    <None Remove="Assets\Icons\IcCoordinadores.png" />
+    <None Remove="Assets\Icons\IcCorrecto.png" />
+    <None Remove="Assets\Icons\IcCorreo.png" />
+    <None Remove="Assets\Icons\IcDevolverTb1.png" />
+    <None Remove="Assets\Icons\IcDevuelve.png" />
+    <None Remove="Assets\Icons\IcDocentes.png" />
+    <None Remove="Assets\Icons\IcDocentes2.png" />
+    <None Remove="Assets\Icons\IcDocentesCircI.png" />
+    <None Remove="Assets\Icons\IcEditar.png" />
+    <None Remove="Assets\Icons\IcEliminarNg.png" />
+    <None Remove="Assets\Icons\IcEliminarRj.png" />
+    <None Remove="Assets\Icons\IcFacultad.png" />
+    <None Remove="Assets\Icons\IcGrupos.png" />
+    <None Remove="Assets\Icons\IcGruposCircI.png" />
+    <None Remove="Assets\Icons\IcHistorial.png" />
+    <None Remove="Assets\Icons\IcHorarios.png" />
+    <None Remove="Assets\Icons\IcIniciar.png" />
+    <None Remove="Assets\Icons\IcInicio.png" />
+    <None Remove="Assets\Icons\Iclapiz.png" />
+    <None Remove="Assets\Icons\IcManual.png" />
+    <None Remove="Assets\Icons\IcMaterias.png" />
+    <None Remove="Assets\Icons\IcMateriasCircI.png" />
+    <None Remove="Assets\Icons\icPerfilUs.png" />
+    <None Remove="Assets\Icons\IcPlanAca.png" />
+    <None Remove="Assets\Icons\IcPlanCircI.png" />
+    <None Remove="Assets\Icons\IcReportes.png" />
+    <None Remove="Assets\Icons\IcRol.png" />
+    <None Remove="Assets\Icons\IcTelefono.png" />
+    <None Remove="Assets\Icons\IcUsuaCircul.png" />
+    <None Remove="Assets\Icons\IcUsuario.png" />
+    <None Remove="Assets\Icons\IcUsuarioIn.png" />
+    <None Remove="Assets\Icons\IcVolverTb1.png" />
+    <None Remove="Assets\Icons\IcX.png" />
+    <None Remove="Assets\Icons\OpcUsua.png" />
+    <None Remove="Assets\Images\ImgCupula.png" />
+    <None Remove="Assets\Images\ImgUsuario.png" />
+    <None Remove="Assets\Images\LogosUam.png" />
+    <None Remove="Assets\Images\LogoU.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\Icons\IcGrupos.png" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\SistemaHorarios.Application\SistemaHorario.Application.csproj" />
     <ProjectReference Include="..\SistemaHorarios.Infrastructure\SistemaHorario.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\Icons\flecha.png" />
+    <Resource Include="Assets\Icons\IcAdvertencia.png" />
+    <Resource Include="Assets\Icons\IcAdvertenciaR.png" />
+    <Resource Include="Assets\Icons\IcAgregar.png" />
+    <Resource Include="Assets\Icons\IcAgregarBlc.png" />
+    <Resource Include="Assets\Icons\IcCambiar.png" />
+    <Resource Include="Assets\Icons\IcCambiarContra.png" />
+    <Resource Include="Assets\Icons\IcCerrar.png" />
+    <Resource Include="Assets\Icons\IcCerrarsesion.png" />
+    <Resource Include="Assets\Icons\IcCoordinadores.png" />
+    <Resource Include="Assets\Icons\IcCorrecto.png" />
+    <Resource Include="Assets\Icons\IcCorreo.png" />
+    <Resource Include="Assets\Icons\IcDevolverTb1.png" />
+    <Resource Include="Assets\Icons\IcDevuelve.png" />
+    <Resource Include="Assets\Icons\IcDocentes.png" />
+    <Resource Include="Assets\Icons\IcDocentes2.png" />
+    <Resource Include="Assets\Icons\IcDocentesCircI.png" />
+    <Resource Include="Assets\Icons\IcEditar.png" />
+    <Resource Include="Assets\Icons\IcEliminarNg.png" />
+    <Resource Include="Assets\Icons\IcEliminarRj.png" />
+    <Resource Include="Assets\Icons\IcFacultad.png" />
+    <Resource Include="Assets\Icons\IcGruposCircI.png" />
+    <Resource Include="Assets\Icons\IcHistorial.png" />
+    <Resource Include="Assets\Icons\IcHorarios.png" />
+    <Resource Include="Assets\Icons\IcIniciar.png" />
+    <Resource Include="Assets\Icons\IcInicio.png" />
+    <Resource Include="Assets\Icons\Iclapiz.png" />
+    <Resource Include="Assets\Icons\IcManual.png" />
+    <Resource Include="Assets\Icons\IcMaterias.png" />
+    <Resource Include="Assets\Icons\IcMateriasCircI.png" />
+    <Resource Include="Assets\Icons\icPerfilUs.png" />
+    <Resource Include="Assets\Icons\IcPlanAca.png" />
+    <Resource Include="Assets\Icons\IcPlanCircI.png" />
+    <Resource Include="Assets\Icons\IcReportes.png" />
+    <Resource Include="Assets\Icons\IcRol.png" />
+    <Resource Include="Assets\Icons\IcTelefono.png" />
+    <Resource Include="Assets\Icons\IcUsuaCircul.png" />
+    <Resource Include="Assets\Icons\IcUsuario.png" />
+    <Resource Include="Assets\Icons\IcUsuarioIn.png" />
+    <Resource Include="Assets\Icons\IcVolverTb1.png" />
+    <Resource Include="Assets\Icons\IcX.png" />
+    <Resource Include="Assets\Icons\OpcUsua.png" />
+    <Resource Include="Assets\Images\ImgCupula.png" />
+    <Resource Include="Assets\Images\ImgUsuario.png" />
+    <Resource Include="Assets\Images\LogosUam.png" />
+    <Resource Include="Assets\Images\LogoU.png" />
   </ItemGroup>
 
 </Project>

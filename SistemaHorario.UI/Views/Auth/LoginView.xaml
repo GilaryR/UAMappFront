@@ -1,0 +1,225 @@
+﻿<UserControl x:Class="SistemaHorario.UI.Views.Auth.LoginView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Grid Background="#F4F8FB">
+
+        <!-- Fondo blanco superior -->
+        <Grid>
+            <Grid.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                    <GradientStop Color="White" Offset="0"/>
+                    <GradientStop Color="#F3FAFD" Offset="1"/>
+                </LinearGradientBrush>
+            </Grid.Background>
+        </Grid>
+
+        <!-- Imagen cúpula izquierda -->
+        <Image Source="/Assets/Images/ImgCupula.png"
+        Width="760"
+               Opacity="0.22"
+               Stretch="Uniform"
+               HorizontalAlignment="Left"
+               VerticalAlignment="Center"
+               Margin="80,0,0,0"/>
+
+        <!-- Forma inferior suave -->
+        <Path Fill="#EAF5FB"
+              Opacity="0.9"
+              VerticalAlignment="Bottom"
+              Stretch="Fill"
+              Height="180"
+              Data="M0,120 C180,30 350,90 520,50 C740,0 900,70 1100,20 C1300,-20 1500,60 1700,0 L1700,180 L0,180 Z"/>
+
+        <!-- Contenedor general -->
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="620"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Card login -->
+            <Border Grid.Column="1"
+                    Width="470"
+                    MinHeight="540"
+                    Padding="38"
+                    Background="White"
+                    CornerRadius="14"
+                    BorderBrush="#DDE3EA"
+                    BorderThickness="1"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center">
+
+                <Border.Effect>
+                    <DropShadowEffect BlurRadius="10"
+                                      ShadowDepth="4"
+                                      Opacity="0.18"/>
+                </Border.Effect>
+
+                <StackPanel>
+
+                    <!-- Logo -->
+                    <Image Source="/Assets/Images/LogoU.png"
+                           Width="92"
+                           Height="72"
+                           Stretch="Uniform"
+                           HorizontalAlignment="Center"
+                           Margin="0,0,0,8"/>
+
+                    <!-- Título -->
+                    <TextBlock Text="Iniciar sesión"
+                               FontSize="39"
+                               FontWeight="Bold"
+                               Foreground="#222831"
+                               HorizontalAlignment="Center"/>
+
+                    <TextBlock Text="Sistema de gestión de horarios académicos"
+                               FontSize="14"
+                               FontWeight="SemiBold"
+                               Foreground="#9AA3AF"
+                               HorizontalAlignment="Center"
+                               Margin="0,8,0,30"/>
+
+                    <!-- Correo -->
+                    <TextBlock Text="Correo institucional"
+                               FontSize="16"
+                               FontWeight="Bold"
+                               Foreground="Black"
+                               Margin="0,0,0,8"/>
+
+                    <Grid Height="36">
+                        <Border Background="White"
+                                BorderBrush="#E1E5EA"
+                                BorderThickness="1"
+                                CornerRadius="6"/>
+
+                        <TextBox x:Name="TxtCorreoInstitucional"
+                                 BorderThickness="0"
+                                 Background="Transparent"
+                                 Padding="34,7,10,7"
+                                 FontSize="13"
+                                 VerticalContentAlignment="Center"/>
+
+                        <TextBlock Text="👤"
+                                   Foreground="#B8C9D8"
+                                   FontSize="15"
+                                   VerticalAlignment="Center"
+                                   Margin="10,0,0,0"
+                                   IsHitTestVisible="False"/>
+
+                        <TextBlock x:Name="PlaceholderCorreo"
+                                   Text="Ingresa tu correo"
+                                   Foreground="#C5C8CD"
+                                   FontSize="13"
+                                   VerticalAlignment="Center"
+                                   Margin="34,0,0,0"
+                                   IsHitTestVisible="False"/>
+                    </Grid>
+
+                    <TextBlock x:Name="TxtErrorCorreo"
+                               Foreground="#C00000"
+                               FontSize="12"
+                               FontWeight="Bold"
+                               Margin="3,6,0,16"
+                               Visibility="Collapsed"/>
+
+                    <!-- Contraseña -->
+                    <TextBlock Text="Contraseña"
+                               FontSize="16"
+                               FontWeight="Bold"
+                               Foreground="Black"
+                               Margin="0,0,0,8"/>
+
+                    <Grid Height="36">
+                        <Border Background="White"
+                                BorderBrush="#E1E5EA"
+                                BorderThickness="1"
+                                CornerRadius="6"/>
+
+                        <PasswordBox x:Name="TxtContrasena"
+                                     BorderThickness="0"
+                                     Background="Transparent"
+                                     Padding="34,7,10,7"
+                                     FontSize="13"
+                                     VerticalContentAlignment="Center"/>
+
+                        <TextBlock Text="🔒"
+                                   Foreground="#B8C9D8"
+                                   FontSize="14"
+                                   VerticalAlignment="Center"
+                                   Margin="10,0,0,0"
+                                   IsHitTestVisible="False"/>
+
+                        <TextBlock x:Name="PlaceholderContrasena"
+                                   Text="Ingresa tu contraseña"
+                                   Foreground="#C5C8CD"
+                                   FontSize="13"
+                                   VerticalAlignment="Center"
+                                   Margin="34,0,0,0"
+                                   IsHitTestVisible="False"/>
+                    </Grid>
+
+                    <TextBlock x:Name="TxtErrorContrasena"
+                               Foreground="#C00000"
+                               FontSize="12"
+                               FontWeight="Bold"
+                               Margin="3,6,0,8"
+                               Visibility="Collapsed"/>
+
+                    <TextBlock x:Name="TxtErrorCredenciales"
+                               Text="Usuario o contraseña incorrecta"
+                               Foreground="#C00000"
+                               FontSize="12"
+                               FontWeight="Bold"
+                               Margin="3,0,0,14"
+                               Visibility="Collapsed"/>
+
+                    <!-- Mantener sesión -->
+                    <CheckBox x:Name="ChkMantenerSesion"
+                              Content="Mantener sesión iniciada"
+                              FontSize="12"
+                              Margin="0,0,0,20"/>
+
+                    <!-- Botón iniciar -->
+                    <Button x:Name="BtnIniciarSesion"
+                            Height="40"
+                            Background="#0878B8"
+                            BorderThickness="0"
+                            Cursor="Hand"
+                            Click="BtnIniciarSesion_Click">
+
+                        <Button.Resources>
+                            <Style TargetType="Border">
+                                <Setter Property="CornerRadius" Value="4"/>
+                            </Style>
+                        </Button.Resources>
+
+                        <StackPanel Orientation="Horizontal"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center">
+
+                            <Image Source="/Assets/Icons/IcIniciar.png"
+                                   Width="20"
+                                   Height="20"
+                                   Margin="0,0,12,0"/>
+
+                            <TextBlock Text="Iniciar sesión"
+                                       Foreground="White"
+                                       FontSize="18"
+                                       FontWeight="Bold"/>
+                        </StackPanel>
+                    </Button>
+
+                    <!-- Estado API -->
+                    <TextBlock x:Name="TxtEstadoApi"
+                               Text=""
+                               FontSize="13"
+                               FontWeight="Bold"
+                               TextAlignment="Center"
+                               HorizontalAlignment="Center"
+                               Margin="0,18,0,0"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>
