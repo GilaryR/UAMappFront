@@ -1,0 +1,84 @@
+﻿<Window x:Class="SistemaHorario.UI.Dialogs.Shared.CerrarSesionDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Cerrar sesión"
+        Width="416"
+        Height="268"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        WindowStyle="None"
+        Background="Transparent"
+        AllowsTransparency="True">
+
+    <Border Background="White"
+            CornerRadius="10"
+            Padding="22">
+
+        <StackPanel VerticalAlignment="Center">
+
+            <Image Source="/Assets/Icons/IcAdvertencia.png"
+                   Width="52"
+                   Height="52"
+                   Stretch="Uniform"
+                   HorizontalAlignment="Center"
+                   Margin="0,0,0,12"/>
+
+            <TextBlock Text="Cerrar sesión"
+                       FontSize="24"
+                       FontWeight="Bold"
+                       Foreground="Black"
+                       TextAlignment="Center"
+                       HorizontalAlignment="Center"
+                       Margin="0,0,0,16"/>
+
+            <TextBlock Text="¿Estás seguro que deseas cerrar tu sesión actual?&#x0a;Deberás iniciar sesión nuevamente para acceder&#x0a;al sistema."
+                       FontSize="13"
+                       FontWeight="SemiBold"
+                       Foreground="#9B9B9B"
+                       TextAlignment="Center"
+                       HorizontalAlignment="Center"
+                       Margin="0,0,0,24"/>
+
+            <StackPanel Orientation="Horizontal"
+                        HorizontalAlignment="Center">
+
+                <Button Content="Cancelar"
+                        Width="145"
+                        Height="36"
+                        Background="White"
+                        Foreground="#9B9B9B"
+                        BorderBrush="#BDBDBD"
+                        BorderThickness="1"
+                        FontSize="14"
+                        FontWeight="Bold"
+                        Cursor="Hand"
+                        Margin="0,0,24,0"
+                        Click="BtnCancelar_Click"/>
+
+                <Button Width="150"
+                        Height="36"
+                        Background="#C00000"
+                        Foreground="White"
+                        BorderThickness="0"
+                        FontSize="14"
+                        FontWeight="Bold"
+                        Cursor="Hand"
+                        Click="BtnCerrarSesion_Click">
+
+                    <StackPanel Orientation="Horizontal"
+                                HorizontalAlignment="Center">
+
+                        <Image Source="/Assets/Icons/IcCerrar.png"
+                               Width="20"
+                               Height="20"
+                               Stretch="Uniform"
+                               Margin="0,0,8,0"/>
+
+                        <TextBlock Text="Cerrar sesión"
+                                   VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+        </StackPanel>
+    </Border>
+</Window>
