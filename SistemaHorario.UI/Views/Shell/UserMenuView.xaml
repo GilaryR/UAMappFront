@@ -1,0 +1,117 @@
+﻿<UserControl x:Class="SistemaHorario.UI.Views.Shell.UserMenuView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Width="290"
+             Height="205"
+             Visibility="Collapsed">
+
+    <Border Background="White"
+            CornerRadius="14"
+            BorderBrush="#E5E7EB"
+            BorderThickness="1"
+            Padding="14">
+
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="10"
+                              ShadowDepth="2"
+                              Opacity="0.16"/>
+        </Border.Effect>
+
+        <StackPanel>
+
+            <!-- Usuario -->
+            <Grid Margin="0,0,0,12">
+
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="60"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Imagen -->
+                <Image Source="/Assets/Icons/IcUsuaCircul.png"
+                       Width="44"
+                       Height="44"
+                       Stretch="Uniform"
+                       VerticalAlignment="Center"/>
+
+                <!-- Datos -->
+                <StackPanel Grid.Column="1"
+                            Margin="10,0,0,0"
+                            VerticalAlignment="Center">
+
+                    <TextBlock x:Name="TxtNombreUsuario"
+                               Text="Administrador"
+                               FontSize="15"
+                               FontWeight="Bold"
+                               Foreground="#111827"/>
+
+                    <TextBlock x:Name="TxtCorreoUsuario"
+                               Text="administrador@autonoma.edu.co"
+                               FontSize="10"
+                               FontWeight="SemiBold"
+                               Foreground="#A1A1AA"
+                               Margin="0,2,0,0"/>
+                </StackPanel>
+            </Grid>
+
+            <!-- Línea -->
+            <Rectangle Height="1"
+                       Fill="#E5E7EB"
+                       Margin="0,0,0,12"/>
+
+            <!-- Perfil -->
+            <Button x:Name="BtnMiPerfil"
+                    Height="38"
+                    Background="White"
+                    BorderThickness="0"
+                    Cursor="Hand"
+                    HorizontalContentAlignment="Left"
+                    Click="BtnMiPerfil_Click">
+
+                <StackPanel Orientation="Horizontal">
+
+                    <Image Source="/Assets/Icons/IcPerfilUs.png"
+                           Width="20"
+                           Height="20"
+                           Stretch="Uniform"
+                           Margin="10,0,16,0"/>
+
+                    <TextBlock Text="Mi perfil"
+                               FontSize="14"
+                               Foreground="#111827"
+                               VerticalAlignment="Center"/>
+                </StackPanel>
+            </Button>
+
+            <!-- Línea -->
+            <Rectangle Height="1"
+                       Fill="#E5E7EB"
+                       Margin="0,12,0,12"/>
+
+            <!-- Cerrar sesión -->
+            <Button x:Name="BtnCerrarSesion"
+                    Height="38"
+                    Background="White"
+                    BorderThickness="0"
+                    Cursor="Hand"
+                    HorizontalContentAlignment="Left"
+                    Click="BtnCerrarSesion_Click">
+
+                <StackPanel Orientation="Horizontal">
+
+                    <Image Source="/Assets/Icons/IcCerrarsesion.png"
+                           Width="24"
+                           Height="24"
+                           Stretch="Uniform"
+                           Margin="10,0,16,0"/>
+
+                    <TextBlock Text="Cerrar sesión"
+                               FontSize="14"
+                               FontWeight="SemiBold"
+                               Foreground="#D17B82"
+                               VerticalAlignment="Center"/>
+                </StackPanel>
+            </Button>
+        </StackPanel>
+    </Border>
+</UserControl>
