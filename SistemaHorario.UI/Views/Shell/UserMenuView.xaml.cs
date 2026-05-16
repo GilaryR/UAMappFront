@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Windows;
 using System.Windows.Controls;
+using SistemaHorario.UI.Views.Auth;
+using SistemaHorario.UI.Dialogs.Shared;
+
 
 namespace SistemaHorario.UI.Views.Shell
 {
@@ -41,6 +44,8 @@ namespace SistemaHorario.UI.Views.Shell
         public UserMenuView()
         {
             InitializeComponent();
+
+            Visibility = Visibility.Collapsed;
 
             // TODO:
             // Reemplazar estos datos por la información real
@@ -137,7 +142,7 @@ namespace SistemaHorario.UI.Views.Shell
         /// </summary>
         private void BtnMiPerfil_Click(object sender, RoutedEventArgs e)
         {
-            PerfilSolicitado?.Invoke(this, EventArgs.Empty);
+            Ocultar();
         }
 
         /// <summary>
@@ -148,7 +153,34 @@ namespace SistemaHorario.UI.Views.Shell
         /// </summary>
         private void BtnCerrarSesion_Click(object sender, RoutedEventArgs e)
         {
-            CerrarSesionSolicitado?.Invoke(this, EventArgs.Empty);
+            CerrarSesionDialog dialog = new CerrarSesionDialog
+            {
+                Owner = Window.GetWindow(this)
+            };
+
+            bool? resultado = dialog.ShowDialog();
+
+            if (resultado != true)
+                return;
+
+            CerrarSesion();
+        }
+
+        /// <summary>
+        /// Cierra la sesión visual actual y retorna al LoginView.
+        ///
+        /// TODO:
+        /// Cuando exista autenticación real, limpiar aquí UsuarioSesion,
+        /// token JWT y cualquier dato persistido.
+        /// </summary>
+        private void CerrarSesion()
+        {
+            Window? ventanaPrincipal = Window.GetWindow(this);
+
+            if (ventanaPrincipal == null)
+                return;
+
+            ventanaPrincipal.Content = new LoginView();
         }
     }
 }
