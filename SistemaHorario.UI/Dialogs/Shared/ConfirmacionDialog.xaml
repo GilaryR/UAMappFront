@@ -1,0 +1,74 @@
+﻿<Window x:Class="SistemaHorario.UI.Dialogs.Shared.ConfirmacionDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Confirmación"
+        Width="358"
+        Height="220"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        WindowStyle="None"
+        Background="Transparent"
+        AllowsTransparency="True">
+
+    <Border Background="White"
+            CornerRadius="8"
+            BorderBrush="#333333"
+            BorderThickness="1"
+            Padding="22" HorizontalAlignment="Left" Width="348">
+
+        <StackPanel VerticalAlignment="Center">
+
+            <Image Source="/Assets/Icons/IcAdvertencia.png"
+                   Width="46"
+                   Height="46"
+                   Stretch="Uniform"
+                   HorizontalAlignment="Center"
+                   Margin="0,0,0,10"/>
+
+            <TextBlock x:Name="TxtTitulo"
+                       Text="Crear docente"
+                       FontSize="22"
+                       FontWeight="Bold"
+                       Foreground="Black"
+                       TextAlignment="Center"
+                       HorizontalAlignment="Center"
+                       Margin="0,0,0,10"/>
+
+            <TextBlock x:Name="TxtMensaje"
+                       Text="¿Estás seguro que deseas crear al docente?"
+                       FontSize="13"
+                       FontWeight="SemiBold"
+                       Foreground="#9B9B9B"
+                       TextAlignment="Center"
+                       HorizontalAlignment="Center"
+                       Margin="0,0,0,22"/>
+
+            <StackPanel Orientation="Horizontal"
+                        HorizontalAlignment="Center">
+
+                <Button Content="Cancelar"
+                        Width="135"
+                        Height="34"
+                        Background="#C00000"
+                        Foreground="White"
+                        FontSize="14"
+                        FontWeight="Bold"
+                        BorderThickness="0"
+                        Cursor="Hand"
+                        Margin="0,0,24,0"
+                        Click="BtnCancelar_Click"/>
+
+                <Button Content="Confirmar"
+                        Width="135"
+                        Height="34"
+                        Background="#70AD3A"
+                        Foreground="White"
+                        FontSize="14"
+                        FontWeight="Bold"
+                        BorderThickness="0"
+                        Cursor="Hand"
+                        Click="BtnConfirmar_Click"/>
+            </StackPanel>
+        </StackPanel>
+    </Border>
+</Window>
