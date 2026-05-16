@@ -1,0 +1,75 @@
+﻿<UserControl x:Class="SistemaHorario.UI.Views.Shell.TopBarView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Height="78">
+
+    <Border Background="White"
+            BorderBrush="#E5E7EB"
+            BorderThickness="0,0,0,1"
+            Padding="28,0">
+
+        <Grid>
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- TÍTULO -->
+            <TextBlock x:Name="TxtTituloSistema"
+                       Text="Sistema de gestión de horarios académicos"
+                       FontSize="24"
+                       FontWeight="Bold"
+                       Foreground="#1F2937"
+                       VerticalAlignment="Center"/>
+
+            <!-- USUARIO -->
+            <Border Grid.Column="1"
+                    Background="Transparent"
+                    Cursor="Hand">
+
+                <Grid x:Name="BtnUsuario"
+                      MouseLeftButtonUp="BtnUsuario_MouseLeftButtonUp">
+
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- FOTO -->
+                    <Border Width="48"
+                            Height="48"
+                            CornerRadius="24"
+                            Background="#F3F4F6"
+                            VerticalAlignment="Center">
+
+                        <Image Source="/Assets/Icons/IcUsuaCircul.png"
+                               Width="48"
+                               Height="48"
+                               Stretch="Uniform"/>
+                    </Border>
+
+                    <!-- NOMBRE -->
+                    <TextBlock x:Name="TxtNombreUsuario"
+                               Grid.Column="1"
+                               Text="Administrador"
+                               FontSize="16"
+                               FontWeight="SemiBold"
+                               Foreground="#1F2937"
+                               VerticalAlignment="Center"
+                               Margin="14,0,14,0"/>
+
+                    <!-- FLECHA -->
+                    <Image x:Name="ImgFlecha"
+                           Grid.Column="2"
+                           Source="/Assets/Icons/Flecha.png"
+                           Width="18"
+                           Height="18"
+                           Stretch="Uniform"
+                           VerticalAlignment="Center"/>
+                </Grid>
+            </Border>
+        </Grid>
+    </Border>
+</UserControl>

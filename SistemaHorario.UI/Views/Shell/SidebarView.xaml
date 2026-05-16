@@ -1,0 +1,33 @@
+﻿<UserControl x:Class="SistemaHorario.UI.Views.Shell.SidebarView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Width="260">
+
+    <Border Background="#536679">
+
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="135"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- Logo superior -->
+            <Border Grid.Row="0"
+                    Background="#536679"
+                    Padding="20,20,20,10">
+
+                <Image Source="/Assets/Images/LogoU.png"
+                       Stretch="Uniform"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"/>
+            </Border>
+
+            <!-- Opciones del menú -->
+            <ScrollViewer Grid.Row="1"
+                          VerticalScrollBarVisibility="Auto">
+
+                <StackPanel x:Name="PnlMenu"/>
+            </ScrollViewer>
+        </Grid>
+    </Border>
+</UserControl>
