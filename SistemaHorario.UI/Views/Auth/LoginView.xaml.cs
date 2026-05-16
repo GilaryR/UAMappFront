@@ -1,4 +1,5 @@
-﻿using SistemaHorario.Infrastructure.Api;
+﻿using SistemaHorario.UI.ViewModels.Auth;
+using SistemaHorario.UI.Views.Shell;
 using SistemaHorarios.Application.Common;
 using System.Windows;
 using System.Windows.Controls;
@@ -14,6 +15,7 @@ namespace SistemaHorario.UI.Views.Auth
     /// - Capturar la contraseña.
     /// - Validar campos obligatorios.
     /// - Probar la conexión con la API mediante un GET temporal.
+    /// - Navegación hacia MainShellView.
     ///
     /// NOTA:
     /// En esta etapa todavía no se consume el endpoint real de login.
@@ -23,9 +25,9 @@ namespace SistemaHorario.UI.Views.Auth
     public partial class LoginView : UserControl
     {
         /// <summary>
-        /// Servicio utilizado para validar la conexión con la API.
+        /// ViewModel asociado al login.
         /// </summary>
-        private readonly ApiHealthService _apiHealthService;
+        private readonly LoginViewModel _viewModel;
 
         /// <summary>
         /// Constructor de la vista LoginView.
@@ -38,7 +40,8 @@ namespace SistemaHorario.UI.Views.Auth
         {
             InitializeComponent();
 
-            _apiHealthService = new ApiHealthService();
+            _viewModel = new LoginViewModel();
+            DataContext = _viewModel;
 
             TxtCorreoInstitucional.TextChanged += TxtCorreoInstitucional_TextChanged;
             TxtContrasena.PasswordChanged += TxtContrasena_PasswordChanged;
@@ -47,52 +50,47 @@ namespace SistemaHorario.UI.Views.Auth
         }
 
         /// <summary>
-        /// Evento ejecutado al presionar el botón "Iniciar sesión".
+        /// Evento ejecutado al presionar Iniciar sesión.
         ///
-        /// Flujo actual:
-        /// 1. Limpia mensajes previos.
-        /// 2. Valida campos obligatorios.
-        /// 3. Si los campos son válidos, prueba la conexión con la API.
-        /// 4. Muestra el resultado de la conexión.
+        /// Actualmente el sistema NO consume todavía
+        /// el endpoint real POST /api/auth/login.
         ///
-        /// Este método queda preparado para que en el futuro
-        /// se reemplace la prueba GET por el consumo real del endpoint:
-        /// POST /api/auth/login.
+        /// Por esta razón:
+        /// - solo se validan campos básicos
+        /// - se permite navegar temporalmente al sistema
+        ///
+        /// TODO:
+        /// Reemplazar esta lógica por autenticación real
+        /// cuando backend implemente JWT/login completo.
         /// </summary>
-        private async void BtnIniciarSesion_Click(object sender, RoutedEventArgs e)
+        private void BtnIniciarSesion_Click(object sender, RoutedEventArgs e)
         {
             LimpiarMensajes();
 
-            bool formularioValido = ValidarFormulario();
+            SincronizarViewModel();
 
-            if (!formularioValido)
+            if (!ValidarFormulario())
                 return;
 
-            BtnIniciarSesion.IsEnabled = false;
-            TxtEstadoApi.Text = "Probando conexión con la API...";
-            TxtEstadoApi.Foreground = Brushes.DarkOrange;
+            AbrirSistemaPrincipal();
+        }
 
-            ApiResponse respuesta = await _apiHealthService.ProbarConexionAsync();
+        /// <summary>
+        /// Sincroniza los controles visuales con el ViewModel.
+        ///
+        /// PasswordBox no permite binding directo seguro,
+        /// por eso se asigna manualmente.
+        /// </summary>
+        private void SincronizarViewModel()
+        {
+            _viewModel.CorreoInstitucional =
+                TxtCorreoInstitucional.Text.Trim();
 
-            BtnIniciarSesion.IsEnabled = true;
+            _viewModel.Contrasena =
+                TxtContrasena.Password.Trim();
 
-            if (respuesta.Exitoso)
-            {
-                TxtEstadoApi.Text = respuesta.Mensaje;
-                TxtEstadoApi.Foreground = Brushes.Green;
-
-                MessageBox.Show(
-                    "Login preparado correctamente. La autenticación real se conectará después.",
-                    "Login preparado",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Information
-                );
-
-                return;
-            }
-
-            TxtEstadoApi.Text = respuesta.Mensaje;
-            TxtEstadoApi.Foreground = Brushes.Red;
+            _viewModel.MantenerSesion =
+                ChkMantenerSesion.IsChecked == true;
         }
 
         /// <summary>
@@ -111,24 +109,43 @@ namespace SistemaHorario.UI.Views.Auth
         {
             bool valido = true;
 
-            string correoInstitucional = TxtCorreoInstitucional.Text.Trim();
-            string contrasena = TxtContrasena.Password.Trim();
-
-            if (string.IsNullOrWhiteSpace(correoInstitucional))
+            if (!_viewModel.CorreoEsValido())
             {
                 TxtErrorCorreo.Text = "ⓘ El usuario es obligatorio.";
                 TxtErrorCorreo.Visibility = Visibility.Visible;
                 valido = false;
             }
 
-            if (string.IsNullOrWhiteSpace(contrasena))
+            if (!_viewModel.ContrasenaEsValida())
             {
-                TxtErrorContrasena.Text = "ⓘ Contraseña obligatoria";
+                TxtErrorContrasena.Text = "ⓘ Contraseña obligatoria.";
+                TxtErrorContrasena.Visibility = Visibility.Visible;
+                valido = false;
+            }
+            else if (!_viewModel.ContrasenaCumpleLongitudMinima())
+            {
+                TxtErrorContrasena.Text = "ⓘ La contraseña debe tener mínimo 6 caracteres.";
                 TxtErrorContrasena.Visibility = Visibility.Visible;
                 valido = false;
             }
 
             return valido;
+        }
+
+        /// <summary>
+        /// Carga MainShellView dentro de MainWindow.
+        ///
+        /// MainShellView mostrará DashboardView como pantalla inicial
+        /// cuando la rama del Dashboard ya esté integrada en develop.
+        /// </summary>
+        private void AbrirSistemaPrincipal()
+        {
+            Window? ventanaPrincipal = Window.GetWindow(this);
+
+            if (ventanaPrincipal == null)
+                return;
+
+            ventanaPrincipal.Content = new MainShellView();
         }
 
         /// <summary>
