@@ -27,5 +27,24 @@ namespace SistemaHorario.UI.ViewModels.Base
                 new PropertyChangedEventArgs(nombre)
             );
         }
+
+        /// <summary>
+        /// Actualiza una propiedad y notifica el cambio
+        /// solo cuando el valor realmente cambió.
+        /// </summary>
+        protected bool SetProperty<T>(
+            ref T campo,
+            T valor,
+            [CallerMemberName] string? nombrePropiedad = null)
+        {
+            if (Equals(campo, valor))
+                return false;
+
+            campo = valor;
+            OnPropertyChanged(nombrePropiedad);
+
+            return true;
+        }
+
     }
 }
