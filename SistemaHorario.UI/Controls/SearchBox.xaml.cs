@@ -11,6 +11,7 @@ namespace SistemaHorario.UI.Controls
     /// - Escribir texto de búsqueda.
     /// - Mostrar placeholder dinámico.
     /// - Limpiar contenido rápidamente.
+    /// - Notificar cambios de búsqueda.
     ///
     /// Este control será utilizado en:
     /// - Materias
@@ -23,7 +24,12 @@ namespace SistemaHorario.UI.Controls
     public partial class SearchBox : UserControl
     {
         /// <summary>
-        /// Constructor del control SearchBox.
+        /// Evento público ejecutado cuando cambia el texto.
+        /// </summary>
+        public event RoutedEventHandler? BusquedaCambiada;
+
+        /// <summary>
+        /// Constructor del SearchBox.
         /// </summary>
         public SearchBox()
         {
@@ -33,8 +39,7 @@ namespace SistemaHorario.UI.Controls
         }
 
         /// <summary>
-        /// Texto placeholder mostrado cuando
-        /// el campo está vacío.
+        /// Placeholder mostrado cuando el campo está vacío.
         /// </summary>
         public string Placeholder
         {
@@ -43,7 +48,7 @@ namespace SistemaHorario.UI.Controls
         }
 
         /// <summary>
-        /// Texto actual escrito por el usuario.
+        /// Texto actual del buscador.
         /// </summary>
         public string TextoBusqueda
         {
@@ -52,27 +57,46 @@ namespace SistemaHorario.UI.Controls
         }
 
         /// <summary>
-        /// Evento ejecutado cuando cambia el texto.
-        /// </summary>
-        private void TxtBusqueda_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            ActualizarEstadoVisual();
-        }
-
-        /// <summary>
         /// Limpia el contenido del buscador.
         /// </summary>
-        private void BtnLimpiar_Click(object sender, RoutedEventArgs e)
+        public void Limpiar()
         {
             TxtBusqueda.Clear();
 
             ActualizarEstadoVisual();
+
+            BusquedaCambiada?.Invoke(
+                this,
+                new RoutedEventArgs()
+            );
+        }
+
+        /// <summary>
+        /// Evento ejecutado cuando cambia el texto.
+        /// </summary>
+        private void TxtBusqueda_TextChanged(
+            object sender,
+            TextChangedEventArgs e)
+        {
+            ActualizarEstadoVisual();
+
+            BusquedaCambiada?.Invoke(this, e);
+        }
+
+        /// <summary>
+        /// Limpia el contenido desde el botón interno.
+        /// </summary>
+        private void BtnLimpiar_Click(
+            object sender,
+            RoutedEventArgs e)
+        {
+            Limpiar();
         }
 
         /// <summary>
         /// Actualiza visualmente:
-        /// - Placeholder
-        /// - Botón limpiar
+        /// - Placeholder.
+        /// - Botón limpiar.
         /// </summary>
         private void ActualizarEstadoVisual()
         {
