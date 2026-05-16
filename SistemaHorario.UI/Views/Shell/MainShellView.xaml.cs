@@ -1,6 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using SistemaHorario.UI.Views.Dashboard;
+using SistemaHorario.UI.Views.Materias;
 
 namespace SistemaHorario.UI.Views.Shell
 {
@@ -73,7 +74,13 @@ namespace SistemaHorario.UI.Views.Shell
 				return;
 			}
 
-			MostrarMensajeTemporal(vistaDestino);
+            if (vistaDestino == "Materias")
+            {
+                ContentArea.Content = new MateriasView();
+                return;
+            }
+
+            MostrarMensajeTemporal(vistaDestino);
 		}
 
 		/// <summary>
