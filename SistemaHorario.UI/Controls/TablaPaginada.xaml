@@ -1,0 +1,128 @@
+﻿<UserControl x:Class="SistemaHorario.UI.Controls.TablaPaginada"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             MinHeight="300">
+
+    <UserControl.Resources>
+
+        <!-- FILA SELECCIONADA -->
+        <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}"
+                         Color="#71C3F2"/>
+
+        <SolidColorBrush x:Key="{x:Static SystemColors.ControlBrushKey}"
+                         Color="#71C3F2"/>
+
+        <!-- ESTILO DATAGRID -->
+        <Style TargetType="DataGrid">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="HeadersVisibility" Value="Column"/>
+            <Setter Property="GridLinesVisibility" Value="None"/>
+            <Setter Property="RowBackground" Value="White"/>
+            <Setter Property="AlternatingRowBackground" Value="#FAFBFC"/>
+            <Setter Property="HorizontalGridLinesBrush" Value="#E5E7EB"/>
+            <Setter Property="VerticalGridLinesBrush" Value="#E5E7EB"/>
+            <Setter Property="SelectionMode" Value="Single"/>
+            <Setter Property="SelectionUnit" Value="FullRow"/>
+        </Style>
+
+        <!-- ESTILO ENCABEZADO -->
+        <Style TargetType="DataGridColumnHeader">
+            <Setter Property="Background" Value="#F4F7FA"/>
+            <Setter Property="Foreground" Value="#374151"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Height" Value="45"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="10,0"/>
+        </Style>
+
+        <!-- ESTILO FILAS -->
+        <Style TargetType="DataGridRow">
+            <Setter Property="Height" Value="46"/>
+            <Setter Property="Foreground" Value="#1F2937"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="BorderThickness" Value="0"/>
+        </Style>
+
+    </UserControl.Resources>
+
+    <Border Background="White"
+            CornerRadius="14"
+            BorderBrush="#D9E2EC"
+            BorderThickness="1"
+            Padding="16">
+
+        <Grid>
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- TABLA -->
+            <DataGrid x:Name="DgDatos"
+                      AutoGenerateColumns="False"
+                      CanUserAddRows="False"
+                      CanUserDeleteRows="False"
+                      IsReadOnly="True"
+                      BorderThickness="0"/>
+
+            <!-- MENSAJE VACÍO -->
+            <TextBlock x:Name="TxtSinDatos"
+                       Text="No hay datos para mostrar."
+                       FontSize="15"
+                       FontWeight="SemiBold"
+                       Foreground="#6B7280"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"
+                       Visibility="Collapsed"/>
+
+            <!-- PAGINACIÓN -->
+            <Grid Grid.Row="1"
+                  Margin="0,18,0,0">
+
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- BOTÓN ANTERIOR -->
+                <Button x:Name="BtnAnterior"
+                        Content="Anterior"
+                        Width="95"
+                        Height="38"
+                        Background="#E5E7EB"
+                        Foreground="#111827"
+                        BorderThickness="0"
+                        FontWeight="Bold"
+                        Cursor="Hand"
+                        Click="BtnAnterior_Click"/>
+
+                <!-- TEXTO PÁGINA -->
+                <TextBlock x:Name="TxtPagina"
+                           Grid.Column="1"
+                           Text="Página 1 de 1"
+                           FontSize="13"
+                           FontWeight="SemiBold"
+                           Foreground="#374151"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"/>
+
+                <!-- BOTÓN SIGUIENTE -->
+                <Button x:Name="BtnSiguiente"
+                        Grid.Column="2"
+                        Content="Siguiente"
+                        Width="95"
+                        Height="38"
+                        Background="#006AA6"
+                        Foreground="White"
+                        BorderThickness="0"
+                        FontWeight="Bold"
+                        Cursor="Hand"
+                        Click="BtnSiguiente_Click"/>
+            </Grid>
+        </Grid>
+    </Border>
+</UserControl>
