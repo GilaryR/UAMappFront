@@ -1,0 +1,208 @@
+﻿<UserControl x:Class="SistemaHorario.UI.Views.Dashboard.DashboardView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="clr-namespace:SistemaHorario.UI.Controls">
+
+	<Grid Background="#F4F7FA">
+
+		<ScrollViewer VerticalScrollBarVisibility="Auto">
+
+			<StackPanel Margin="22">
+
+				<!-- Logos superiores -->
+				<Image Source="/Assets/Images/LogosUam.png"
+                       Height="110"
+                       HorizontalAlignment="Right"
+                       Stretch="Uniform"
+                       Margin="0,0,0,24"/>
+
+				<!-- Cards resumen -->
+				<Grid Margin="0,0,0,32">
+
+					<Grid.ColumnDefinitions>
+						<ColumnDefinition Width="*"/>
+						<ColumnDefinition Width="14"/>
+						<ColumnDefinition Width="*"/>
+						<ColumnDefinition Width="14"/>
+						<ColumnDefinition Width="*"/>
+						<ColumnDefinition Width="14"/>
+						<ColumnDefinition Width="*"/>
+					</Grid.ColumnDefinitions>
+
+					<!-- Materias -->
+					<controls:CardResumen x:Name="CardMaterias"
+                                          Grid.Column="0"
+                                          Height="88"/>
+
+					<!-- Usuarios -->
+					<controls:CardResumen x:Name="CardUsuarios"
+                                          Grid.Column="2"
+                                          Height="88"/>
+
+					<!-- Grupos -->
+					<controls:CardResumen x:Name="CardGrupos"
+                                          Grid.Column="4"
+                                          Height="88"/>
+
+					<!-- Plan académico -->
+					<controls:CardResumen x:Name="CardPlanes"
+                                          Grid.Column="6"
+                                          Height="88"/>
+				</Grid>
+
+				<!-- Tabla -->
+				<Border Background="White"
+                        CornerRadius="10"
+                        Padding="14">
+
+					<StackPanel>
+
+						<TextBlock Text="Últimos horarios generados"
+                                   FontSize="18"
+                                   FontWeight="Bold"
+                                   Foreground="#111827"
+                                   Margin="0,0,0,16"/>
+
+						<DataGrid ItemsSource="{Binding UltimosHorarios}"
+                                  AutoGenerateColumns="False"
+                                  CanUserAddRows="False"
+                                  CanUserDeleteRows="False"
+                                  IsReadOnly="True"
+                                  HeadersVisibility="Column"
+                                  GridLinesVisibility="Horizontal"
+                                  RowHeight="40"
+                                  ColumnHeaderHeight="36"
+                                  BorderThickness="0"
+                                  Background="White"
+                                  FontSize="13"
+                                  FontWeight="SemiBold">
+
+							<DataGrid.Resources>
+
+								<!-- Encabezados -->
+								<Style TargetType="DataGridColumnHeader">
+									<Setter Property="Background"
+                                            Value="#ECECEC"/>
+
+									<Setter Property="Foreground"
+                                            Value="Black"/>
+
+									<Setter Property="FontWeight"
+                                            Value="Bold"/>
+
+									<Setter Property="FontSize"
+                                            Value="14"/>
+
+									<Setter Property="HorizontalContentAlignment"
+                                            Value="Center"/>
+
+									<Setter Property="BorderThickness"
+                                            Value="0"/>
+								</Style>
+
+								<!-- Celdas -->
+								<Style TargetType="DataGridCell">
+									<Setter Property="BorderThickness"
+                                            Value="0"/>
+
+									<Setter Property="Padding"
+                                            Value="4"/>
+
+									<Setter Property="HorizontalContentAlignment"
+                                            Value="Center"/>
+
+									<Setter Property="VerticalContentAlignment"
+                                            Value="Center"/>
+								</Style>
+
+								<!-- Filas -->
+								<Style TargetType="DataGridRow">
+									<Setter Property="BorderBrush"
+                                            Value="#E5E7EB"/>
+
+									<Setter Property="BorderThickness"
+                                            Value="0,0,0,1"/>
+								</Style>
+
+							</DataGrid.Resources>
+
+							<DataGrid.Columns>
+
+								<!-- Nombre -->
+								<DataGridTextColumn Header="Nombre"
+                                                    Binding="{Binding Nombre}"
+                                                    Width="*"/>
+
+								<!-- Fecha -->
+								<DataGridTextColumn Header="Fecha"
+                                                    Binding="{Binding Fecha}"
+                                                    Width="*"/>
+
+								<!-- Jornada -->
+								<DataGridTemplateColumn Header="Jornada"
+                                                        Width="*">
+
+									<DataGridTemplateColumn.CellTemplate>
+
+										<DataTemplate>
+
+											<Border Background="{Binding JornadaFondo}"
+                                                    CornerRadius="5"
+                                                    Padding="7,2"
+                                                    HorizontalAlignment="Center">
+
+												<TextBlock Text="{Binding Jornada}"
+                                                           Foreground="{Binding JornadaColorTexto}"
+                                                           FontWeight="Bold"
+                                                           FontSize="12"/>
+											</Border>
+
+										</DataTemplate>
+
+									</DataGridTemplateColumn.CellTemplate>
+
+								</DataGridTemplateColumn>
+
+								<!-- Grupos -->
+								<DataGridTextColumn Header="Grupos"
+                                                    Binding="{Binding Grupos}"
+                                                    Width="*"/>
+
+								<!-- Semestre -->
+								<DataGridTextColumn Header="Semestre"
+                                                    Binding="{Binding Semestre}"
+                                                    Width="*"/>
+
+								<!-- Estado -->
+								<DataGridTemplateColumn Header="Estado"
+                                                        Width="*">
+
+									<DataGridTemplateColumn.CellTemplate>
+
+										<DataTemplate>
+
+											<Border Background="#B9EFC2"
+                                                    CornerRadius="5"
+                                                    Padding="7,2"
+                                                    HorizontalAlignment="Center">
+
+												<TextBlock Text="{Binding Estado}"
+                                                           Foreground="#1A9E3B"
+                                                           FontWeight="Bold"
+                                                           FontSize="12"/>
+											</Border>
+
+										</DataTemplate>
+
+									</DataGridTemplateColumn.CellTemplate>
+
+								</DataGridTemplateColumn>
+
+							</DataGrid.Columns>
+						</DataGrid>
+					</StackPanel>
+				</Border>
+			</StackPanel>
+		</ScrollViewer>
+	</Grid>
+</UserControl>

@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
+using SistemaHorario.UI.Views.Dashboard;
 
 namespace SistemaHorario.UI.Views.Shell
 {
@@ -49,43 +50,39 @@ namespace SistemaHorario.UI.Views.Shell
             userMenuView.CerrarSesionSolicitado += UserMenuView_CerrarSesionSolicitado;
         }
 
-        /// <summary>
-        /// Carga la vista inicial del sistema.
-        ///
-        /// Por ahora muestra un mensaje temporal.
-        /// Más adelante aquí se cargará DashboardView.
-        /// </summary>
-        private void CargarVistaInicial()
-        {
-            MostrarMensajeTemporal("Inicio");
-        }
+		/// <summary>
+		/// Carga DashboardView como pantalla inicial.
+		/// </summary>
+		private void CargarVistaInicial()
+		{
+			ContentArea.Content = new DashboardView();
+		}
 
-        /// <summary>
-        /// Evento ejecutado cuando el usuario selecciona
-        /// una opción del menú lateral.
-        /// </summary>
-        /// <param name="sender">
-        /// Objeto que genera el evento.
-        /// </param>
-        /// <param name="vistaDestino">
-        /// Nombre interno de la vista solicitada.
-        /// </param>
-        private void SidebarView_NavegacionSolicitada(
-            object? sender,
-            string vistaDestino)
-        {
-            userMenuView.Ocultar();
+		/// <summary>
+		/// Maneja navegación desde Sidebar.
+		/// </summary>
+		private void SidebarView_NavegacionSolicitada(
+			object? sender,
+			string vistaDestino)
+		{
+			userMenuView.Ocultar();
 
-            MostrarMensajeTemporal(vistaDestino);
-        }
+			if (vistaDestino == "Inicio")
+			{
+				ContentArea.Content = new DashboardView();
+				return;
+			}
 
-        /// <summary>
-        /// Evento ejecutado cuando el usuario hace clic
-        /// sobre su nombre o imagen en la TopBar.
-        ///
-        /// Muestra u oculta el menú de usuario.
-        /// </summary>
-        private void TopBarView_MenuUsuarioSolicitado(
+			MostrarMensajeTemporal(vistaDestino);
+		}
+
+		/// <summary>
+		/// Evento ejecutado cuando el usuario hace clic
+		/// sobre su nombre o imagen en la TopBar.
+		///
+		/// Muestra u oculta el menú de usuario.
+		/// </summary>
+		private void TopBarView_MenuUsuarioSolicitado(
             object? sender,
             System.EventArgs e)
         {

@@ -84,12 +84,16 @@
     <Resource Include="Assets\Icons\IcDevuelve.png" />
     <Resource Include="Assets\Icons\IcDocentes.png" />
     <Resource Include="Assets\Icons\IcDocentes2.png" />
-    <Resource Include="Assets\Icons\IcDocentesCircI.png" />
+    <Resource Include="Assets\Icons\IcDocentesCircI.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
     <Resource Include="Assets\Icons\IcEditar.png" />
     <Resource Include="Assets\Icons\IcEliminarNg.png" />
     <Resource Include="Assets\Icons\IcEliminarRj.png" />
     <Resource Include="Assets\Icons\IcFacultad.png" />
-    <Resource Include="Assets\Icons\IcGruposCircI.png" />
+    <Resource Include="Assets\Icons\IcGruposCircI.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
     <Resource Include="Assets\Icons\IcHistorial.png" />
     <Resource Include="Assets\Icons\IcHorarios.png" />
     <Resource Include="Assets\Icons\IcIniciar.png" />
@@ -97,10 +101,14 @@
     <Resource Include="Assets\Icons\Iclapiz.png" />
     <Resource Include="Assets\Icons\IcManual.png" />
     <Resource Include="Assets\Icons\IcMaterias.png" />
-    <Resource Include="Assets\Icons\IcMateriasCircI.png" />
+    <Resource Include="Assets\Icons\IcMateriasCircI.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
     <Resource Include="Assets\Icons\icPerfilUs.png" />
     <Resource Include="Assets\Icons\IcPlanAca.png" />
-    <Resource Include="Assets\Icons\IcPlanCircI.png" />
+    <Resource Include="Assets\Icons\IcPlanCircI.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
     <Resource Include="Assets\Icons\IcReportes.png" />
     <Resource Include="Assets\Icons\IcRol.png" />
     <Resource Include="Assets\Icons\IcTelefono.png" />
