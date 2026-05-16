@@ -1,0 +1,53 @@
+﻿<UserControl x:Class="SistemaHorario.UI.Controls.CardResumen"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Width="360"
+             Height="190">
+
+    <Border Background="White"
+            CornerRadius="22"
+            Padding="28"
+            BorderBrush="#EEEEEE"
+            BorderThickness="1">
+
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="8"
+                              ShadowDepth="2"
+                              Opacity="0.12"/>
+        </Border.Effect>
+
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="130"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Image x:Name="ImgIcono"
+                    Width="95"
+                    Height="95"
+                    Stretch="Uniform"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Left"/>
+
+            <StackPanel Grid.Column="1"
+                        VerticalAlignment="Center"
+                        HorizontalAlignment="Center">
+
+                <TextBlock x:Name="TxtTitulo"
+                           Text="Título"
+                           FontSize="24"
+                           FontWeight="Bold"
+                           Foreground="#111111"
+                           TextAlignment="Center"
+                           Margin="0,0,0,15"/>
+
+                <TextBlock x:Name="TxtValor"
+                           Text="0"
+                           FontSize="56"
+                           FontWeight="Bold"
+                           Foreground="Black"
+                           TextAlignment="Center"/>
+            </StackPanel>
+        </Grid>
+    </Border>
+</UserControl>

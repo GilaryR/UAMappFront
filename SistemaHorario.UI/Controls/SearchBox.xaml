@@ -1,0 +1,60 @@
+﻿<UserControl x:Class="SistemaHorario.UI.Controls.SearchBox"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             MinWidth="260"
+             Height="42">
+
+    <Border Background="White"
+            BorderBrush="#D9E2EC"
+            BorderThickness="1"
+            CornerRadius="10"
+            Padding="10,0">
+
+        <Grid>
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="35"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="35"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Icono buscar -->
+            <TextBlock Text="🔍"
+                       FontSize="16"
+                       VerticalAlignment="Center"
+                       HorizontalAlignment="Center"
+                       Foreground="#94A3B8"/>
+
+            <!-- Caja texto -->
+            <TextBox x:Name="TxtBusqueda"
+                     Grid.Column="1"
+                     BorderThickness="0"
+                     Background="Transparent"
+                     FontSize="14"
+                     VerticalContentAlignment="Center"
+                     TextChanged="TxtBusqueda_TextChanged"/>
+
+            <!-- Placeholder -->
+            <TextBlock x:Name="TxtPlaceholder"
+                       Grid.Column="1"
+                       Text="Buscar..."
+                       Foreground="#94A3B8"
+                       FontSize="14"
+                       VerticalAlignment="Center"
+                       IsHitTestVisible="False"
+                       Margin="4,0,0,0"/>
+
+            <!-- Botón limpiar -->
+            <Button x:Name="BtnLimpiar"
+                    Grid.Column="2"
+                    Content="✖"
+                    FontSize="12"
+                    Background="Transparent"
+                    BorderThickness="0"
+                    Cursor="Hand"
+                    Foreground="#94A3B8"
+                    Visibility="Collapsed"
+                    Click="BtnLimpiar_Click"/>
+        </Grid>
+    </Border>
+</UserControl>
