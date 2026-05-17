@@ -18,7 +18,7 @@
                            FontWeight="Bold"
                            Foreground="#111827"/>
 
-                <TextBlock Text="Seleccione el grupo académico para generar automáticamente el horario"
+                <TextBlock Text="Configure los parámetros solicitados por el backend para generar el horario"
                            Margin="0,8,0,30"
                            FontSize="15"
                            Foreground="#6B7280"/>
@@ -31,15 +31,135 @@
 
                     <StackPanel>
 
-                        <TextBlock Text="Grupo académico"
-                                   FontWeight="SemiBold"
-                                   FontSize="15"
-                                   Margin="0,0,0,8"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="30"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
 
-                        <ComboBox x:Name="CmbGrupo"
-                                  Height="42"
-                                  FontSize="14"
-                                  DisplayMemberPath="DisplayTexto"/>
+                            <!-- Grupo académico -->
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="Grupo académico"
+                                           FontWeight="SemiBold"
+                                           FontSize="15"
+                                           Margin="0,0,0,8"/>
+
+                                <ComboBox x:Name="CmbGrupo"
+                                          Height="42"
+                                          FontSize="14"
+                                          DisplayMemberPath="DisplayTexto"/>
+                            </StackPanel>
+
+                            <!-- Duración -->
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="Duración del bloque"
+                                           FontWeight="SemiBold"
+                                           FontSize="15"
+                                           Margin="0,0,0,8"/>
+
+                                <ComboBox x:Name="CmbDuracion"
+                                          Height="42"
+                                          FontSize="14">
+
+                                    <ComboBoxItem Content="60 minutos"
+                                                  Tag="60"
+                                                  IsSelected="True"/>
+
+                                    <ComboBoxItem Content="120 minutos"
+                                                  Tag="120"/>
+                                </ComboBox>
+                            </StackPanel>
+                        </Grid>
+
+                        <Grid Margin="0,24,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="30"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Hora inicio -->
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="Hora inicio"
+                                           FontWeight="SemiBold"
+                                           FontSize="15"
+                                           Margin="0,0,0,8"/>
+
+                                <ComboBox x:Name="CmbHoraInicio"
+                                          Height="42"
+                                          FontSize="14">
+
+                                    <ComboBoxItem Content="07:00"
+                                                  IsSelected="True"/>
+                                    <ComboBoxItem Content="08:00"/>
+                                    <ComboBoxItem Content="09:00"/>
+                                    <ComboBoxItem Content="10:00"/>
+                                </ComboBox>
+                            </StackPanel>
+
+                            <!-- Hora final -->
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="Hora final"
+                                           FontWeight="SemiBold"
+                                           FontSize="15"
+                                           Margin="0,0,0,8"/>
+
+                                <ComboBox x:Name="CmbHoraFinal"
+                                          Height="42"
+                                          FontSize="14">
+
+                                    <ComboBoxItem Content="18:00"/>
+                                    <ComboBoxItem Content="22:30"
+                                                  IsSelected="True"/>
+                                </ComboBox>
+                            </StackPanel>
+                        </Grid>
+
+                        <Rectangle Height="1"
+                                   Fill="#E5E7EB"
+                                   Margin="0,24"/>
+
+                        <!-- Días requeridos por backend -->
+                        <StackPanel>
+
+                            <TextBlock Text="Días habilitados"
+                                       FontWeight="SemiBold"
+                                       FontSize="15"
+                                       Margin="0,0,0,18"/>
+
+                            <WrapPanel>
+
+                                <CheckBox x:Name="ChkLunes"
+                                          Content="Lunes"
+                                          IsChecked="True"
+                                          Margin="0,0,24,0"/>
+
+                                <CheckBox x:Name="ChkMartes"
+                                          Content="Martes"
+                                          IsChecked="True"
+                                          Margin="0,0,24,0"/>
+
+                                <CheckBox x:Name="ChkMiercoles"
+                                          Content="Miércoles"
+                                          IsChecked="True"
+                                          Margin="0,0,24,0"/>
+
+                                <CheckBox x:Name="ChkJueves"
+                                          Content="Jueves"
+                                          IsChecked="True"
+                                          Margin="0,0,24,0"/>
+
+                                <CheckBox x:Name="ChkViernes"
+                                          Content="Viernes"
+                                          IsChecked="True"
+                                          Margin="0,0,24,0"/>
+
+                                <CheckBox x:Name="ChkSabado"
+                                          Content="Sábado"
+                                          IsChecked="True"/>
+                            </WrapPanel>
+                        </StackPanel>
 
                         <Button x:Name="BtnGenerar"
                                 Content="Generar horario"
