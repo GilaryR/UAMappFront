@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using SistemaHorario.UI.Views.Perfil;
+using System.Windows;
 using System.Windows.Controls;
 using SistemaHorario.UI.Views.Dashboard;
 using SistemaHorario.UI.Views.Materias;
@@ -30,9 +31,10 @@ namespace SistemaHorario.UI.Views.Shell
         public MainShellView()
         {
             InitializeComponent();
-
+            
             ConectarEventos();
             CargarVistaInicial();
+
         }
 
         /// <summary>
@@ -102,13 +104,11 @@ namespace SistemaHorario.UI.Views.Shell
         ///
         /// Más adelante deberá navegar hacia PerfilView.
         /// </summary>
-        private void UserMenuView_PerfilSolicitado(
-            object? sender,
-            System.EventArgs e)
+        private void UserMenuView_PerfilSolicitado(object? sender,System.EventArgs e)
         {
             userMenuView.Ocultar();
 
-            MostrarMensajeTemporal("Perfil");
+            ContentArea.Content = new PerfilView();
         }
 
         /// <summary>
