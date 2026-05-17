@@ -4,6 +4,7 @@ using SistemaHorarios.Application.Common;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using SistemaHorario.UI.State;
 
 namespace SistemaHorario.UI.Views.Auth
 {
@@ -63,7 +64,7 @@ namespace SistemaHorario.UI.Views.Auth
         /// Reemplazar esta lógica por autenticación real
         /// cuando backend implemente JWT/login completo.
         /// </summary>
-        private void BtnIniciarSesion_Click(object sender, RoutedEventArgs e)
+        private async void BtnIniciarSesion_Click(object sender, RoutedEventArgs e)
         {
             LimpiarMensajes();
 
@@ -72,7 +73,53 @@ namespace SistemaHorario.UI.Views.Auth
             if (!ValidarFormulario())
                 return;
 
-            AbrirSistemaPrincipal();
+            BtnIniciarSesion.IsEnabled = false;
+            TxtEstadoApi.Foreground = Brushes.Gray;
+            TxtEstadoApi.Text = "Validando credenciales...";
+
+            try
+            {
+                var response = await _viewModel.IniciarSesionAsync();
+
+                if (!response.Success)
+                {
+                    TxtErrorCredenciales.Text = response.Message;
+                    TxtErrorCredenciales.Visibility = Visibility.Visible;
+
+                    TxtEstadoApi.Foreground = Brushes.Red;
+                    TxtEstadoApi.Text = "No se pudo iniciar sesión.";
+                    return;
+                }
+
+                if (response.Data is null ||
+                    string.IsNullOrWhiteSpace(response.Data.Token))
+                {
+                    TxtErrorCredenciales.Text = "La API no devolvió un token válido.";
+                    TxtErrorCredenciales.Visibility = Visibility.Visible;
+
+                    TxtEstadoApi.Foreground = Brushes.Red;
+                    TxtEstadoApi.Text = "Respuesta inválida del servidor.";
+                    return;
+                }
+
+                UsuarioSesion.IniciarSesion(
+                    response.Data.IdUsuario,
+                    string.IsNullOrWhiteSpace(response.Data.NombreCompleto)
+                        ? "Usuario"
+                        : response.Data.NombreCompleto,
+                    string.IsNullOrWhiteSpace(response.Data.CorreoInstitucional)
+                        ? _viewModel.CorreoInstitucional
+                        : response.Data.CorreoInstitucional,
+                    response.Data.Rol,
+                    response.Data.Token
+                );
+
+                AbrirSistemaPrincipal();
+            }
+            finally
+            {
+                BtnIniciarSesion.IsEnabled = true;
+            }
         }
 
         /// <summary>
