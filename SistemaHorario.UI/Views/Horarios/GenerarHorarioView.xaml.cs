@@ -1,6 +1,7 @@
 ﻿using SistemaHorario.UI.Models.UI;
 using SistemaHorario.UI.ViewModels.Horarios;
 using System;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -11,19 +12,20 @@ namespace SistemaHorario.UI.Views.Horarios
     ///
     /// Actualmente trabaja con datos temporales para validar la interfaz.
     ///
-    /// En la versión final, esta vista solo debe enviar el grupo seleccionado
-    /// al backend. La lógica real de distribución de materias, docentes,
-    /// aulas, horas y duración de bloques pertenece al motor de generación
-    /// del backend.
+    /// Esta vista fue ajustada para respetar el contrato actual del backend:
     ///
-    /// Endpoints relacionados:
-    /// - GET /api/grupos/activos
-    /// - POST /api/horarios/generar
-    /// - GET /api/horarios/{id}/vista-previa
+    /// POST /api/horarios/generar
     ///
-    /// Nota para integración:
-    /// El endpoint POST /api/horarios/generar debería recibir idGrupo.
-    /// Si el request actual no lo tiene, se recomienda solicitar ese ajuste.
+    /// {
+    ///   "horaInicio": "07:00",
+    ///   "horaFinal": "22:30",
+    ///   "duracionBloque": 60,
+    ///   "dias": ["Lunes", "Martes", "Miércoles"]
+    /// }
+    ///
+    /// Nota:
+    /// El grupo académico se conserva visualmente porque el flujo funcional
+    /// del sistema lo necesita, pero el backend actual todavía no recibe IdGrupo.
     /// </summary>
     public partial class GenerarHorarioView : UserControl
     {
@@ -42,8 +44,7 @@ namespace SistemaHorario.UI.Views.Horarios
         /// Carga los grupos disponibles en el ComboBox.
         ///
         /// TODO:
-        /// Reemplazar datos mock por consumo real de:
-        /// GET /api/grupos/activos.
+        /// Reemplazar datos mock por GET /api/grupos/activos.
         /// </summary>
         private void CargarGrupos()
         {
@@ -54,18 +55,12 @@ namespace SistemaHorario.UI.Views.Horarios
         }
 
         /// <summary>
-        /// Genera un horario temporal y navega hacia la vista previa
-        /// en modo aprobación.
-        ///
-        /// Actualmente crea un HorarioItem mock.
+        /// Prepara el request según contrato actual del backend
+        /// y navega temporalmente hacia la vista previa.
         ///
         /// TODO:
-        /// Reemplazar esta creación local por consumo de:
+        /// Reemplazar creación mock por consumo real de:
         /// POST /api/horarios/generar.
-        ///
-        /// Después de generar, backend debe retornar el horario creado
-        /// o su identificador para consultar:
-        /// GET /api/horarios/{id}/vista-previa.
         /// </summary>
         private void BtnGenerar_Click(
             object sender,
@@ -76,6 +71,21 @@ namespace SistemaHorario.UI.Views.Horarios
 
             GrupoHorarioOption grupoSeleccionado =
                 (GrupoHorarioOption)CmbGrupo.SelectedItem;
+
+            GenerarHorarioRequestUI request =
+                ConstruirRequestBackend();
+
+            _viewModel.Request = request;
+
+            // TODO:
+            // Enviar request a POST /api/horarios/generar.
+            //
+            // Importante:
+            // Este request NO incluye IdGrupo porque backend
+            // actualmente no lo acepta.
+            //
+            // Si backend agrega IdGrupo, mapear aquí:
+            // request.IdGrupo = grupoSeleccionado.IdGrupo;
 
             HorarioItem horarioGenerado = new()
             {
@@ -104,7 +114,22 @@ namespace SistemaHorario.UI.Views.Horarios
         }
 
         /// <summary>
-        /// Valida que el usuario seleccione un grupo antes de generar.
+        /// Construye el request exactamente con los campos
+        /// esperados actualmente por backend.
+        /// </summary>
+        private GenerarHorarioRequestUI ConstruirRequestBackend()
+        {
+            return new GenerarHorarioRequestUI
+            {
+                HoraInicio = ObtenerContenidoCombo(CmbHoraInicio),
+                HoraFinal = ObtenerContenidoCombo(CmbHoraFinal),
+                DuracionBloque = ObtenerDuracionBloque(),
+                Dias = ObtenerDiasSeleccionados()
+            };
+        }
+
+        /// <summary>
+        /// Valida campos requeridos antes de generar.
         /// </summary>
         private bool FormularioEsValido()
         {
@@ -119,7 +144,71 @@ namespace SistemaHorario.UI.Views.Horarios
                 return false;
             }
 
+            if (ObtenerDiasSeleccionados().Count == 0)
+            {
+                MessageBox.Show(
+                    "Debe seleccionar al menos un día.",
+                    "Validación",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+
+                return false;
+            }
+
             return true;
+        }
+
+        /// <summary>
+        /// Obtiene la duración seleccionada en minutos.
+        /// </summary>
+        private int ObtenerDuracionBloque()
+        {
+            if (CmbDuracion.SelectedItem is ComboBoxItem item &&
+                int.TryParse(item.Tag?.ToString(), out int duracion))
+            {
+                return duracion;
+            }
+
+            return 60;
+        }
+
+        /// <summary>
+        /// Obtiene el texto seleccionado de un ComboBox.
+        /// </summary>
+        private static string ObtenerContenidoCombo(ComboBox comboBox)
+        {
+            if (comboBox.SelectedItem is ComboBoxItem item)
+                return item.Content?.ToString() ?? string.Empty;
+
+            return string.Empty;
+        }
+
+        /// <summary>
+        /// Obtiene los días seleccionados para el request.
+        /// </summary>
+        private List<string> ObtenerDiasSeleccionados()
+        {
+            List<string> dias = new();
+
+            if (ChkLunes.IsChecked == true)
+                dias.Add("Lunes");
+
+            if (ChkMartes.IsChecked == true)
+                dias.Add("Martes");
+
+            if (ChkMiercoles.IsChecked == true)
+                dias.Add("Miércoles");
+
+            if (ChkJueves.IsChecked == true)
+                dias.Add("Jueves");
+
+            if (ChkViernes.IsChecked == true)
+                dias.Add("Viernes");
+
+            if (ChkSabado.IsChecked == true)
+                dias.Add("Sábado");
+
+            return dias;
         }
 
         /// <summary>

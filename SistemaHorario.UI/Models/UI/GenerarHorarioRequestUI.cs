@@ -1,45 +1,54 @@
-﻿namespace SistemaHorario.UI.Models.UI
+﻿using System.Collections.Generic;
+
+namespace SistemaHorario.UI.Models.UI
 {
     /// <summary>
-    /// Modelo utilizado para generar horarios.
+    /// Modelo preparado para solicitar la generación automática
+    /// de horarios según el contrato actual documentado del backend.
     ///
-    /// Actualmente funciona como modelo visual temporal.
-    ///
-    /// Más adelante este modelo será enviado al backend:
-    ///
+    /// Endpoint:
     /// POST /api/horarios/generar
+    ///
+    /// Contrato esperado por backend:
+    ///
+    /// {
+    ///   "horaInicio": "07:00",
+    ///   "horaFinal": "22:30",
+    ///   "duracionBloque": 60,
+    ///   "dias": ["Lunes", "Martes"]
+    /// }
+    ///
+    /// Nota:
+    /// Actualmente el backend NO recibe IdGrupo.
+    /// Si se necesita generar horario por grupo académico,
+    /// backend debe agregar IdGrupo al request.
     /// </summary>
     public class GenerarHorarioRequestUI
     {
         /// <summary>
-        /// Grupo académico seleccionado.
+        /// Hora inicial permitida para la generación.
+        /// Formato esperado: HH:mm.
         /// </summary>
-        public int IdGrupo { get; set; }
+        public string HoraInicio { get; set; } = "07:00";
 
         /// <summary>
-        /// Hora inicial permitida para generación.
+        /// Hora final permitida para la generación.
+        /// Formato esperado: HH:mm.
         /// </summary>
-        public string HoraInicio { get; set; }
-            = "07:00";
+        public string HoraFinal { get; set; } = "22:30";
 
         /// <summary>
-        /// Hora final permitida para generación.
-        /// </summary>
-        public string HoraFinal { get; set; }
-            = "22:30";
-
-        /// <summary>
-        /// Duración del bloque académico.
+        /// Duración del bloque en minutos.
         ///
         /// Ejemplo:
-        /// - 1 hora
-        /// - 2 horas
+        /// 60 = una hora.
+        /// 120 = dos horas.
         /// </summary>
-        public int DuracionBloque { get; set; }
+        public int DuracionBloque { get; set; } = 60;
 
         /// <summary>
-        /// Días habilitados para generar horarios.
+        /// Días habilitados para generar el horario.
         /// </summary>
-        public List<string> Dias { get; set; } = [];
+        public List<string> Dias { get; set; } = new();
     }
 }

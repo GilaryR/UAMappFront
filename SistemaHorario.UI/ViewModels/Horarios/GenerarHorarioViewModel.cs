@@ -4,25 +4,34 @@ using System.Collections.ObjectModel;
 namespace SistemaHorario.UI.ViewModels.Horarios
 {
     /// <summary>
-    /// ViewModel encargado de la lógica visual
-    /// para la generación de horarios académicos.
+    /// ViewModel encargado de preparar la información visual
+    /// necesaria para generar horarios.
     ///
-    /// Actualmente utiliza datos mock temporales.
+    /// Actualmente usa datos mock.
     ///
-    /// Más adelante deberá conectarse con:
+    /// Endpoints relacionados:
+    /// - GET /api/grupos/activos
+    /// - POST /api/horarios/generar
     ///
-    /// GET  /api/grupos/activos
-    /// POST /api/horarios/generar
+    /// Nota:
+    /// El combo de grupo se conserva en UI porque funcionalmente
+    /// el sistema debe generar horarios por grupo académico.
+    ///
+    /// Sin embargo, el contrato actual del backend para
+    /// POST /api/horarios/generar todavía no recibe IdGrupo.
     /// </summary>
     public class GenerarHorarioViewModel
     {
         /// <summary>
-        /// Lista visual de grupos disponibles.
+        /// Lista visual de grupos académicos.
+        ///
+        /// TODO:
+        /// Reemplazar por GET /api/grupos/activos.
         /// </summary>
         public ObservableCollection<GrupoHorarioOption> Grupos { get; set; }
 
         /// <summary>
-        /// Request temporal utilizado para generar horarios.
+        /// Request preparado según contrato actual del backend.
         /// </summary>
         public GenerarHorarioRequestUI Request { get; set; }
 
