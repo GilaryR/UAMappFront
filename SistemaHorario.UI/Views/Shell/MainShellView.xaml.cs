@@ -1,4 +1,5 @@
-﻿using SistemaHorario.UI.Views.Perfil;
+﻿using SistemaHorario.UI.Views.Horarios;
+using SistemaHorario.UI.Views.Perfil;
 using System.Windows;
 using System.Windows.Controls;
 using SistemaHorario.UI.Views.Dashboard;
@@ -79,6 +80,11 @@ namespace SistemaHorario.UI.Views.Shell
             if (vistaDestino == "Materias")
             {
                 ContentArea.Content = new MateriasView();
+                return;
+            }
+            if(vistaDestino == "Horarios")
+            {
+                ContentArea.Content = new HorariosView();
                 return;
             }
 

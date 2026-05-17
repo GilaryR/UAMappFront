@@ -1,0 +1,62 @@
+﻿<UserControl x:Class="SistemaHorario.UI.Views.Horarios.GenerarHorarioView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d">
+
+    <Grid Background="#F4F7FA">
+
+        <Border Background="White"
+                CornerRadius="16"
+                Padding="30">
+
+            <StackPanel>
+
+                <TextBlock Text="Generar horario"
+                           FontSize="36"
+                           FontWeight="Bold"
+                           Foreground="#111827"/>
+
+                <TextBlock Text="Seleccione el grupo académico para generar automáticamente el horario"
+                           Margin="0,8,0,30"
+                           FontSize="15"
+                           Foreground="#6B7280"/>
+
+                <Border Background="#F9FAFB"
+                        BorderBrush="#E5E7EB"
+                        BorderThickness="1"
+                        CornerRadius="12"
+                        Padding="24">
+
+                    <StackPanel>
+
+                        <TextBlock Text="Grupo académico"
+                                   FontWeight="SemiBold"
+                                   FontSize="15"
+                                   Margin="0,0,0,8"/>
+
+                        <ComboBox x:Name="CmbGrupo"
+                                  Height="42"
+                                  FontSize="14"
+                                  DisplayMemberPath="DisplayTexto"/>
+
+                        <Button x:Name="BtnGenerar"
+                                Content="Generar horario"
+                                Width="220"
+                                Height="46"
+                                Margin="0,35,0,0"
+                                HorizontalAlignment="Right"
+                                Background="#0F6CBD"
+                                Foreground="White"
+                                BorderThickness="0"
+                                FontSize="15"
+                                FontWeight="SemiBold"
+                                Cursor="Hand"
+                                Click="BtnGenerar_Click"/>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>
