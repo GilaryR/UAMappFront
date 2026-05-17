@@ -1,0 +1,131 @@
+﻿<UserControl x:Class="SistemaHorario.UI.Views.Horarios.HorariosView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="clr-namespace:SistemaHorario.UI.Controls">
+
+    <Grid Background="#F4F7FA">
+
+        <StackPanel>
+
+            <!-- ENCABEZADO -->
+            <Grid Margin="0,0,0,20">
+
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="220"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel>
+
+                    <TextBlock Text="Gestión de horarios"
+                               FontSize="30"
+                               FontWeight="Bold"
+                               Foreground="#111827"/>
+
+                    <TextBlock Text="Consulta y administración de horarios generados"
+                               Margin="0,5,0,0"
+                               FontSize="14"
+                               Foreground="#6B7280"/>
+                </StackPanel>
+
+                <!-- BOTÓN -->
+                <Button Grid.Column="1"
+                        Content="+ Generar horario"
+                        Height="42"
+                        Background="#006AA6"
+                        Foreground="White"
+                        BorderThickness="0"
+                        FontWeight="Bold"
+                        Cursor="Hand"
+                        Click="BtnGenerarHorario_Click"/>
+            </Grid>
+
+            <!-- FILTROS -->
+            <Border Background="White"
+                    CornerRadius="14"
+                    BorderBrush="#D9E2EC"
+                    BorderThickness="1"
+                    Padding="18"
+                    Margin="0,0,0,18">
+
+                <Grid>
+
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="280"/>
+                        <ColumnDefinition Width="20"/>
+                        <ColumnDefinition Width="170"/>
+                        <ColumnDefinition Width="20"/>
+                        <ColumnDefinition Width="170"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="150"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- SEARCH -->
+                    <controls:SearchBox x:Name="SearchBoxHorarios"
+                                        Grid.Column="0"
+                                        Placeholder="Buscar horario o grupo"
+                                        BusquedaCambiada="SearchBoxHorarios_BusquedaCambiada"/>
+
+                    <!-- JORNADA -->
+                    <StackPanel Grid.Column="2">
+
+                        <TextBlock Text="Jornada"
+                                   FontSize="12"
+                                   FontWeight="Bold"
+                                   Margin="0,0,0,4"/>
+
+                        <ComboBox x:Name="CmbJornada"
+                                  Height="36"
+                                  SelectionChanged="CmbJornada_SelectionChanged">
+
+                            <ComboBoxItem Content="Todas"
+                                          IsSelected="True"/>
+
+                            <ComboBoxItem Content="Diurna"/>
+
+                            <ComboBoxItem Content="Nocturna"/>
+                        </ComboBox>
+                    </StackPanel>
+
+                    <!-- ESTADO -->
+                    <StackPanel Grid.Column="4">
+
+                        <TextBlock Text="Estado"
+                                   FontSize="12"
+                                   FontWeight="Bold"
+                                   Margin="0,0,0,4"/>
+
+                        <ComboBox x:Name="CmbEstado"
+                                  Height="36"
+                                  SelectionChanged="CmbEstado_SelectionChanged">
+
+                            <ComboBoxItem Content="Todos"
+                                          IsSelected="True"/>
+
+                            <ComboBoxItem Content="Pendiente"/>
+
+                            <ComboBoxItem Content="Aprobado"/>
+
+                            <ComboBoxItem Content="Rechazado"/>
+                        </ComboBox>
+                    </StackPanel>
+
+                    <!-- LIMPIAR -->
+                    <Button Grid.Column="6"
+                            Content="Limpiar filtros"
+                            Height="36"
+                            Background="#E5E7EB"
+                            Foreground="#111827"
+                            BorderThickness="0"
+                            FontWeight="Bold"
+                            Cursor="Hand"
+                            VerticalAlignment="Bottom"
+                            Click="BtnLimpiarFiltros_Click"/>
+                </Grid>
+            </Border>
+
+            <!-- TABLA PAGINADA -->
+            <controls:TablaPaginada x:Name="TablaHorarios"/>
+        </StackPanel>
+    </Grid>
+</UserControl>
