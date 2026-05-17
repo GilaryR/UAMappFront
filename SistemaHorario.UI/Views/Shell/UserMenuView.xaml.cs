@@ -143,6 +143,7 @@ namespace SistemaHorario.UI.Views.Shell
         private void BtnMiPerfil_Click(object sender, RoutedEventArgs e)
         {
             Ocultar();
+            PerfilSolicitado?.Invoke(this, EventArgs.Empty);
         }
 
         /// <summary>
