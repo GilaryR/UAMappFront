@@ -191,5 +191,29 @@ namespace SistemaHorario.UI.Models.UI
 				Estado = "Inactivo"
 			});
 		}
+
+		/// <summary>
+		/// Retorna las materias disponibles para asignar a un docente.
+		/// 
+		/// Por ahora son datos temporales para la interfaz.
+		/// Cuando backend esté listo, este método se reemplaza por el endpoint
+		/// que devuelva las materias disponibles.
+		/// </summary>
+		public static List<string> ObtenerMateriasDisponibles()
+		{
+			return new List<string>
+		    {
+			"Cálculo Diferencial",
+			"Álgebra Lineal",
+			"Cálculo Integral",
+			"Física I",
+			"Física II",
+			"POO",
+			"Redes LAN",
+			"Bases de datos I",
+			"Ingeniería de software I",
+			"Técnicas de programación"
+		     };
+		}
 	}
 }

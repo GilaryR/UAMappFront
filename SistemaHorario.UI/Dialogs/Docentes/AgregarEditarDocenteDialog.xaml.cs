@@ -1,92 +1,45 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-/*
- * Librerías WPF utilizadas para:
- * - Controles visuales
- * - Eventos
- * - Navegación
- * - Estilos
- * - Componentes gráficos
- */
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-
-/*
- * Referencias internas del sistema:
- * - Dialogs compartidos
- * - Modelos UI
- * - ViewModels
- */
-using SistemaHorario.UI.Dialogs.Shared;
+﻿using SistemaHorario.UI.Dialogs.Shared;
 using SistemaHorario.UI.Models.UI;
 using SistemaHorario.UI.ViewModels.Docentes;
-
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Media;
 
 namespace SistemaHorario.UI.Dialogs.Docentes
 {
 	/// <summary>
-	/// Ventana modal utilizada para:
+	/// Ventana utilizada para crear, editar o ver docentes.
 	/// 
-	/// - Crear docentes nuevos
-	/// - Editar docentes existentes
-	/// - Visualizar información en modo lectura
+	/// En este formulario también se asignan las materias del docente.
+	/// Por ahora las materias se guardan como texto separado por comas,
+	/// para mantener compatibilidad con la tabla actual de docentes.
 	/// 
-	/// Funcionalidades principales:
-	/// - Gestión de información básica del docente
-	/// - Configuración de disponibilidad horaria
-	/// - Validaciones de formulario
-	/// - Persistencia temporal mediante MockStore
-	/// 
-	/// TODO:
-	/// Conectar operaciones de guardado con:
-	/// - POST /api/Docentes
-	/// - PUT /api/Docentes
+	/// Cuando se conecte backend, la lista de materias disponibles
+	/// debe venir desde un endpoint de materias.
 	/// </summary>
 	public partial class AgregarEditarDocenteDialog : Window
 	{
-		/// <summary>
-		/// ViewModel principal del diálogo.
-		/// 
-		/// Contiene:
-		/// - Datos del docente
-		/// - Disponibilidad
-		/// - Estado de edición
-		/// </summary>
 		private readonly AgregarEditarDocenteViewModel _viewModel;
 
-		/// <summary>
-		/// Indica si la ventana se encuentra en modo solo lectura.
-		/// 
-		/// TRUE:
-		/// - No permite editar campos
-		/// - Oculta botón guardar
-		/// 
-		/// FALSE:
-		/// - Permite edición completa
-		/// </summary>
 		private readonly bool _soloLectura;
 
 		/// <summary>
-		/// Constructor utilizado para:
-		/// - Crear un nuevo docente
-		/// 
-		/// Inicializa:
-		/// - Componentes visuales
-		/// - ViewModel vacío
-		/// - Configuración inicial
-		/// - Carga de datos
+		/// Materias seleccionadas para el docente en este formulario.
+		/// Al guardar, se convierten en texto separado por comas.
 		/// </summary>
+		private readonly ObservableCollection<string> _materiasSeleccionadas = new();
+
+		/// <summary>
+		/// Materias disponibles para asignar.
+		/// Actualmente vienen desde DocentesMockStore.
+		/// Después pueden venir desde backend.
+		/// </summary>
+		private readonly ObservableCollection<string> _materiasDisponibles = new();
+
 		public AgregarEditarDocenteDialog()
 		{
 			InitializeComponent();
@@ -98,20 +51,6 @@ namespace SistemaHorario.UI.Dialogs.Docentes
 			CargarDatos();
 		}
 
-		/// <summary>
-		/// Constructor utilizado para:
-		/// - Editar un docente existente
-		/// - Visualizar detalle del docente
-		/// 
-		/// <param name="docente">
-		/// Información del docente a cargar
-		/// </param>
-		/// 
-		/// <param name="soloLectura">
-		/// TRUE  = modo visualización
-		/// FALSE = modo edición
-		/// </param>
-		/// </summary>
 		public AgregarEditarDocenteDialog(
 			DocenteItem docente,
 			bool soloLectura = false)
@@ -125,17 +64,8 @@ namespace SistemaHorario.UI.Dialogs.Docentes
 			CargarDatos();
 		}
 
-		/// <summary>
-		/// Configura el comportamiento visual de la ventana
-		/// dependiendo del modo actual:
-		/// 
-		/// - Modo lectura
-		/// - Modo edición
-		/// - Modo creación
-		/// </summary>
 		private void ConfigurarModo()
 		{
-			// Configuración de modo solo lectura
 			if (_soloLectura)
 			{
 				TxtTitulo.Text = "Detalle docente";
@@ -146,7 +76,6 @@ namespace SistemaHorario.UI.Dialogs.Docentes
 				return;
 			}
 
-			// Configuración de modo edición
 			if (_viewModel.EsEdicion)
 			{
 				TxtTitulo.Text = "Editar docente";
@@ -154,39 +83,30 @@ namespace SistemaHorario.UI.Dialogs.Docentes
 			}
 		}
 
-		/// <summary>
-		/// Deshabilita todos los controles editables
-		/// del formulario para evitar modificaciones.
-		/// 
-		/// Utilizado en:
-		/// - Modo visualización
-		/// </summary>
 		private void BloquearFormulario()
 		{
 			TxtNombreCompleto.IsReadOnly = true;
 			TxtIdentificacion.IsReadOnly = true;
 			TxtCorreo.IsReadOnly = true;
-			TxtMaterias.IsReadOnly = true;
 
 			CmbEstado.IsEnabled = false;
+			CmbMateriaDisponible.IsEnabled = false;
+
+			BtnAgregarMateria.Visibility = Visibility.Collapsed;
 			BtnDisponibilidad.IsEnabled = false;
 		}
 
-		/// <summary>
-		/// Carga los datos del docente en los controles visuales.
-		/// 
-		/// Realiza:
-		/// - Asignación de textos
-		/// - Selección del estado actual
-		/// </summary>
 		private void CargarDatos()
 		{
 			TxtNombreCompleto.Text = _viewModel.Docente.NombreCompleto;
 			TxtIdentificacion.Text = _viewModel.Docente.Identificacion;
 			TxtCorreo.Text = _viewModel.Docente.CorreoInstitucional;
-			TxtMaterias.Text = _viewModel.Docente.Materias;
 
-			// Selecciona el estado actual del docente
+			CargarMateriasDisponibles();
+			CargarMateriasSeleccionadas(_viewModel.Docente.Materias);
+			DibujarMateriasSeleccionadas();
+			ActualizarComboMaterias();
+
 			foreach (ComboBoxItem item in CmbEstado.Items)
 			{
 				if (item.Content?.ToString() == _viewModel.Docente.Estado)
@@ -197,16 +117,6 @@ namespace SistemaHorario.UI.Dialogs.Docentes
 			}
 		}
 
-		/// <summary>
-		/// Evento ejecutado al presionar el botón
-		/// "Disponibilidad".
-		/// 
-		/// Abre el diálogo de configuración horaria
-		/// del docente.
-		/// 
-		/// Si el usuario confirma:
-		/// - Se actualiza la disponibilidad
-		/// </summary>
 		private void BtnDisponibilidad_Click(
 			object sender,
 			RoutedEventArgs e)
@@ -217,63 +127,45 @@ namespace SistemaHorario.UI.Dialogs.Docentes
 					Owner = this
 				};
 
-			// Si el usuario cancela, no continuar
 			if (dialog.ShowDialog() != true)
 				return;
 
-			// Guardar disponibilidad seleccionada
 			_viewModel.Disponibilidad = dialog.DisponibilidadResultado;
 		}
 
-		/// <summary>
-		/// Evento ejecutado al presionar el botón Guardar.
-		/// 
-		/// Flujo:
-		/// 1. Validar formulario
-		/// 2. Actualizar modelo
-		/// 3. Crear o editar docente
-		/// 4. Guardar disponibilidad
-		/// 5. Mostrar mensaje de éxito
-		/// 6. Cerrar ventana
-		/// </summary>
 		private void BtnGuardar_Click(
 			object sender,
 			RoutedEventArgs e)
 		{
-			// Validación inicial
 			if (!FormularioEsValido())
 				return;
 
-			// Actualizar información desde controles UI
 			_viewModel.Docente.NombreCompleto = TxtNombreCompleto.Text.Trim();
 			_viewModel.Docente.Identificacion = TxtIdentificacion.Text.Trim();
 			_viewModel.Docente.CorreoInstitucional = TxtCorreo.Text.Trim();
-			_viewModel.Docente.Materias = TxtMaterias.Text.Trim();
 
-			// Obtener estado seleccionado
+			_viewModel.Docente.Materias =
+				string.Join(", ", _materiasSeleccionadas);
+
 			if (CmbEstado.SelectedItem is ComboBoxItem item)
 			{
 				_viewModel.Docente.Estado =
 					item.Content?.ToString() ?? "Activo";
 			}
 
-			// Actualizar docente existente
 			if (_viewModel.EsEdicion)
 			{
 				DocentesMockStore.ActualizarDocente(_viewModel.Docente);
 			}
 			else
 			{
-				// Crear nuevo docente
 				DocentesMockStore.CrearDocente(_viewModel.Docente);
 			}
 
-			// Guardar disponibilidad del docente
 			DocentesMockStore.GuardarDisponibilidad(
 				_viewModel.Docente.IdDocente,
 				_viewModel.Disponibilidad);
 
-			// Mostrar mensaje de confirmación
 			MensajeExitoDialog exito =
 				new(_viewModel.EsEdicion
 					? "Docente actualizado"
@@ -284,26 +176,12 @@ namespace SistemaHorario.UI.Dialogs.Docentes
 
 			exito.ShowDialog();
 
-			// Finalizar diálogo exitosamente
 			DialogResult = true;
 			Close();
 		}
 
-		/// <summary>
-		/// Realiza validaciones básicas del formulario.
-		/// 
-		/// Validaciones:
-		/// - Nombre obligatorio
-		/// - Identificación obligatoria
-		/// - Correo obligatorio
-		/// 
-		/// <returns>
-		/// TRUE  = formulario válido
-		/// FALSE = existen errores
-		/// </returns>
 		private bool FormularioEsValido()
 		{
-			// Validar nombre completo
 			if (string.IsNullOrWhiteSpace(TxtNombreCompleto.Text))
 			{
 				MessageBox.Show(
@@ -315,7 +193,6 @@ namespace SistemaHorario.UI.Dialogs.Docentes
 				return false;
 			}
 
-			// Validar identificación
 			if (string.IsNullOrWhiteSpace(TxtIdentificacion.Text))
 			{
 				MessageBox.Show(
@@ -327,7 +204,6 @@ namespace SistemaHorario.UI.Dialogs.Docentes
 				return false;
 			}
 
-			// Validar correo institucional
 			if (string.IsNullOrWhiteSpace(TxtCorreo.Text))
 			{
 				MessageBox.Show(
@@ -339,15 +215,148 @@ namespace SistemaHorario.UI.Dialogs.Docentes
 				return false;
 			}
 
+			if (_materiasSeleccionadas.Count == 0)
+			{
+				MessageBox.Show(
+					"⚠ Debes agregar al menos una materia.",
+					"Validación",
+					MessageBoxButton.OK,
+					MessageBoxImage.Warning);
+
+				return false;
+			}
+
 			return true;
 		}
 
-		/// <summary>
-		/// Evento ejecutado al presionar el botón Cancelar.
-		/// 
-		/// Cierra el diálogo indicando:
-		/// - Operación cancelada
-		/// </summary>
+		private void BtnAgregarMateria_Click(object sender, RoutedEventArgs e)
+		{
+			if (CmbMateriaDisponible.SelectedItem is not string materia)
+				return;
+
+			if (_materiasSeleccionadas.Contains(materia))
+				return;
+
+			_materiasSeleccionadas.Add(materia);
+
+			DibujarMateriasSeleccionadas();
+			ActualizarComboMaterias();
+		}
+
+		private void CargarMateriasDisponibles()
+		{
+			_materiasDisponibles.Clear();
+
+			foreach (string materia in DocentesMockStore.ObtenerMateriasDisponibles())
+			{
+				_materiasDisponibles.Add(materia);
+			}
+		}
+
+		private void CargarMateriasSeleccionadas(string materiasTexto)
+		{
+			_materiasSeleccionadas.Clear();
+
+			if (string.IsNullOrWhiteSpace(materiasTexto))
+				return;
+
+			string[] materias = materiasTexto.Split(',');
+
+			foreach (string materia in materias)
+			{
+				string materiaLimpia = materia.Trim();
+
+				if (!string.IsNullOrWhiteSpace(materiaLimpia) &&
+					!_materiasSeleccionadas.Contains(materiaLimpia))
+				{
+					_materiasSeleccionadas.Add(materiaLimpia);
+				}
+			}
+		}
+
+		private void ActualizarComboMaterias()
+		{
+			CmbMateriaDisponible.ItemsSource = null;
+
+			List<string> disponibles = _materiasDisponibles
+				.Where(materia => !_materiasSeleccionadas.Contains(materia))
+				.ToList();
+
+			CmbMateriaDisponible.ItemsSource = disponibles;
+
+			if (disponibles.Count > 0)
+				CmbMateriaDisponible.SelectedIndex = 0;
+		}
+
+		private void DibujarMateriasSeleccionadas()
+		{
+			PanelMateriasSeleccionadas.Children.Clear();
+
+			foreach (string materia in _materiasSeleccionadas)
+			{
+				Border chip = new()
+				{
+					Background = new SolidColorBrush(Color.FromRgb(219, 234, 254)),
+					CornerRadius = new CornerRadius(14),
+					Padding = new Thickness(10, 5, 8, 5),
+					Margin = new Thickness(0, 0, 8, 8)
+				};
+
+				StackPanel contenido = new()
+				{
+					Orientation = Orientation.Horizontal
+				};
+
+				TextBlock texto = new()
+				{
+					Text = materia,
+					Foreground = new SolidColorBrush(Color.FromRgb(30, 64, 175)),
+					FontWeight = FontWeights.SemiBold,
+					VerticalAlignment = VerticalAlignment.Center
+				};
+
+				contenido.Children.Add(texto);
+
+				if (!_soloLectura)
+				{
+					Button quitar = new()
+					{
+						Content = "x",
+						Width = 20,
+						Height = 20,
+						Margin = new Thickness(8, 0, 0, 0),
+						Background = Brushes.Transparent,
+						BorderThickness = new Thickness(0),
+						Foreground = new SolidColorBrush(Color.FromRgb(30, 64, 175)),
+						FontWeight = FontWeights.Bold,
+						Cursor = Cursors.Hand,
+						Tag = materia
+					};
+
+					quitar.Click += BtnQuitarMateria_Click;
+
+					contenido.Children.Add(quitar);
+				}
+
+				chip.Child = contenido;
+				PanelMateriasSeleccionadas.Children.Add(chip);
+			}
+		}
+
+		private void BtnQuitarMateria_Click(object sender, RoutedEventArgs e)
+		{
+			if (sender is not Button boton)
+				return;
+
+			if (boton.Tag is not string materia)
+				return;
+
+			_materiasSeleccionadas.Remove(materia);
+
+			DibujarMateriasSeleccionadas();
+			ActualizarComboMaterias();
+		}
+
 		private void BtnCancelar_Click(
 			object sender,
 			RoutedEventArgs e)
@@ -356,11 +365,6 @@ namespace SistemaHorario.UI.Dialogs.Docentes
 			Close();
 		}
 
-		/// <summary>
-		/// Evento ejecutado al presionar el botón cerrar.
-		/// 
-		/// Finaliza la ventana sin guardar cambios.
-		/// </summary>
 		private void BtnCerrar_Click(
 			object sender,
 			RoutedEventArgs e)
@@ -369,5 +373,4 @@ namespace SistemaHorario.UI.Dialogs.Docentes
 			Close();
 		}
 	}
-
 }
