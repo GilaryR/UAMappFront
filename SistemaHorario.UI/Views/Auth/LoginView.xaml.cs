@@ -162,6 +162,12 @@ namespace SistemaHorario.UI.Views.Auth
                 TxtErrorCorreo.Visibility = Visibility.Visible;
                 valido = false;
             }
+            else if (!_viewModel.CorreoTieneFormatoValido())
+            {
+                TxtErrorCorreo.Text = "ⓘ El correo debe contener @.";
+                TxtErrorCorreo.Visibility = Visibility.Visible;
+                valido = false;
+            }
 
             if (!_viewModel.ContrasenaEsValida())
             {
