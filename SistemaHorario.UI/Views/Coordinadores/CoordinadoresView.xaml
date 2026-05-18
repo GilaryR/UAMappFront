@@ -1,0 +1,153 @@
+﻿<UserControl x:Class="SistemaHorario.UI.Views.Coordinadores.CoordinadoresView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="clr-namespace:SistemaHorario.UI.Controls">
+
+	<Grid Background="#F4F7FA">
+
+		<Grid Margin="24">
+
+			<Grid.RowDefinitions>
+				<RowDefinition Height="Auto"/>
+				<RowDefinition Height="Auto"/>
+				<RowDefinition Height="*"/>
+			</Grid.RowDefinitions>
+
+			<!-- ENCABEZADO -->
+			<Grid Grid.Row="0"
+                  Margin="0,0,0,22">
+
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="*"/>
+					<ColumnDefinition Width="220"/>
+				</Grid.ColumnDefinitions>
+
+				<StackPanel>
+					<TextBlock Text="Gestión de coordinadores"
+                               FontSize="34"
+                               FontWeight="Bold"
+                               Foreground="#111827"/>
+
+					<TextBlock Text="Administra coordinadores y permisos"
+                               FontSize="14"
+                               Foreground="#6B7280"
+                               Margin="0,6,0,0"/>
+				</StackPanel>
+
+				<Button x:Name="BtnAgregar"
+                        Grid.Column="1"
+                        Content="Agregar"
+                        Width="180"
+                        Height="46"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Center"
+                        Background="#006AA6"
+                        Foreground="White"
+                        BorderThickness="0"
+                        FontSize="15"
+                        FontWeight="Bold"
+                        Cursor="Hand"
+                        Click="BtnAgregar_Click"/>
+			</Grid>
+
+			<!-- FILTROS -->
+			<Border Grid.Row="1"
+                    Background="White"
+                    CornerRadius="14"
+                    BorderBrush="#D9E2EC"
+                    BorderThickness="1"
+                    Padding="18"
+                    Margin="0,0,0,18">
+
+				<Grid>
+					<Grid.ColumnDefinitions>
+						<ColumnDefinition Width="2*"/>
+						<ColumnDefinition Width="18"/>
+						<ColumnDefinition Width="*"/>
+						<ColumnDefinition Width="18"/>
+						<ColumnDefinition Width="*"/>
+						<ColumnDefinition Width="18"/>
+						<ColumnDefinition Width="Auto"/>
+						<ColumnDefinition Width="12"/>
+						<ColumnDefinition Width="Auto"/>
+					</Grid.ColumnDefinitions>
+
+					<!-- SearchBox reutilizable -->
+					<StackPanel Grid.Column="0">
+						<TextBlock Text="Buscar"
+                                   FontWeight="SemiBold"
+                                   Foreground="#111827"
+                                   Margin="0,0,0,6"/>
+
+						<controls:SearchBox x:Name="SearchCoordinadores"
+                                            Placeholder="Buscar por nombre, cédula o correo"
+                                            BusquedaCambiada="SearchCoordinadores_BusquedaCambiada"/>
+					</StackPanel>
+
+					<!-- Buscar por -->
+					<StackPanel Grid.Column="2">
+						<TextBlock Text="Buscar por"
+                                   FontWeight="SemiBold"
+                                   Foreground="#111827"
+                                   Margin="0,0,0,6"/>
+
+						<ComboBox x:Name="CmbBuscarPor"
+                                  Height="38">
+							<ComboBoxItem Content="Nombre"
+                                          IsSelected="True"/>
+							<ComboBoxItem Content="Cédula"/>
+							<ComboBoxItem Content="Correo"/>
+						</ComboBox>
+					</StackPanel>
+
+					<!-- Estado -->
+					<StackPanel Grid.Column="4">
+						<TextBlock Text="Estado"
+                                   FontWeight="SemiBold"
+                                   Foreground="#111827"
+                                   Margin="0,0,0,6"/>
+
+						<ComboBox x:Name="CmbEstado"
+                                  Height="38">
+							<ComboBoxItem Content="Todos"
+                                          IsSelected="True"/>
+							<ComboBoxItem Content="Activo"/>
+							<ComboBoxItem Content="Inactivo"/>
+						</ComboBox>
+					</StackPanel>
+
+					<!-- Botón filtrar -->
+					<Button Grid.Column="6"
+                            Content="Filtrar"
+                            Width="120"
+                            Height="38"
+                            Margin="0,22,0,0"
+                            Background="#006AA6"
+                            Foreground="White"
+                            BorderThickness="0"
+                            FontWeight="Bold"
+                            Cursor="Hand"
+                            Click="BtnFiltrar_Click"/>
+
+					<!-- Botón limpiar -->
+					<Button Grid.Column="8"
+                            Content="Limpiar"
+                            Width="110"
+                            Height="38"
+                            Margin="0,22,0,0"
+                            Background="#E5E7EB"
+                            Foreground="#111827"
+                            BorderThickness="0"
+                            FontWeight="Bold"
+                            Cursor="Hand"
+                            Click="BtnLimpiar_Click"/>
+				</Grid>
+			</Border>
+
+			<!-- TABLA -->
+			<controls:TablaPaginada x:Name="TablaCoordinadores"
+                                    Grid.Row="2"
+                                    MinHeight="430"/>
+		</Grid>
+	</Grid>
+</UserControl>

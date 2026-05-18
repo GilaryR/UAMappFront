@@ -1,0 +1,41 @@
+﻿<Window x:Class="SistemaHorario.UI.Dialogs.Coordinadores.VerificarCredencialesDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Verificación"
+        Width="430"
+        Height="320"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize">
+
+	<Border Padding="24"
+            Background="White">
+
+		<StackPanel>
+
+			<TextBlock Text="Verificación de credenciales"
+                       FontSize="28"
+                       FontWeight="Bold"
+                       Margin="0,0,0,24"/>
+
+			<TextBlock Text="Correo institucional"/>
+
+			<TextBox x:Name="TxtCorreo"
+                     Height="38"
+                     Margin="0,8,0,18"/>
+
+			<TextBlock Text="Contraseña"/>
+
+			<PasswordBox x:Name="TxtPassword"
+                         Height="38"
+                         Margin="0,8,0,28"/>
+
+			<Button Content="Verificar"
+                    Height="42"
+                    Background="#006AA6"
+                    Foreground="White"
+                    FontWeight="Bold"
+                    BorderThickness="0"
+                    Click="BtnVerificar_Click"/>
+		</StackPanel>
+	</Border>
+</Window>

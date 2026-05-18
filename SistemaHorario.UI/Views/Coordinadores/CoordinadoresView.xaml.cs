@@ -1,0 +1,315 @@
+﻿using SistemaHorario.UI.Controls;
+using SistemaHorario.UI.Dialogs.Coordinadores;
+using SistemaHorario.UI.Dialogs.Shared;
+using SistemaHorario.UI.Models.UI;
+using SistemaHorario.UI.ViewModels.Coordinadores;
+using System.Windows;
+using System.Windows.Controls;
+
+namespace SistemaHorario.UI.Views.Coordinadores
+{
+	/// <summary>
+	/// Vista principal del módulo Coordinadores.
+	///
+	/// Permite:
+	/// - listar coordinadores,
+	/// - buscar por nombre, cédula o correo,
+	/// - filtrar por estado,
+	/// - crear coordinadores después de verificar credenciales,
+	/// - editar coordinadores,
+	/// - eliminar coordinadores.
+	///
+	/// Actualmente trabaja con datos mock.
+	///
+	/// TODO:
+	/// Reemplazar CoordinadoresMockStore por endpoints reales:
+	/// GET /api/coordinadores
+	/// POST /api/coordinadores
+	/// PUT /api/coordinadores/{id}
+	/// DELETE /api/coordinadores/{id}
+	/// </summary>
+	public partial class CoordinadoresView : UserControl
+	{
+		/// <summary>
+		/// ViewModel principal de coordinadores.
+		/// </summary>
+		private readonly CoordinadoresViewModel _viewModel;
+
+		/// <summary>
+		/// Constructor principal.
+		/// </summary>
+		public CoordinadoresView()
+		{
+			InitializeComponent();
+
+			_viewModel = new CoordinadoresViewModel();
+
+			ConfigurarTabla();
+
+			CargarDatos();
+		}
+
+		/// <summary>
+		/// Configura columnas y acciones de la tabla reutilizable.
+		/// </summary>
+		private void ConfigurarTabla()
+		{
+			TablaCoordinadores.ConfigurarColumnas(
+			[
+				new TableColumnDefinition
+				{
+					Header = "Nombre",
+					Binding = "NombreCompleto",
+					Width = 2
+				},
+
+				new TableColumnDefinition
+				{
+					Header = "Cédula",
+					Binding = "Cedula",
+					Width = 1.2
+				},
+
+				new TableColumnDefinition
+				{
+					Header = "Correo electrónico",
+					Binding = "CorreoInstitucional",
+					Width = 2
+				},
+
+				new TableColumnDefinition
+				{
+					Header = "Rol",
+					Binding = "Rol",
+					Width = 1
+				},
+
+				new TableColumnDefinition
+				{
+					Header = "Estado",
+					Binding = "Estado",
+					Width = 1
+				},
+
+				new TableColumnDefinition
+				{
+					Header = "Celular",
+					Binding = "Celular",
+					Width = 1.2
+				}
+			]);
+
+			TablaCoordinadores.ConfigurarAcciones(
+			[
+				new TableActionDefinition
+				{
+					Nombre = "editar",
+					Texto = "✏"
+				},
+
+				new TableActionDefinition
+				{
+					Nombre = "eliminar",
+					Texto = "🗑"
+				}
+			]);
+
+			TablaCoordinadores.AccionEjecutada +=
+				TablaCoordinadores_AccionEjecutada;
+		}
+
+		/// <summary>
+		/// Carga la información actual en la tabla.
+		/// </summary>
+		private void CargarDatos()
+		{
+			TablaCoordinadores.CargarDatos(
+				_viewModel.Coordinadores);
+		}
+
+		/// <summary>
+		/// Ejecuta búsqueda automática cuando cambia el texto.
+		/// </summary>
+		private void SearchCoordinadores_BusquedaCambiada(
+			object sender,
+			RoutedEventArgs e)
+		{
+			AplicarFiltros();
+		}
+
+		/// <summary>
+		/// Aplica filtros al presionar el botón Filtrar.
+		/// </summary>
+		private void BtnFiltrar_Click(
+			object sender,
+			RoutedEventArgs e)
+		{
+			AplicarFiltros();
+		}
+
+		/// <summary>
+		/// Limpia búsqueda y filtros.
+		/// </summary>
+		private void BtnLimpiar_Click(
+			object sender,
+			RoutedEventArgs e)
+		{
+			SearchCoordinadores.Limpiar();
+
+			CmbBuscarPor.SelectedIndex = 0;
+			CmbEstado.SelectedIndex = 0;
+
+			AplicarFiltros();
+		}
+
+		/// <summary>
+		/// Aplica búsqueda por texto, tipo de búsqueda y estado.
+		/// </summary>
+		private void AplicarFiltros()
+		{
+			_viewModel.Filtrar(
+				SearchCoordinadores.TextoBusqueda,
+				ObtenerTextoCombo(CmbBuscarPor),
+				ObtenerTextoCombo(CmbEstado));
+
+			CargarDatos();
+		}
+
+		/// <summary>
+		/// Obtiene el texto seleccionado de un ComboBox.
+		/// </summary>
+		private static string ObtenerTextoCombo(ComboBox combo)
+		{
+			if (combo.SelectedItem is ComboBoxItem item)
+				return item.Content?.ToString() ?? string.Empty;
+
+			return string.Empty;
+		}
+
+		/// <summary>
+		/// Maneja acciones ejecutadas desde TablaPaginada.
+		/// </summary>
+		private void TablaCoordinadores_AccionEjecutada(
+			object? sender,
+			TableActionEventArgs e)
+		{
+			if (e.Fila is not CoordinadorItem coordinador)
+				return;
+
+			switch (e.Accion.ToLower())
+			{
+				case "editar":
+					EditarCoordinador(coordinador);
+					break;
+
+				case "eliminar":
+					EliminarCoordinador(coordinador);
+					break;
+			}
+		}
+
+		/// <summary>
+		/// Inicia el flujo de creación:
+		/// primero verifica credenciales y luego abre formulario.
+		/// </summary>
+		private void BtnAgregar_Click(
+			object sender,
+			RoutedEventArgs e)
+		{
+			VerificarCredencialesDialog dialog =
+				new()
+				{
+					Owner = Window.GetWindow(this)
+				};
+
+			bool? resultado = dialog.ShowDialog();
+
+			if (resultado != true)
+				return;
+
+			NavegarAFormulario();
+		}
+
+		/// <summary>
+		/// Abre formulario de edición.
+		/// </summary>
+		private void EditarCoordinador(
+			CoordinadorItem coordinador)
+		{
+			NavegarAFormulario(coordinador);
+		}
+
+		/// <summary>
+		/// Elimina un coordinador usando diálogo de confirmación.
+		///
+		/// TODO:
+		/// Reemplazar por DELETE /api/coordinadores/{id}.
+		/// </summary>
+		private void EliminarCoordinador(
+			CoordinadorItem coordinador)
+		{
+			EliminarConfirmacionDialog dialog =
+				new($"¿Deseas eliminar al coordinador {coordinador.NombreCompleto}?\nDebes escribir la palabra eliminar.")
+				{
+					Owner = Window.GetWindow(this)
+				};
+
+			if (dialog.ShowDialog() != true)
+				return;
+
+			CoordinadoresMockStore.Eliminar(
+				coordinador.IdCoordinador);
+
+			_viewModel.CargarDatos();
+
+			CargarDatos();
+
+			MensajeExitoDialog exito =
+				new("Coordinador eliminado")
+				{
+					Owner = Window.GetWindow(this)
+				};
+
+			exito.ShowDialog();
+		}
+
+		/// <summary>
+		/// Navega al formulario de crear o editar coordinador.
+		/// </summary>
+		private void NavegarAFormulario(
+			CoordinadorItem? coordinador = null)
+		{
+			ContentControl? contentArea =
+				BuscarContentArea();
+
+			if (contentArea == null)
+				return;
+
+			contentArea.Content =
+				new AgregarEditarCoordinadorView(
+					coordinador);
+		}
+
+		/// <summary>
+		/// Busca el ContentArea del MainShell para navegar internamente.
+		/// </summary>
+		private ContentControl? BuscarContentArea()
+		{
+			DependencyObject? actual = this;
+
+			while (actual != null)
+			{
+				if (actual is ContentControl content &&
+					content.Name == "ContentArea")
+				{
+					return content;
+				}
+
+				actual =
+					System.Windows.Media.VisualTreeHelper.GetParent(actual);
+			}
+
+			return null;
+		}
+	}
+}

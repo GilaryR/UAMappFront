@@ -5,6 +5,7 @@ using System.Windows.Controls;
 using SistemaHorario.UI.Views.Dashboard;
 using SistemaHorario.UI.Views.Materias;
 using SistemaHorario.UI.Views.Docentes;
+using SistemaHorario.UI.Views.Coordinadores;
 
 namespace SistemaHorario.UI.Views.Shell
 {
@@ -91,6 +92,12 @@ namespace SistemaHorario.UI.Views.Shell
 			if (vistaDestino == "Docentes")
 			{
 				ContentArea.Content = new DocentesView();
+				return;
+			}
+
+			if (vistaDestino == "Coordinadores")
+			{
+				ContentArea.Content = new CoordinadoresView();
 				return;
 			}
 
