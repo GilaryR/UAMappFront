@@ -42,6 +42,11 @@ namespace SistemaHorario.UI.ViewModels.Auth
             return !string.IsNullOrWhiteSpace(CorreoInstitucional);
         }
 
+        public bool CorreoTieneFormatoValido()
+        {
+            return CorreoInstitucional.Contains("@");
+        }
+
         public bool ContrasenaEsValida()
         {
             return !string.IsNullOrWhiteSpace(Contrasena);
