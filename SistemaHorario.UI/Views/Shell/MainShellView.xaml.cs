@@ -1,12 +1,14 @@
-﻿using SistemaHorario.UI.Views.Horarios;
+﻿using SistemaHorario.UI.Views.Coordinadores;
+using SistemaHorario.UI.Views.Dashboard;
+using SistemaHorario.UI.Views.Docentes;
+using SistemaHorario.UI.Views.HistorialCambios;
+using SistemaHorario.UI.Views.Horarios;
+using SistemaHorario.UI.Views.Materias;
 using SistemaHorario.UI.Views.Perfil;
+using SistemaHorario.UI.Views.PlanAcademico;
 using System.Windows;
 using System.Windows.Controls;
-using SistemaHorario.UI.Views.Dashboard;
-using SistemaHorario.UI.Views.Materias;
-using SistemaHorario.UI.Views.Docentes;
-using SistemaHorario.UI.Views.Coordinadores;
-using SistemaHorario.UI.Views.PlanAcademico;
+
 
 namespace SistemaHorario.UI.Views.Shell
 {
@@ -108,7 +110,14 @@ namespace SistemaHorario.UI.Views.Shell
                 return;
             }
 
-            MostrarMensajeTemporal(vistaDestino);
+			if (vistaDestino == "HistorialCambios")
+			{
+				ContentArea.Content = new HistorialCambiosView();
+				return;
+			}
+
+
+			MostrarMensajeTemporal(vistaDestino);
 		}
 
 		/// <summary>
