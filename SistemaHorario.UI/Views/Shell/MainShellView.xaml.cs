@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Controls;
 using SistemaHorario.UI.Views.Dashboard;
 using SistemaHorario.UI.Views.Materias;
+using SistemaHorario.UI.Views.Docentes;
 
 namespace SistemaHorario.UI.Views.Shell
 {
@@ -87,8 +88,13 @@ namespace SistemaHorario.UI.Views.Shell
                 ContentArea.Content = new HorariosView();
                 return;
             }
+			if (vistaDestino == "Docentes")
+			{
+				ContentArea.Content = new DocentesView();
+				return;
+			}
 
-            MostrarMensajeTemporal(vistaDestino);
+			MostrarMensajeTemporal(vistaDestino);
 		}
 
 		/// <summary>
