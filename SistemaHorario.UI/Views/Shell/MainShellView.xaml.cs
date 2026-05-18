@@ -6,6 +6,7 @@ using SistemaHorario.UI.Views.Dashboard;
 using SistemaHorario.UI.Views.Materias;
 using SistemaHorario.UI.Views.Docentes;
 using SistemaHorario.UI.Views.Coordinadores;
+using SistemaHorario.UI.Views.PlanAcademico;
 
 namespace SistemaHorario.UI.Views.Shell
 {
@@ -101,7 +102,13 @@ namespace SistemaHorario.UI.Views.Shell
 				return;
 			}
 
-			MostrarMensajeTemporal(vistaDestino);
+            if (vistaDestino == "PlanAcademico")
+            {
+                ContentArea.Content = new PlanAcademicoView();
+                return;
+            }
+
+            MostrarMensajeTemporal(vistaDestino);
 		}
 
 		/// <summary>
