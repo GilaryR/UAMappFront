@@ -1,181 +1,86 @@
-﻿using SistemaHorario.UI.Models.UI;
+﻿using SistemaHorario.Infrastructure.Api;
+using SistemaHorario.UI.Models.UI;
 using SistemaHorario.UI.ViewModels.Base;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace SistemaHorario.UI.ViewModels.Materias
 {
-    /// <summary>
-    /// ViewModel de la vista Materias.
-    ///
-    /// Centraliza los datos temporales, filtros y operaciones visuales
-    /// del módulo de materias.
-    ///
-    /// Actualmente NO consume API.
-    ///
-    /// Más adelante deberá conectarse con:
-    /// - GET /api/materias
-    /// - POST /api/materias
-    /// - PUT /api/materias/{id}
-    /// - DELETE /api/materias/{id}
-    /// - GET /api/materias/{id}/prerrequisitos
-    /// </summary>
     public class MateriasViewModel : ViewModelBase
     {
+        private readonly MateriasApiService _api = new();
+
         private string _busqueda = string.Empty;
         private string _semestreSeleccionado = "Todos";
         private string _estadoSeleccionado = "Todos";
+        private string _mensajeEstado = string.Empty;
 
-        /// <summary>
-        /// Lista completa temporal de materias.
-        /// </summary>
         public ObservableCollection<MateriaItem> Materias { get; } = new();
-
-        /// <summary>
-        /// Lista filtrada que se muestra en pantalla.
-        /// </summary>
         public ObservableCollection<MateriaItem> MateriasFiltradas { get; } = new();
 
-        /// <summary>
-        /// Texto de búsqueda.
-        /// </summary>
         public string Busqueda
         {
             get => _busqueda;
-            set
-            {
-                if (SetProperty(ref _busqueda, value))
-                    AplicarFiltros();
-            }
+            set { if (SetProperty(ref _busqueda, value)) AplicarFiltros(); }
         }
 
-        /// <summary>
-        /// Semestre seleccionado.
-        /// </summary>
         public string SemestreSeleccionado
         {
             get => _semestreSeleccionado;
-            set
-            {
-                if (SetProperty(ref _semestreSeleccionado, value))
-                    AplicarFiltros();
-            }
+            set { if (SetProperty(ref _semestreSeleccionado, value)) AplicarFiltros(); }
         }
 
-        /// <summary>
-        /// Estado seleccionado.
-        /// </summary>
         public string EstadoSeleccionado
         {
             get => _estadoSeleccionado;
-            set
-            {
-                if (SetProperty(ref _estadoSeleccionado, value))
-                    AplicarFiltros();
-            }
+            set { if (SetProperty(ref _estadoSeleccionado, value)) AplicarFiltros(); }
         }
 
-        /// <summary>
-        /// Constructor del ViewModel.
-        /// </summary>
+        public string MensajeEstado
+        {
+            get => _mensajeEstado;
+            set => SetProperty(ref _mensajeEstado, value);
+        }
+
         public MateriasViewModel()
         {
-            CargarDatosTemporales();
-            AplicarFiltros();
+            _ = CargarMateriasAsync();
         }
 
-        /// <summary>
-        /// Carga datos temporales para validar la interfaz.
-        ///
-        /// TODO:
-        /// Reemplazar por GET /api/materias.
-        /// </summary>
-        private void CargarDatosTemporales()
+        public async Task CargarMateriasAsync()
         {
+            var resp = await _api.ObtenerMateriasAsync();
+
+            if (!resp.Success || resp.Data == null)
+            {
+                MensajeEstado = $"Error al cargar materias: {resp.Message}";
+                return;
+            }
+
             Materias.Clear();
+            foreach (var m in resp.Data)
+                Materias.Add(m);
 
-            Materias.Add(new MateriaItem
-            {
-                IdMateria = 1,
-                Codigo = "MAT101",
-                Nombre = "Cálculo Diferencial",
-                Creditos = 4,
-                IntensidadHorariaSemanal = 64,
-                Semestre = 1,
-                CantidadGrupos = 1,
-                Activa = true
-            });
-
-            Materias.Add(new MateriaItem
-            {
-                IdMateria = 2,
-                Codigo = "MAT102",
-                Nombre = "Álgebra Lineal",
-                Creditos = 3,
-                IntensidadHorariaSemanal = 48,
-                Semestre = 2,
-                CantidadGrupos = 2,
-                Activa = true
-            });
-
-            Materias.Add(new MateriaItem
-            {
-                IdMateria = 3,
-                Codigo = "MAT103",
-                Nombre = "Cálculo Integral",
-                Creditos = 4,
-                IntensidadHorariaSemanal = 64,
-                Semestre = 2,
-                CantidadGrupos = 2,
-                Activa = true
-            });
-
-            Materias.Add(new MateriaItem
-            {
-                IdMateria = 4,
-                Codigo = "FIS101",
-                Nombre = "Física I",
-                Creditos = 4,
-                IntensidadHorariaSemanal = 64,
-                Semestre = 1,
-                CantidadGrupos = 1,
-                Activa = true
-            });
-
-            Materias.Add(new MateriaItem
-            {
-                IdMateria = 5,
-                Codigo = "QUI101",
-                Nombre = "Física II",
-                Creditos = 3,
-                IntensidadHorariaSemanal = 48,
-                Semestre = 1,
-                CantidadGrupos = 1,
-                Activa = false
-            });
+            AplicarFiltros();
+            MensajeEstado = $"{Materias.Count} materias cargadas.";
         }
 
-        /// <summary>
-        /// Aplica los filtros de búsqueda, semestre y estado.
-        /// </summary>
         public void AplicarFiltros()
         {
             var resultado = Materias.AsEnumerable();
 
             if (!string.IsNullOrWhiteSpace(Busqueda))
             {
-                string busquedaNormalizada = Busqueda.ToLower();
-
+                string b = Busqueda.ToLower();
                 resultado = resultado.Where(m =>
-                    m.Codigo.ToLower().Contains(busquedaNormalizada) ||
-                    m.Nombre.ToLower().Contains(busquedaNormalizada));
+                    m.Codigo.ToLower().Contains(b) ||
+                    m.Nombre.ToLower().Contains(b));
             }
 
-            if (SemestreSeleccionado != "Todos")
-            {
-                if (int.TryParse(SemestreSeleccionado, out int semestre))
-                    resultado = resultado.Where(m => m.Semestre == semestre);
-            }
+            if (SemestreSeleccionado != "Todos" &&
+                int.TryParse(SemestreSeleccionado, out int sem))
+                resultado = resultado.Where(m => m.Semestre == sem);
 
             if (EstadoSeleccionado != "Todos")
             {
@@ -184,100 +89,65 @@ namespace SistemaHorario.UI.ViewModels.Materias
             }
 
             MateriasFiltradas.Clear();
-
-            foreach (MateriaItem materia in resultado)
-                MateriasFiltradas.Add(materia);
+            foreach (var m in resultado)
+                MateriasFiltradas.Add(m);
         }
 
-        /// <summary>
-        /// Limpia todos los filtros.
-        /// </summary>
         public void LimpiarFiltros()
         {
             Busqueda = string.Empty;
             SemestreSeleccionado = "Todos";
             EstadoSeleccionado = "Todos";
-
             AplicarFiltros();
         }
 
-        /// <summary>
-        /// Agrega una nueva materia temporalmente.
-        ///
-        /// TODO:
-        /// Reemplazar por POST /api/materias.
-        /// </summary>
-        public void AgregarMateria(MateriaItem materia)
+        public async Task<bool> AgregarMateriaAsync(MateriaItem materia)
         {
-            int nuevoId = Materias.Any()
-                ? Materias.Max(m => m.IdMateria) + 1
-                : 1;
-
-            materia.IdMateria = nuevoId;
-            materia.Activa = true;
-
-            Materias.Add(materia);
-            AplicarFiltros();
+            var resp = await _api.CrearMateriaAsync(materia);
+            if (resp.Success)
+            {
+                await CargarMateriasAsync();
+                return true;
+            }
+            MensajeEstado = $"Error al crear: {resp.Message}";
+            return false;
         }
 
-        /// <summary>
-        /// Actualiza una materia existente temporalmente.
-        ///
-        /// TODO:
-        /// Reemplazar por PUT /api/materias/{id}.
-        /// </summary>
-        public void ActualizarMateria(MateriaItem materiaActualizada)
+        public async Task<bool> ActualizarMateriaAsync(MateriaItem materia)
         {
-            MateriaItem? materiaExistente =
-                Materias.FirstOrDefault(m =>
-                    m.IdMateria == materiaActualizada.IdMateria);
-
-            if (materiaExistente == null)
-                return;
-
-            materiaExistente.Codigo = materiaActualizada.Codigo;
-            materiaExistente.Nombre = materiaActualizada.Nombre;
-            materiaExistente.Creditos = materiaActualizada.Creditos;
-            materiaExistente.IntensidadHorariaSemanal =
-                materiaActualizada.IntensidadHorariaSemanal;
-            materiaExistente.Semestre = materiaActualizada.Semestre;
-            materiaExistente.CantidadGrupos = materiaActualizada.CantidadGrupos;
-            materiaExistente.Activa = materiaActualizada.Activa;
-
-            AplicarFiltros();
+            var resp = await _api.ActualizarMateriaAsync(materia);
+            if (resp.Success)
+            {
+                await CargarMateriasAsync();
+                return true;
+            }
+            MensajeEstado = $"Error al actualizar: {resp.Message}";
+            return false;
         }
 
-        /// <summary>
-        /// Elimina una materia temporalmente.
-        ///
-        /// TODO:
-        /// Reemplazar por DELETE /api/materias/{id}.
-        /// </summary>
-        public void EliminarMateria(MateriaItem materia)
+        public async Task<bool> EliminarMateriaAsync(MateriaItem materia)
         {
-            Materias.Remove(materia);
-            AplicarFiltros();
+            var resp = await _api.EliminarMateriaAsync(materia.IdMateria);
+            if (resp.Success)
+            {
+                Materias.Remove(materia);
+                AplicarFiltros();
+                return true;
+            }
+            MensajeEstado = $"Error al eliminar: {resp.Message}";
+            return false;
         }
 
-        /// <summary>
-        /// Retorna materias disponibles para usarse como prerrequisitos.
-        /// </summary>
         public ObservableCollection<MateriaItem> ObtenerMateriasDisponiblesComoPrerrequisito(
             MateriaItem? materiaActual = null)
         {
             ObservableCollection<MateriaItem> resultado = new();
-
-            foreach (MateriaItem materia in Materias)
+            foreach (var m in Materias)
             {
-                if (materiaActual != null &&
-                    materia.IdMateria == materiaActual.IdMateria)
-                {
+                if (materiaActual != null && m.IdMateria == materiaActual.IdMateria)
                     continue;
-                }
-
-                resultado.Add(materia);
+                resultado.Add(m);
             }
-
             return resultado;
         }
     }
