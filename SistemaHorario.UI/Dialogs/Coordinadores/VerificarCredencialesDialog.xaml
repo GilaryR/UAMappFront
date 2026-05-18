@@ -8,14 +8,14 @@
         ResizeMode="NoResize">
 
 	<Border Padding="24"
-            Background="White">
+            Background="White" Margin="0,0,0,-49">
 
-		<StackPanel>
+		<StackPanel Height="300" VerticalAlignment="Top">
 
 			<TextBlock Text="Verificación de credenciales"
                        FontSize="28"
                        FontWeight="Bold"
-                       Margin="0,0,0,24"/>
+                       />
 
 			<TextBlock Text="Correo institucional"/>
 
@@ -28,7 +28,6 @@
 			<PasswordBox x:Name="TxtPassword"
                          Height="38"
                          Margin="0,8,0,28"/>
-
 			<Button Content="Verificar"
                     Height="42"
                     Background="#006AA6"
