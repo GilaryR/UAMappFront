@@ -6,34 +6,20 @@ namespace SistemaHorario.Infrastructure.Api;
 
 public class AuthApiService
 {
-    private readonly HttpClient _httpClient;
-
-    public AuthApiService()
+    private static readonly HttpClient _http = new()
     {
-        _httpClient = new HttpClient
-        {
-            BaseAddress = new Uri("http://localhost:5023/api/")
-        };
-    }
+        BaseAddress = new Uri("http://localhost:5023/api/")
+    };
 
-    public async Task<ApiResponse<LoginData>> LoginAsync(
-        LoginRequest request)
+    public async Task<ApiResponse<LoginData>> LoginAsync(LoginRequest request)
     {
         try
         {
-            HttpResponseMessage response =
-                await _httpClient.PostAsJsonAsync(
-                    "auth/login",
-                    request
-                );
+            var response = await _http.PostAsJsonAsync("auth/login", request);
+            var resultado = await response.Content
+                .ReadFromJsonAsync<ApiResponse<LoginData>>();
 
-            ApiResponse<LoginData>? apiResponse =
-                await response.Content.ReadFromJsonAsync<ApiResponse<LoginData>>();
-
-            if (apiResponse is not null)
-                return apiResponse;
-
-            return new ApiResponse<LoginData>
+            return resultado ?? new ApiResponse<LoginData>
             {
                 Success = false,
                 Message = "La API no devolvió una respuesta válida."
