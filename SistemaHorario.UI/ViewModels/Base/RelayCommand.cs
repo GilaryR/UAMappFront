@@ -4,51 +4,38 @@ using System.Windows.Input;
 namespace SistemaHorario.UI.ViewModels.Base
 {
     /// <summary>
-    /// Implementación básica de ICommand.
-    ///
-    /// Permite conectar acciones desde ViewModels
-    /// hacia botones y eventos visuales.
+    /// Comando reutilizable para enlazar botones del XAML
+    /// con métodos del ViewModel.
     /// </summary>
     public class RelayCommand : ICommand
     {
-        private readonly Action _execute;
-        private readonly Func<bool>? _canExecute;
+        private readonly Action<object?> _execute;
+        private readonly Func<object?, bool>? _canExecute;
 
-        /// <summary>
-        /// Evento ejecutado cuando cambia el estado del comando.
-        /// </summary>
         public event EventHandler? CanExecuteChanged;
 
-        /// <summary>
-        /// Constructor del comando.
-        /// </summary>
-        public RelayCommand(
-            Action execute,
-            Func<bool>? canExecute = null)
+        public RelayCommand(Action execute, Func<bool>? canExecute = null)
+        {
+            _execute = _ => execute();
+            _canExecute = canExecute == null ? null : _ => canExecute();
+        }
+
+        public RelayCommand(Action<object?> execute, Func<object?, bool>? canExecute = null)
         {
             _execute = execute;
             _canExecute = canExecute;
         }
 
-        /// <summary>
-        /// Indica si el comando puede ejecutarse.
-        /// </summary>
         public bool CanExecute(object? parameter)
         {
-            return _canExecute == null || _canExecute();
+            return _canExecute == null || _canExecute(parameter);
         }
 
-        /// <summary>
-        /// Ejecuta la acción del comando.
-        /// </summary>
         public void Execute(object? parameter)
         {
-            _execute();
+            _execute(parameter);
         }
 
-        /// <summary>
-        /// Fuerza actualización del estado del comando.
-        /// </summary>
         public void RaiseCanExecuteChanged()
         {
             CanExecuteChanged?.Invoke(this, EventArgs.Empty);
