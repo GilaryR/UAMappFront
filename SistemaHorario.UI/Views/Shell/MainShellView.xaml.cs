@@ -1,6 +1,7 @@
 ﻿using SistemaHorario.UI.Views.Coordinadores;
 using SistemaHorario.UI.Views.Dashboard;
 using SistemaHorario.UI.Views.Docentes;
+using SistemaHorario.UI.Views.GruposAcademicos;
 using SistemaHorario.UI.Views.HistorialCambios;
 using SistemaHorario.UI.Views.Horarios;
 using SistemaHorario.UI.Views.Materias;
@@ -116,8 +117,14 @@ namespace SistemaHorario.UI.Views.Shell
 				return;
 			}
 
+            if (vistaDestino == "GruposAcademicos")
+            {
+                ContentArea.Content = new GruposAcademicosView();
+                return;
+            }
 
-			MostrarMensajeTemporal(vistaDestino);
+
+            MostrarMensajeTemporal(vistaDestino);
 		}
 
 		/// <summary>
