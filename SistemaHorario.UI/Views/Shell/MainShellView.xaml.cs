@@ -7,6 +7,7 @@ using SistemaHorario.UI.Views.Horarios;
 using SistemaHorario.UI.Views.Materias;
 using SistemaHorario.UI.Views.Perfil;
 using SistemaHorario.UI.Views.PlanAcademico;
+using SistemaHorario.UI.Views.Reportes;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -123,8 +124,14 @@ namespace SistemaHorario.UI.Views.Shell
                 return;
             }
 
+			if (vistaDestino == "Reportes")
+			{
+				ContentArea.Content = new ReportesAcademicosView();
+				return;
+			}
 
-            MostrarMensajeTemporal(vistaDestino);
+
+			MostrarMensajeTemporal(vistaDestino);
 		}
 
 		/// <summary>
