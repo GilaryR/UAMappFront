@@ -101,6 +101,8 @@ namespace SistemaHorario.UI.Views.Auth
                     TxtEstadoApi.Text = "Respuesta inválida del servidor.";
                     return;
                 }
+		
+		SistemaHorario.UI.Services.ApiClient.Token = response.Data.Token;
 
                 UsuarioSesion.IniciarSesion(
                     response.Data.IdUsuario,
