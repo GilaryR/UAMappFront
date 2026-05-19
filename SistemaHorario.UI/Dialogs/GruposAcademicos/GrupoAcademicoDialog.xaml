@@ -60,8 +60,8 @@
                     <StackPanel Grid.Row="4" Grid.Column="0">
                         <TextBlock Text="Estado *" FontWeight="Bold" Margin="0,0,0,8"/>
                         <ComboBox x:Name="CmbEstado" Height="36" FontSize="15">
-                            <ComboBoxItem Content="Activa"/>
-                            <ComboBoxItem Content="Inactiva"/>
+                            <ComboBoxItem Content="Activo"/>
+                            <ComboBoxItem Content="Inactivo"/>
                         </ComboBox>
                     </StackPanel>
 

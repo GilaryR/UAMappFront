@@ -312,7 +312,7 @@ namespace SistemaHorario.UI.Controls
 
             return estado.Contains("act")
                 ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#B9EFC2"))
-                : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FED227"));
+                : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FECACA"));
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
@@ -332,7 +332,7 @@ namespace SistemaHorario.UI.Controls
 
             return estado.Contains("act")
                 ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#1A9E3B"))
-                : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#D6AB05"));
+                : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#DC2626"));
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)

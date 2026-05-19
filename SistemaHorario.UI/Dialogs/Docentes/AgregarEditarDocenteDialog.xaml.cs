@@ -53,6 +53,18 @@ namespace SistemaHorario.UI.Dialogs.Docentes
             }
             catch { }
 
+            if (_viewModel.EsEdicion)
+            {
+                try
+                {
+                    var docentesApi = new DocentesApiService();
+                    var dispResp = await docentesApi.ObtenerDisponibilidadAsync(_viewModel.Docente.IdDocente);
+                    if (dispResp.Success && dispResp.Data != null && dispResp.Data.Count > 0)
+                        _viewModel.Disponibilidad = dispResp.Data;
+                }
+                catch { }
+            }
+
             // Fallback: if API returned nothing, use mock store so the combo is never blank
             if (_todasLasMaterias.Count == 0)
             {
@@ -251,18 +263,35 @@ namespace SistemaHorario.UI.Dialogs.Docentes
                 _viewModel.Docente.Estado = item.Content?.ToString() ?? "Activo";
 
             var api = new DocentesApiService();
-            SistemaHorarios.Application.Common.ApiResponse<string> resp;
+            int idDocente;
 
             if (_viewModel.EsEdicion)
-                resp = await api.ActualizarDocenteAsync(_viewModel.Docente);
-            else
-                resp = await api.CrearDocenteAsync(_viewModel.Docente);
-
-            if (!resp.Success)
             {
-                MessageBox.Show("Error al guardar: " + resp.Message, "Error",
-                    MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
+                var resp = await api.ActualizarDocenteAsync(_viewModel.Docente);
+                if (!resp.Success)
+                {
+                    MessageBox.Show("Error al guardar: " + resp.Message, "Error",
+                        MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+                idDocente = _viewModel.Docente.IdDocente;
+            }
+            else
+            {
+                var resp = await api.CrearDocenteAsync(_viewModel.Docente);
+                if (!resp.Success || resp.Data == null)
+                {
+                    MessageBox.Show("Error al guardar: " + resp.Message, "Error",
+                        MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+                idDocente = resp.Data.IdDocente;
+            }
+
+            if (_viewModel.Disponibilidad.Count > 0)
+            {
+                try { await api.ActualizarDisponibilidadAsync(idDocente, _viewModel.Disponibilidad); }
+                catch { }
             }
 
             MensajeExitoDialog exito = new(_viewModel.EsEdicion ? "Docente actualizado" : "Docente creado")

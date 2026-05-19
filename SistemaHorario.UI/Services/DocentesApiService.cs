@@ -13,6 +13,13 @@ public class DocenteBackendDto
     public List<string> Materias { get; set; } = new();
 }
 
+public class DisponibilidadBackendDto
+{
+    public string Dia { get; set; } = string.Empty;
+    public string HoraInicio { get; set; } = string.Empty;
+    public string HoraFin { get; set; } = string.Empty;
+    public bool Disponible { get; set; }
+}
 
 public class DocentesApiService
 {
@@ -37,8 +44,8 @@ public class DocentesApiService
         return new ApiResponse<List<DocenteItem>> { Success = true, Data = lista };
     }
 
-    public async Task<ApiResponse<string>> CrearDocenteAsync(DocenteItem d)
-        => await _api.PostAsync("Docentes", new
+    public async Task<ApiResponse<DocenteBackendDto>> CrearDocenteAsync(DocenteItem d)
+        => await _api.PostAsync<DocenteBackendDto>("Docentes", new
         {
             d.NombreCompleto,
             d.Identificacion,
@@ -59,4 +66,33 @@ public class DocentesApiService
 
     public async Task<ApiResponse<string>> EliminarDocenteAsync(int id)
         => await _api.DeleteAsync($"Docentes/{id}");
+
+    public async Task<ApiResponse<List<DisponibilidadDocenteItem>>> ObtenerDisponibilidadAsync(int idDocente)
+    {
+        var resp = await _api.GetAsync<List<DisponibilidadBackendDto>>($"Docentes/{idDocente}/disponibilidad");
+        if (!resp.Success || resp.Data == null)
+            return new ApiResponse<List<DisponibilidadDocenteItem>> { Success = false, Message = resp.Message };
+
+        var lista = resp.Data.Select(d => new DisponibilidadDocenteItem
+        {
+            Dia = d.Dia,
+            HoraInicio = d.HoraInicio,
+            HoraFin = d.HoraFin,
+            Disponible = d.Disponible
+        }).ToList();
+
+        return new ApiResponse<List<DisponibilidadDocenteItem>> { Success = true, Data = lista };
+    }
+
+    public async Task<ApiResponse<string>> ActualizarDisponibilidadAsync(int idDocente, List<DisponibilidadDocenteItem> disponibilidad)
+        => await _api.PutAsync($"Docentes/{idDocente}/disponibilidad", new
+        {
+            Disponibilidades = disponibilidad.Select(d => new
+            {
+                d.Dia,
+                HoraInicio = TimeSpan.TryParse(d.HoraInicio, out var hi) ? hi : TimeSpan.Zero,
+                HoraFin = TimeSpan.TryParse(d.HoraFin, out var hf) ? hf : TimeSpan.Zero,
+                d.Disponible
+            }).ToList()
+        });
 }

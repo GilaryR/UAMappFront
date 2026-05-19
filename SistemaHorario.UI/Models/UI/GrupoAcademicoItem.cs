@@ -17,6 +17,8 @@ namespace SistemaHorario.UI.Models.UI
     public class GrupoAcademicoItem : INotifyPropertyChanged
     {
         private int _idGrupoAcademico;
+        private int _idPlanAcademico;
+        private int _numeroSemestre;
         private string _nombreGrupo = string.Empty;
         private string _codigo = string.Empty;
         private string _jornada = string.Empty;
@@ -30,11 +32,19 @@ namespace SistemaHorario.UI.Models.UI
         public int IdGrupoAcademico
         {
             get => _idGrupoAcademico;
-            set
-            {
-                _idGrupoAcademico = value;
-                OnPropertyChanged();
-            }
+            set { _idGrupoAcademico = value; OnPropertyChanged(); }
+        }
+
+        public int IdPlanAcademico
+        {
+            get => _idPlanAcademico;
+            set { _idPlanAcademico = value; OnPropertyChanged(); }
+        }
+
+        public int NumeroSemestre
+        {
+            get => _numeroSemestre;
+            set { _numeroSemestre = value; OnPropertyChanged(); }
         }
 
         public string NombreGrupo
@@ -143,6 +153,8 @@ namespace SistemaHorario.UI.Models.UI
             return new GrupoAcademicoItem
             {
                 IdGrupoAcademico = IdGrupoAcademico,
+                IdPlanAcademico = IdPlanAcademico,
+                NumeroSemestre = NumeroSemestre,
                 NombreGrupo = NombreGrupo,
                 Codigo = Codigo,
                 Jornada = Jornada,
@@ -158,6 +170,8 @@ namespace SistemaHorario.UI.Models.UI
         public void CopiarDesde(GrupoAcademicoItem grupo)
         {
             IdGrupoAcademico = grupo.IdGrupoAcademico;
+            IdPlanAcademico = grupo.IdPlanAcademico;
+            NumeroSemestre = grupo.NumeroSemestre;
             NombreGrupo = grupo.NombreGrupo;
             Codigo = grupo.Codigo;
             Jornada = grupo.Jornada;
