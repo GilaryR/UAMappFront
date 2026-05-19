@@ -10,7 +10,9 @@ public class DocenteBackendDto
     public string Identificacion { get; set; } = string.Empty;
     public string CorreoInstitucional { get; set; } = string.Empty;
     public bool Activo { get; set; }
+    public List<string> Materias { get; set; } = new();
 }
+
 
 public class DocentesApiService
 {
@@ -28,7 +30,7 @@ public class DocentesApiService
             NombreCompleto = d.NombreCompleto,
             Identificacion = d.Identificacion,
             CorreoInstitucional = d.CorreoInstitucional,
-            Materias = string.Empty,
+            Materias = string.Join(", ", d.Materias),
             Estado = d.Activo ? "Activo" : "Inactivo"
         }).ToList();
 
@@ -40,7 +42,9 @@ public class DocentesApiService
         {
             d.NombreCompleto,
             d.Identificacion,
-            d.CorreoInstitucional
+            d.CorreoInstitucional,
+            Activo = d.Estado == "Activo",
+            IdsMateria = d.IdsMateria
         });
 
     public async Task<ApiResponse<string>> ActualizarDocenteAsync(DocenteItem d)
@@ -48,7 +52,9 @@ public class DocentesApiService
         {
             d.NombreCompleto,
             d.Identificacion,
-            d.CorreoInstitucional
+            d.CorreoInstitucional,
+            Activo = d.Estado == "Activo",
+            IdsMateria = d.IdsMateria
         });
 
     public async Task<ApiResponse<string>> EliminarDocenteAsync(int id)

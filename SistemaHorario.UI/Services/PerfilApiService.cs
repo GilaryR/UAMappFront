@@ -46,6 +46,6 @@ public class PerfilApiService
         => await _api.PutAsync("usuarios/cambiar-contrasena", new
         {
             ContrasenaActual = actual,
-            ContrasenaNueva = nueva
+            NuevaContrasena = nueva
         });
 }

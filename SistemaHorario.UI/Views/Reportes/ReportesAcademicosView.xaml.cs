@@ -27,8 +27,16 @@ namespace SistemaHorario.UI.Views.Reportes
 		{
 			InitializeComponent();
 
+			DataContext = _viewModel;
+			Loaded += ReportesAcademicosView_Loaded;
+		}
+
+		private async void ReportesAcademicosView_Loaded(object sender, RoutedEventArgs e)
+		{
+			await _viewModel.CargarCatalogosAsync();
 			ConfigurarFiltros();
 			ConfigurarTabla();
+			await _viewModel.CargarReportesAsync();
 			CargarTabla();
 		}
 

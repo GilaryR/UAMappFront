@@ -1,4 +1,5 @@
 ﻿using SistemaHorario.UI.ViewModels.Dashboard;
+using System.Windows;
 using System.Windows.Controls;
 
 namespace SistemaHorario.UI.Views.Dashboard
@@ -34,19 +35,25 @@ namespace SistemaHorario.UI.Views.Dashboard
 
 			DataContext = _viewModel;
 
-			ConfigurarCards();
-		}
+		Loaded += DashboardView_Loaded;
+	}
 
-		/// <summary>
-		/// Configura visualmente las cards resumen.
-		///
-		/// Los valores actuales son temporales.
-		///
-		/// TODO:
-		/// Reemplazar cuando se confirme la estructura real
-		/// de GET /api/dashboard/resumen.
-		/// </summary>
-		private void ConfigurarCards()
+	private async void DashboardView_Loaded(object sender, RoutedEventArgs e)
+	{
+		await _viewModel.CargarResumenAsync();
+		ConfigurarCards();
+	}
+
+	/// <summary>
+	/// Configura visualmente las cards resumen.
+	///
+	/// Los valores actuales son temporales.
+	///
+	/// TODO:
+	/// Reemplazar cuando se confirme la estructura real
+	/// de GET /api/dashboard/resumen.
+	/// </summary>
+	private void ConfigurarCards()
 		{
 			CardMaterias.Configurar(
 				"Materias",

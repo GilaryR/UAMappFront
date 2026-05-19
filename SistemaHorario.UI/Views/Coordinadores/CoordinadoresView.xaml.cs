@@ -2,6 +2,7 @@
 using SistemaHorario.UI.Dialogs.Coordinadores;
 using SistemaHorario.UI.Dialogs.Shared;
 using SistemaHorario.UI.Models.UI;
+using SistemaHorario.UI.Services;
 using SistemaHorario.UI.ViewModels.Coordinadores;
 using System.Windows;
 using System.Windows.Controls;
@@ -19,17 +20,18 @@ namespace SistemaHorario.UI.Views.Coordinadores
 	/// - editar coordinadores,
 	/// - eliminar coordinadores.
 	///
-	/// Actualmente trabaja con datos mock.
+	/// Consume el backend de usuarios para coordinadores.
 	///
-	/// TODO:
-	/// Reemplazar CoordinadoresMockStore por endpoints reales:
-	/// GET /api/coordinadores
-	/// POST /api/coordinadores
-	/// PUT /api/coordinadores/{id}
-	/// DELETE /api/coordinadores/{id}
+	/// Endpoints utilizados:
+	/// GET /api/usuarios
+	/// POST /api/usuarios
+	/// PUT /api/usuarios/{id}
+	/// DELETE /api/usuarios/{id}
 	/// </summary>
 	public partial class CoordinadoresView : UserControl
 	{
+		private readonly CoordinadoresApiService _api = new();
+
 		/// <summary>
 		/// ViewModel principal de coordinadores.
 		/// </summary>
@@ -45,6 +47,18 @@ namespace SistemaHorario.UI.Views.Coordinadores
 			_viewModel = new CoordinadoresViewModel();
 
 			ConfigurarTabla();
+
+			Loaded += CoordinadoresView_Loaded;
+		}
+
+		private async void CoordinadoresView_Loaded(object sender, RoutedEventArgs e)
+		{
+			await _viewModel.CargarDatosAsync();
+
+			if (!string.IsNullOrWhiteSpace(_viewModel.MensajeEstado))
+			{
+				MessageBox.Show(_viewModel.MensajeEstado, "Error al cargar coordinadores", MessageBoxButton.OK, MessageBoxImage.Error);
+			}
 
 			CargarDatos();
 		}
@@ -241,11 +255,8 @@ namespace SistemaHorario.UI.Views.Coordinadores
 
 		/// <summary>
 		/// Elimina un coordinador usando diálogo de confirmación.
-		///
-		/// TODO:
-		/// Reemplazar por DELETE /api/coordinadores/{id}.
 		/// </summary>
-		private void EliminarCoordinador(
+		private async void EliminarCoordinador(
 			CoordinadorItem coordinador)
 		{
 			EliminarConfirmacionDialog dialog =
@@ -257,11 +268,16 @@ namespace SistemaHorario.UI.Views.Coordinadores
 			if (dialog.ShowDialog() != true)
 				return;
 
-			CoordinadoresMockStore.Eliminar(
+			var resultado = await _api.EliminarCoordinadorAsync(
 				coordinador.IdCoordinador);
 
-			_viewModel.CargarDatos();
+			if (!resultado.Success)
+			{
+				MessageBox.Show(resultado.Message, "Error al eliminar", MessageBoxButton.OK, MessageBoxImage.Error);
+				return;
+			}
 
+			await _viewModel.CargarDatosAsync();
 			CargarDatos();
 
 			MensajeExitoDialog exito =

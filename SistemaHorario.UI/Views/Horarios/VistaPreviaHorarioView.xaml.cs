@@ -84,6 +84,14 @@ namespace SistemaHorario.UI.Views.Horarios
 
             ConfigurarEncabezado();
             ConstruirHorario();
+            Loaded += VistaPreviaHorarioView_Loaded;
+        }
+
+        private async void VistaPreviaHorarioView_Loaded(object sender, RoutedEventArgs e)
+        {
+            await _viewModel.CargarBloquesAsync();
+            if (_viewModel.Bloques.Count > 0)
+                ConstruirHorario();
         }
 
         /// <summary>

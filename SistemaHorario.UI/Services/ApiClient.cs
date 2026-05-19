@@ -52,6 +52,26 @@ public class ApiClient
         }
     }
 
+    public async Task<ApiResponse<T>> PostAsync<T>(string url, object body)
+    {
+        AgregarToken();
+        try
+        {
+            var response = await _http.PostAsJsonAsync(url, body);
+            if (!response.IsSuccessStatusCode)
+            {
+                var msg = await response.Content.ReadAsStringAsync();
+                return new ApiResponse<T> { Success = false, Message = msg };
+            }
+            var data = await response.Content.ReadFromJsonAsync<T>();
+            return new ApiResponse<T> { Success = true, Data = data };
+        }
+        catch (Exception ex)
+        {
+            return new ApiResponse<T> { Success = false, Message = ex.Message };
+        }
+    }
+
     public async Task<ApiResponse<string>> PutAsync(string url, object body)
     {
         AgregarToken();

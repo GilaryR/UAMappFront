@@ -1,4 +1,4 @@
-﻿using SistemaHorario.UI.Models.UI;
+using SistemaHorario.UI.Models.UI;
 using SistemaHorario.UI.Services;
 using System.Threading.Tasks;
 
@@ -7,6 +7,7 @@ namespace SistemaHorario.UI.ViewModels.Perfil
     public class PerfilViewModel
     {
         private readonly PerfilApiService _api = new();
+
         public PerfilUsuarioItem Perfil { get; set; }
         public string MensajeEstado { get; private set; } = string.Empty;
 
@@ -14,14 +15,13 @@ namespace SistemaHorario.UI.ViewModels.Perfil
         {
             Perfil = new PerfilUsuarioItem
             {
-                NombreCompleto = "",
-                CorreoInstitucional = "",
-                Rol = "",
-                Telefono = "",
-                FacultadPrograma = "",
+                NombreCompleto = string.Empty,
+                CorreoInstitucional = string.Empty,
+                Rol = string.Empty,
+                Telefono = string.Empty,
+                FacultadPrograma = string.Empty,
                 RutaImagen = "/Assets/Images/ImgUsuario.png"
             };
-            _ = CargarPerfilAsync();
         }
 
         public async Task CargarPerfilAsync()
@@ -34,7 +34,10 @@ namespace SistemaHorario.UI.ViewModels.Perfil
                 Perfil.Rol = resp.Data.Rol;
                 Perfil.FacultadPrograma = resp.Data.FacultadPrograma;
             }
-            else MensajeEstado = resp.Message;
+            else
+            {
+                MensajeEstado = resp.Message;
+            }
         }
 
         public async Task<bool> ActualizarPerfilAsync(string nombre, string telefono, string rol, string facultad)
@@ -52,8 +55,13 @@ namespace SistemaHorario.UI.ViewModels.Perfil
             return false;
         }
 
-        public void ActualizarPerfil(string nombre, string telefono, string rol, string facultad)
-            => _ = ActualizarPerfilAsync(nombre, telefono, rol, facultad);
+        public async Task<bool> CambiarContrasenaAsync(string actual, string nueva)
+        {
+            var resp = await _api.CambiarContrasenaAsync(actual, nueva);
+            if (!resp.Success)
+                MensajeEstado = resp.Message;
+            return resp.Success;
+        }
 
         public void ActualizarFoto(string rutaImagen) => Perfil.RutaImagen = rutaImagen;
     }
