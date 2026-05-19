@@ -23,6 +23,8 @@ namespace SistemaHorario.UI.Models.UI
         /// </summary>
         public int IdMateria { get; set; }
 
+        public int IdMateriaPlan { get; set; }
+
         /// <summary>
         /// Código académico de la materia.
         /// </summary>

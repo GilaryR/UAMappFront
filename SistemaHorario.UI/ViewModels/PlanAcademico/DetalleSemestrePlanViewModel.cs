@@ -1,26 +1,23 @@
-﻿using SistemaHorario.UI.Models.UI;
+using SistemaHorario.UI.Models.UI;
+using SistemaHorario.UI.Services;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 
 namespace SistemaHorario.UI.ViewModels.PlanAcademico
 {
-    /// <summary>
-    /// ViewModel del detalle de semestre.
-    /// Administra materias asignadas, materias disponibles y modo edición.
-    /// </summary>
     public class DetalleSemestrePlanViewModel : INotifyPropertyChanged
     {
+        private readonly PlanAcademicoApiService _api = new();
+        private readonly MateriasApiService _materiasApi = new();
         private PlanAcademicoItem? _plan;
         private SemestrePlanItem? _semestre;
         private MateriaItem? _materiaSeleccionada;
         private bool _estaEditando;
 
-        /// <summary>
-        /// Plan académico dueño del semestre.
-        /// </summary>
         public PlanAcademicoItem? Plan
         {
             get => _plan;
@@ -32,9 +29,6 @@ namespace SistemaHorario.UI.ViewModels.PlanAcademico
             }
         }
 
-        /// <summary>
-        /// Semestre actualmente consultado o editado.
-        /// </summary>
         public SemestrePlanItem? Semestre
         {
             get => _semestre;
@@ -46,15 +40,8 @@ namespace SistemaHorario.UI.ViewModels.PlanAcademico
             }
         }
 
-        /// <summary>
-        /// Materias disponibles para agregar.
-        /// Para API real, esta colección debe venir desde endpoint de materias.
-        /// </summary>
         public ObservableCollection<MateriaItem> MateriasDisponibles { get; } = new();
 
-        /// <summary>
-        /// Materia seleccionada en el ComboBox de agregar.
-        /// </summary>
         public MateriaItem? MateriaSeleccionada
         {
             get => _materiaSeleccionada;
@@ -65,9 +52,6 @@ namespace SistemaHorario.UI.ViewModels.PlanAcademico
             }
         }
 
-        /// <summary>
-        /// Indica si están activos los controles de edición.
-        /// </summary>
         public bool EstaEditando
         {
             get => _estaEditando;
@@ -79,29 +63,16 @@ namespace SistemaHorario.UI.ViewModels.PlanAcademico
             }
         }
 
-        /// <summary>
-        /// Texto auxiliar del botón de edición.
-        /// </summary>
-        public string TextoBotonEditar =>
-            EstaEditando ? "Editando" : "Editar";
+        public string TextoBotonEditar => EstaEditando ? "Editando" : "Editar";
 
-        /// <summary>
-        /// Título del semestre mostrado en la cabecera.
-        /// </summary>
         public string TituloSemestre =>
             Semestre == null ? "Semestre" : $"Semestre {Semestre.NumeroSemestre}";
 
-        /// <summary>
-        /// Resumen de materias y créditos del semestre.
-        /// </summary>
         public string ResumenSemestre =>
             Semestre == null
                 ? "0 materias · 0 créditos"
                 : $"{Semestre.TotalMaterias} materias · {Semestre.TotalCreditos} créditos";
 
-        /// <summary>
-        /// Jornada del semestre visible en la cabecera.
-        /// </summary>
         public string JornadaSemestre =>
             string.IsNullOrWhiteSpace(Semestre?.Jornada)
                 ? "Jornada: Por definir"
@@ -109,92 +80,87 @@ namespace SistemaHorario.UI.ViewModels.PlanAcademico
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        /// <summary>
-        /// Carga el semestre seleccionado dentro del plan académico.
-        /// Para API real, se podría cargar el detalle por id de plan y número de semestre.
-        /// </summary>
-        public void Cargar(
-            int idPlanAcademico,
-            int numeroSemestre,
-            bool modoEdicion)
+        public void Cargar(int idPlanAcademico, int numeroSemestre, bool modoEdicion)
         {
-            Plan = PlanAcademicoMockStore.ObtenerPlanPorId(idPlanAcademico);
+            _ = CargarAsync(idPlanAcademico, numeroSemestre, modoEdicion);
+        }
 
-            Semestre = Plan?.Semestres
-                .FirstOrDefault(item => item.NumeroSemestre == numeroSemestre);
-
+        public async Task CargarAsync(int idPlanAcademico, int numeroSemestre, bool modoEdicion)
+        {
             EstaEditando = modoEdicion;
-
-            CargarMateriasDisponibles();
+            var resp = await _api.ObtenerPlanPorIdAsync(idPlanAcademico);
+            if (resp.Success && resp.Data != null)
+            {
+                Plan = resp.Data;
+                Semestre = Plan.Semestres.FirstOrDefault(s => s.NumeroSemestre == numeroSemestre);
+            }
+            await CargarMateriasDisponiblesAsync();
             NotificarEncabezado();
         }
 
-        /// <summary>
-        /// Activa el modo edición del semestre.
-        /// </summary>
         public void ActivarEdicion()
         {
             EstaEditando = true;
         }
 
-        /// <summary>
-        /// Agrega al semestre la materia seleccionada desde la lista.
-        /// </summary>
-        public void AgregarMateriaSeleccionada()
+        public async Task AgregarMateriaSeleccionadaAsync()
         {
-            if (Semestre == null || MateriaSeleccionada == null)
-                return;
+            if (Semestre == null || MateriaSeleccionada == null) return;
 
-            Semestre.AgregarMateria(MateriaSeleccionada);
+            var resp = await _api.AgregarMateriaAsync(Semestre.IdSemestre, MateriaSeleccionada.IdMateria);
+            if (!resp.Success || resp.Data == null) return;
+
+            var nuevaMateria = new MateriaItem
+            {
+                IdMateria = resp.Data.IdMateria,
+                IdMateriaPlan = resp.Data.IdMateriaPlan,
+                Codigo = resp.Data.Codigo,
+                Nombre = resp.Data.Nombre,
+                Creditos = resp.Data.Creditos,
+                IntensidadHorariaSemanal = resp.Data.IntensidadHorariaSemanal,
+                Activa = true
+            };
+
+            Semestre.AgregarMateria(nuevaMateria);
             MarcarPlanComoModificado();
-
             MateriaSeleccionada = null;
-
-            CargarMateriasDisponibles();
+            await CargarMateriasDisponiblesAsync();
             NotificarEncabezado();
         }
 
-        /// <summary>
-        /// Quita una materia del semestre actual.
-        /// </summary>
-        public void QuitarMateria(int idMateria)
+        public async Task QuitarMateriaAsync(int idMateria)
         {
-            if (Semestre == null)
-                return;
+            if (Semestre == null) return;
+
+            var materia = Semestre.Materias.FirstOrDefault(m => m.IdMateria == idMateria);
+            if (materia == null) return;
+
+            var resp = await _api.EliminarMateriaAsync(materia.IdMateriaPlan);
+            if (!resp.Success) return;
 
             Semestre.QuitarMateria(idMateria);
             MarcarPlanComoModificado();
-
-            CargarMateriasDisponibles();
+            await CargarMateriasDisponiblesAsync();
             NotificarEncabezado();
         }
 
-        /// <summary>
-        /// Carga las materias que aún no están asignadas al semestre.
-        /// </summary>
-        public void CargarMateriasDisponibles()
+        public async Task CargarMateriasDisponiblesAsync()
         {
             MateriasDisponibles.Clear();
 
-            List<int> idsAsignados = Semestre?.Materias
-                .Select(materia => materia.IdMateria)
-                .ToList() ?? new List<int>();
+            var resp = await _materiasApi.ObtenerMateriasAsync();
+            if (!resp.Success || resp.Data == null) return;
 
-            IEnumerable<MateriaItem> disponibles = PlanAcademicoMockStore
-                .ObtenerMateriasDisponibles()
-                .Where(materia => !idsAsignados.Contains(materia.IdMateria));
+            var idsAsignados = Semestre?.Materias
+                .Select(m => m.IdMateria)
+                .ToHashSet() ?? new System.Collections.Generic.HashSet<int>();
 
-            foreach (MateriaItem materia in disponibles)
-            {
-                MateriasDisponibles.Add(materia);
-            }
+            foreach (var m in resp.Data.Where(m => m.Activa && !idsAsignados.Contains(m.IdMateria)))
+                MateriasDisponibles.Add(m);
 
             OnPropertyChanged(nameof(MateriasDisponibles));
         }
 
-        /// <summary>
-        /// Recalcula el resumen visual del semestre.
-        /// </summary>
         public void RefrescarResumen()
         {
             NotificarEncabezado();
@@ -202,9 +168,7 @@ namespace SistemaHorario.UI.ViewModels.PlanAcademico
 
         private void MarcarPlanComoModificado()
         {
-            if (Plan == null)
-                return;
-
+            if (Plan == null) return;
             Plan.TieneCambiosPendientes = true;
             Plan.RecalcularTotalesDesdeSemestres();
         }
@@ -219,10 +183,7 @@ namespace SistemaHorario.UI.ViewModels.PlanAcademico
 
         protected void OnPropertyChanged([CallerMemberName] string? propertyName = null)
         {
-            PropertyChanged?.Invoke(
-                this,
-                new PropertyChangedEventArgs(propertyName)
-            );
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

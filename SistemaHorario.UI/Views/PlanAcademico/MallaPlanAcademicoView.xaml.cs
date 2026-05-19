@@ -29,17 +29,15 @@ namespace SistemaHorario.UI.Views.PlanAcademico
             DataContext = viewModel;
 
             // Carga la información del plan académico
-            viewModel.CargarPlan(idPlanAcademico, modoCreacion);
+            _ = viewModel.CargarPlan(idPlanAcademico, modoCreacion);
         }
 
         /// <summary>
         /// Evento que se ejecuta al hacer clic en un semestre.
         /// Abre una ventana con el detalle de ese semestre.
         /// </summary>
-        private void VerSemestre_Click(object sender, RoutedEventArgs e)
+        private async void VerSemestre_Click(object sender, RoutedEventArgs e)
         {
-            // Verifica que el botón tenga un semestre asociado
-            // y que exista un plan académico cargado
             if (sender is not Button button ||
                 button.CommandParameter is not SemestrePlanItem semestre ||
                 viewModel.Plan is null)
@@ -47,7 +45,6 @@ namespace SistemaHorario.UI.Views.PlanAcademico
                 return;
             }
 
-            // Crea la ventana de detalle del semestre seleccionado
             DetalleSemestrePlanDialog dialog = new(
                 viewModel.Plan.IdPlanAcademico,
                 semestre.NumeroSemestre,
@@ -56,14 +53,12 @@ namespace SistemaHorario.UI.Views.PlanAcademico
                 Owner = Window.GetWindow(this)
             };
 
-            // Muestra la ventana y espera el resultado
             bool? resultado = dialog.ShowDialog();
 
-            // Si hubo cambios, se actualiza la vista
             if (resultado == true)
             {
                 viewModel.MarcarCambiosPendientes();
-                viewModel.Refrescar();
+                await viewModel.CargarPlan(viewModel.Plan.IdPlanAcademico, viewModel.EsModoCreacion);
             }
         }
 

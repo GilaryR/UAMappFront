@@ -30,12 +30,12 @@ namespace SistemaHorario.UI.Dialogs.PlanAcademico
             viewModel.ActivarEdicion();
         }
 
-        private void AgregarMateria_Click(object sender, RoutedEventArgs e)
+        private async void AgregarMateria_Click(object sender, RoutedEventArgs e)
         {
-            viewModel.AgregarMateriaSeleccionada();
+            await viewModel.AgregarMateriaSeleccionadaAsync();
         }
 
-        private void QuitarMateria_Click(object sender, RoutedEventArgs e)
+        private async void QuitarMateria_Click(object sender, RoutedEventArgs e)
         {
             if (sender is not Button button ||
                 button.CommandParameter is not MateriaItem materia)
@@ -43,7 +43,7 @@ namespace SistemaHorario.UI.Dialogs.PlanAcademico
                 return;
             }
 
-            viewModel.QuitarMateria(materia.IdMateria);
+            await viewModel.QuitarMateriaAsync(materia.IdMateria);
         }
 
         private void GuardarCambios_Click(object sender, RoutedEventArgs e)

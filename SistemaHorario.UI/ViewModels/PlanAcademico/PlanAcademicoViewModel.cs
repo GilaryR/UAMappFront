@@ -70,6 +70,17 @@ namespace SistemaHorario.UI.ViewModels.PlanAcademico
             }
 
             nuevo.IdPlanAcademico = resp.Data.IdPlanAcademico;
+
+            for (int i = 1; i <= cantidadSemestres; i++)
+            {
+                var sResp = await _api.AgregarSemestreAsync(nuevo.IdPlanAcademico, i);
+                if (!sResp.Success)
+                {
+                    MensajeEstado = "Error al crear semestre " + i + ": " + sResp.Message;
+                    return null;
+                }
+            }
+
             await CargarPlanesAsync();
             return nuevo;
         }
