@@ -1,103 +1,87 @@
 ﻿using SistemaHorario.UI.Models.UI;
+using SistemaHorario.UI.Services;
 using SistemaHorario.UI.ViewModels.Base;
 using System.Collections.ObjectModel;
+using System.Threading.Tasks;
 
 namespace SistemaHorario.UI.ViewModels.PlanAcademico
 {
-    /// <summary>
-    /// ViewModel principal del módulo Plan Académico.
-    /// Controla la pantalla donde se listan planes, se muestra la comparación
-    /// general y se inicia la creación de un nuevo plan.
-    /// </summary>
     public class PlanAcademicoViewModel : ViewModelBase
     {
+        private readonly PlanAcademicoApiService _api = new();
         private ObservableCollection<PlanAcademicoItem> _planes = new();
         private int _cantidadSemestresNuevoPlan = 10;
         private string _jornadaNuevoPlan = "Por definir";
 
-        /// <summary>
-        /// Planes académicos visibles en la pantalla principal.
-        /// Luego debe llenarse con el endpoint de consulta de planes.
-        /// </summary>
         public ObservableCollection<PlanAcademicoItem> Planes
         {
             get => _planes;
-            set
-            {
-                _planes = value;
-                OnPropertyChanged();
-            }
+            set { _planes = value; OnPropertyChanged(); }
         }
 
-        /// <summary>
-        /// Cantidad de semestres elegida para crear un nuevo plan académico.
-        /// </summary>
         public int CantidadSemestresNuevoPlan
         {
             get => _cantidadSemestresNuevoPlan;
-            set
-            {
-                _cantidadSemestresNuevoPlan = value;
-                OnPropertyChanged();
-            }
+            set { _cantidadSemestresNuevoPlan = value; OnPropertyChanged(); }
         }
 
-        /// <summary>
-        /// Jornada elegida para crear un nuevo plan académico.
-        /// </summary>
         public string JornadaNuevoPlan
         {
             get => _jornadaNuevoPlan;
-            set
-            {
-                _jornadaNuevoPlan = value;
-                OnPropertyChanged();
-            }
+            set { _jornadaNuevoPlan = value; OnPropertyChanged(); }
         }
 
-        /// <summary>
-        /// Nota fija solicitada para explicar la diferencia entre plan diurno y nocturno.
-        /// </summary>
+        public string MensajeEstado { get; private set; } = string.Empty;
+
         public string NotaComparativa =>
-            "Ambos planes contienen las mismas materias y créditos. La diferencia principal está en la distribución por semestre: el plan diurno se organiza en 10 semestres y el plan nocturno en 12 semestres.";
+            "Ambos planes contienen las mismas materias y creditos. La diferencia principal esta en la distribucion por semestre.";
 
-        /// <summary>
-        /// Carga los planes desde la fuente temporal.
-        /// Para conexión real, reemplazar esta llamada por un servicio de infraestructura.
-        /// </summary>
-        public void CargarPlanes()
+        public PlanAcademicoViewModel() { _ = CargarPlanesAsync(); }
+
+        public async Task CargarPlanesAsync()
         {
-            Planes = PlanAcademicoMockStore.ObtenerPlanesPrincipales();
+            var resp = await _api.ObtenerPlanesAsync();
+            if (!resp.Success || resp.Data == null)
+            {
+                MensajeEstado = "Error: " + resp.Message;
+                return;
+            }
+            Planes = new ObservableCollection<PlanAcademicoItem>(resp.Data);
         }
 
-        /// <summary>
-        /// Crea un nuevo plan académico temporal con los datos seleccionados.
-        /// Para conexión real, aquí se llamaría el endpoint POST de creación.
-        /// </summary>
-        public PlanAcademicoItem CrearNuevoPlan()
+        public void CargarPlanes() => _ = CargarPlanesAsync();
+
+        public async Task<PlanAcademicoItem?> CrearNuevoPlanAsync(int cantidadSemestres, string jornada)
         {
-            PlanAcademicoItem nuevoPlan =
-                PlanAcademicoMockStore.CrearNuevoPlan(
-                    CantidadSemestresNuevoPlan,
-                    JornadaNuevoPlan
-                );
+            var nuevo = new PlanAcademicoItem
+            {
+                Nombre = "Plan " + jornada + " " + System.DateTime.Now.Year,
+                Jornada = jornada,
+                CargaPorSemestre = "Por definir",
+                TotalSemestres = cantidadSemestres,
+                EsNuevo = true
+            };
 
-            OnPropertyChanged(nameof(Planes));
-
-            return nuevoPlan;
+            var resp = await _api.CrearPlanAsync(nuevo);
+            if (!resp.Success)
+            {
+                MensajeEstado = "Error: " + resp.Message;
+                return null;
+            }
+            await CargarPlanesAsync();
+            return nuevo;
         }
 
-        /// <summary>
-        /// Crea un nuevo plan académico recibiendo semestres y jornada desde el diálogo.
-        /// </summary>
-        public PlanAcademicoItem CrearNuevoPlan(
-            int cantidadSemestres,
-            string jornada)
-        {
-            CantidadSemestresNuevoPlan = cantidadSemestres;
-            JornadaNuevoPlan = jornada;
+public PlanAcademicoItem CrearNuevoPlan()
+{
+    var t = CrearNuevoPlanAsync(CantidadSemestresNuevoPlan, JornadaNuevoPlan);
+    return new PlanAcademicoItem { Nombre = "Plan " + JornadaNuevoPlan, Jornada = JornadaNuevoPlan, TotalSemestres = CantidadSemestresNuevoPlan, EsNuevo = true };
+}
 
-            return CrearNuevoPlan();
-        }
+public PlanAcademicoItem CrearNuevoPlan(int cantidadSemestres, string jornada)
+{
+    var t = CrearNuevoPlanAsync(cantidadSemestres, jornada);
+    return new PlanAcademicoItem { Nombre = "Plan " + jornada, Jornada = jornada, TotalSemestres = cantidadSemestres, EsNuevo = true };
+}
     }
 }
