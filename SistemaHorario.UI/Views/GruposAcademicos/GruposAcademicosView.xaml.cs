@@ -14,12 +14,9 @@ namespace SistemaHorario.UI.Views.GruposAcademicos
         public GruposAcademicosView()
         {
             InitializeComponent();
-
             DataContext = _viewModel;
-
             CmbEstado.SelectedValue = "Todos";
             CmbJornada.SelectedValue = "Todas";
-
             ActualizarBotonesPaginacion();
         }
 
@@ -27,129 +24,90 @@ namespace SistemaHorario.UI.Views.GruposAcademicos
         {
             _viewModel.EstadoFiltro = CmbEstado.SelectedValue?.ToString() ?? "Todos";
             _viewModel.JornadaFiltro = CmbJornada.SelectedValue?.ToString() ?? "Todas";
-
             _viewModel.AplicarFiltros();
-
             ActualizarBotonesPaginacion();
         }
 
         private void Limpiar_Click(object sender, RoutedEventArgs e)
         {
             _viewModel.LimpiarFiltros();
-
             CmbEstado.SelectedValue = "Todos";
             CmbJornada.SelectedValue = "Todas";
-
             ActualizarBotonesPaginacion();
         }
 
-        private void NuevoGrupo_Click(object sender, RoutedEventArgs e)
+        private async void NuevoGrupo_Click(object sender, RoutedEventArgs e)
         {
-            GrupoAcademicoDialog dialog = new(
-                ModoGrupoAcademicoDialog.Crear,
-                null,
-                _viewModel.MateriasDisponibles
-            )
+            GrupoAcademicoDialog dialog = new(ModoGrupoAcademicoDialog.Crear, null, _viewModel.MateriasDisponibles)
+            { Owner = Window.GetWindow(this) };
+            if (dialog.ShowDialog() != true) return;
+            bool ok = await _viewModel.AgregarGrupoAsync(dialog.GrupoResultado);
+            if (!ok)
             {
-                Owner = Window.GetWindow(this)
-            };
-
-            if (dialog.ShowDialog() != true)
+                MessageBox.Show("Error: " + _viewModel.MensajeEstado, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
-
-            _viewModel.AgregarGrupo(dialog.GrupoResultado);
-
+            }
             ActualizarBotonesPaginacion();
-
-            MostrarExito("Grupo académico creado");
+            MostrarExito("Grupo academico creado");
         }
 
         private void VerGrupo_Click(object sender, RoutedEventArgs e)
         {
             GrupoAcademicoItem? grupo = ObtenerGrupoDesdeBoton(sender);
-
-            if (grupo == null)
-                return;
-
-            GrupoAcademicoDialog dialog = new(
-                ModoGrupoAcademicoDialog.Ver,
-                grupo,
-                _viewModel.MateriasDisponibles
-            )
-            {
-                Owner = Window.GetWindow(this)
-            };
-
+            if (grupo == null) return;
+            GrupoAcademicoDialog dialog = new(ModoGrupoAcademicoDialog.Ver, grupo, _viewModel.MateriasDisponibles)
+            { Owner = Window.GetWindow(this) };
             dialog.ShowDialog();
         }
 
-        private void EditarGrupo_Click(object sender, RoutedEventArgs e)
+        private async void EditarGrupo_Click(object sender, RoutedEventArgs e)
         {
             GrupoAcademicoItem? grupo = ObtenerGrupoDesdeBoton(sender);
-
-            if (grupo == null)
-                return;
-
-            GrupoAcademicoDialog dialog = new(
-                ModoGrupoAcademicoDialog.Editar,
-                grupo,
-                _viewModel.MateriasDisponibles
-            )
+            if (grupo == null) return;
+            GrupoAcademicoDialog dialog = new(ModoGrupoAcademicoDialog.Editar, grupo, _viewModel.MateriasDisponibles)
+            { Owner = Window.GetWindow(this) };
+            if (dialog.ShowDialog() != true) return;
+            bool ok = await _viewModel.ActualizarGrupoAsync(dialog.GrupoResultado);
+            if (!ok)
             {
-                Owner = Window.GetWindow(this)
-            };
-
-            if (dialog.ShowDialog() != true)
+                MessageBox.Show("Error: " + _viewModel.MensajeEstado, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
-
-            _viewModel.ActualizarGrupo(dialog.GrupoResultado);
-
+            }
             ActualizarBotonesPaginacion();
-
-            MostrarExito("Grupo académico actualizado");
+            MostrarExito("Grupo academico actualizado");
         }
 
-        private void EliminarGrupo_Click(object sender, RoutedEventArgs e)
+        private async void EliminarGrupo_Click(object sender, RoutedEventArgs e)
         {
             GrupoAcademicoItem? grupo = ObtenerGrupoDesdeBoton(sender);
-
-            if (grupo == null)
-                return;
-
-            EliminarConfirmacionDialog dialog = new()
+            if (grupo == null) return;
+            EliminarConfirmacionDialog dialog = new() { Owner = Window.GetWindow(this) };
+            if (dialog.ShowDialog() != true) return;
+            bool ok = await _viewModel.EliminarGrupoAsync(grupo.IdGrupoAcademico);
+            if (!ok)
             {
-                Owner = Window.GetWindow(this)
-            };
-
-            if (dialog.ShowDialog() != true)
+                MessageBox.Show("Error: " + _viewModel.MensajeEstado, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
-
-            _viewModel.EliminarGrupo(grupo.IdGrupoAcademico);
-
+            }
             ActualizarBotonesPaginacion();
-
-            MostrarExito("Grupo académico eliminado");
+            MostrarExito("Grupo academico eliminado");
         }
 
         private void Anterior_Click(object sender, RoutedEventArgs e)
         {
             _viewModel.PaginaAnterior();
-
             ActualizarBotonesPaginacion();
         }
 
         private void Siguiente_Click(object sender, RoutedEventArgs e)
         {
             _viewModel.SiguientePagina();
-
             ActualizarBotonesPaginacion();
         }
 
         private static GrupoAcademicoItem? ObtenerGrupoDesdeBoton(object sender)
         {
-            if (sender is not Button button)
-                return null;
-
+            if (sender is not Button button) return null;
             return button.CommandParameter as GrupoAcademicoItem;
         }
 
@@ -157,18 +115,13 @@ namespace SistemaHorario.UI.Views.GruposAcademicos
         {
             BtnAnterior.IsEnabled = _viewModel.PaginaActual > 1;
             BtnSiguiente.IsEnabled = _viewModel.PaginaActual < _viewModel.TotalPaginas;
-
             BtnAnterior.Opacity = BtnAnterior.IsEnabled ? 1 : 0.45;
             BtnSiguiente.Opacity = BtnSiguiente.IsEnabled ? 1 : 0.45;
         }
 
         private void MostrarExito(string mensaje)
         {
-            MensajeExitoDialog dialog = new(mensaje)
-            {
-                Owner = Window.GetWindow(this)
-            };
-
+            MensajeExitoDialog dialog = new(mensaje) { Owner = Window.GetWindow(this) };
             dialog.ShowDialog();
         }
     }
