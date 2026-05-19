@@ -224,5 +224,6 @@ namespace SistemaHorario.UI.ViewModels.Reportes
 			_reportesBase.Insert(0, reporte);
 			AplicarFiltros();
 		}
+		
 	}
 }
