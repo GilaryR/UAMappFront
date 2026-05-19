@@ -133,52 +133,57 @@ namespace SistemaHorario.UI.Dialogs.Docentes
 			_viewModel.Disponibilidad = dialog.DisponibilidadResultado;
 		}
 
-		private void BtnGuardar_Click(
-			object sender,
-			RoutedEventArgs e)
-		{
-			if (!FormularioEsValido())
-				return;
+		private async void BtnGuardar_Click(
+    object sender,
+    RoutedEventArgs e)
+{
+    if (!FormularioEsValido())
+        return;
 
-			_viewModel.Docente.NombreCompleto = TxtNombreCompleto.Text.Trim();
-			_viewModel.Docente.Identificacion = TxtIdentificacion.Text.Trim();
-			_viewModel.Docente.CorreoInstitucional = TxtCorreo.Text.Trim();
+    _viewModel.Docente.NombreCompleto = TxtNombreCompleto.Text.Trim();
+    _viewModel.Docente.Identificacion = TxtIdentificacion.Text.Trim();
+    _viewModel.Docente.CorreoInstitucional = TxtCorreo.Text.Trim();
 
-			_viewModel.Docente.Materias =
-				string.Join(", ", _materiasSeleccionadas);
+    _viewModel.Docente.Materias =
+        string.Join(", ", _materiasSeleccionadas);
 
-			if (CmbEstado.SelectedItem is ComboBoxItem item)
-			{
-				_viewModel.Docente.Estado =
-					item.Content?.ToString() ?? "Activo";
-			}
+    if (CmbEstado.SelectedItem is ComboBoxItem item)
+    {
+        _viewModel.Docente.Estado =
+            item.Content?.ToString() ?? "Activo";
+    }
 
-			if (_viewModel.EsEdicion)
-			{
-				DocentesMockStore.ActualizarDocente(_viewModel.Docente);
-			}
-			else
-			{
-				DocentesMockStore.CrearDocente(_viewModel.Docente);
-			}
+    var api = new SistemaHorario.UI.Services.DocentesApiService();
+    SistemaHorarios.Application.Common.ApiResponse<string> resp;
 
-			DocentesMockStore.GuardarDisponibilidad(
-				_viewModel.Docente.IdDocente,
-				_viewModel.Disponibilidad);
+    if (_viewModel.EsEdicion)
+        resp = await api.ActualizarDocenteAsync(_viewModel.Docente);
+    else
+        resp = await api.CrearDocenteAsync(_viewModel.Docente);
 
-			MensajeExitoDialog exito =
-				new(_viewModel.EsEdicion
-					? "Docente actualizado"
-					: "Docente creado")
-				{
-					Owner = this
-				};
+    if (!resp.Success)
+    {
+        MessageBox.Show(
+            "Error al guardar: " + resp.Message,
+            "Error",
+            MessageBoxButton.OK,
+            MessageBoxImage.Error);
+        return;
+    }
 
-			exito.ShowDialog();
+    MensajeExitoDialog exito =
+        new(_viewModel.EsEdicion
+            ? "Docente actualizado"
+            : "Docente creado")
+        {
+            Owner = this
+        };
 
-			DialogResult = true;
-			Close();
-		}
+    exito.ShowDialog();
+
+    DialogResult = true;
+    Close();
+}
 
 		private bool FormularioEsValido()
 		{
