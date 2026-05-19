@@ -102,11 +102,9 @@
                             <ComboBoxItem Content="Todos"
                                           IsSelected="True"/>
 
-                            <ComboBoxItem Content="Pendiente"/>
+                            <ComboBoxItem Content="Activo"/>
 
-                            <ComboBoxItem Content="Aprobado"/>
-
-                            <ComboBoxItem Content="Rechazado"/>
+                            <ComboBoxItem Content="Inactivo"/>
                         </ComboBox>
                     </StackPanel>
 

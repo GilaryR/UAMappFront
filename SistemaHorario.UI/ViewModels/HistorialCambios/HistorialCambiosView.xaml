@@ -44,12 +44,7 @@
 
 								<ComboBox x:Name="CmbUsuario"
                                           Height="40"
-                                          FontSize="14">
-									<ComboBoxItem Content="Todos"
-                                                  IsSelected="True"/>
-									<ComboBoxItem Content="Docente"/>
-									<ComboBoxItem Content="Coordinador"/>
-								</ComboBox>
+                                          FontSize="14"/>
 							</StackPanel>
 
 							<!-- MÓDULO -->
@@ -61,17 +56,7 @@
 
 								<ComboBox x:Name="CmbModulo"
                                           Height="40"
-                                          FontSize="14">
-									<ComboBoxItem Content="Todos"
-                                                  IsSelected="True"/>
-									<ComboBoxItem Content="Plan académico"/>
-									<ComboBoxItem Content="Horarios"/>
-									<ComboBoxItem Content="Docentes"/>
-									<ComboBoxItem Content="Grupos académicos"/>
-									<ComboBoxItem Content="Coordinadores"/>
-									<ComboBoxItem Content="Materias"/>
-									<ComboBoxItem Content="Reportes"/>
-								</ComboBox>
+                                          FontSize="14"/>
 							</StackPanel>
 
 							<!-- FECHA DESDE -->

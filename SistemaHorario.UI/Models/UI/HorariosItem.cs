@@ -54,5 +54,7 @@
         /// Pendiente, Aprobado o Rechazado.
         /// </summary>
         public string Estado { get; set; } = string.Empty;
+
+        public int IdGrupo { get; set; }
     }
 }

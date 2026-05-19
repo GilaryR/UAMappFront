@@ -50,6 +50,12 @@ namespace SistemaHorario.UI.Views.Horarios
 
             ConfigurarTabla();
 
+            Loaded += HorariosView_Loaded;
+        }
+
+        private async void HorariosView_Loaded(object sender, RoutedEventArgs e)
+        {
+            await _viewModel.CargarDatosAsync();
             CargarTabla();
         }
 
@@ -299,7 +305,7 @@ namespace SistemaHorario.UI.Views.Horarios
         /// Cuando backend agregue DELETE /api/horarios/{id},
         /// reemplazar eliminación local por consumo real del endpoint.
         /// </summary>
-        private void EliminarHorario(HorarioItem horario)
+        private async void EliminarHorario(HorarioItem horario)
         {
             EliminarConfirmacionDialog dialog = new()
             {
@@ -311,7 +317,16 @@ namespace SistemaHorario.UI.Views.Horarios
             if (resultado != true)
                 return;
 
-            _viewModel.EliminarHorario(horario);
+            bool ok = await _viewModel.EliminarHorarioAsync(horario);
+            if (!ok)
+            {
+                MessageBox.Show(
+                    $"No se pudo eliminar el horario:\n{_viewModel.MensajeEstado}",
+                    "Error",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+                return;
+            }
 
             CargarTabla();
         }

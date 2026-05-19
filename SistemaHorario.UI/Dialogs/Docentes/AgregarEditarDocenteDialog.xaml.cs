@@ -1,5 +1,6 @@
-﻿using SistemaHorario.UI.Dialogs.Shared;
+using SistemaHorario.UI.Dialogs.Shared;
 using SistemaHorario.UI.Models.UI;
+using SistemaHorario.UI.Services;
 using SistemaHorario.UI.ViewModels.Docentes;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -11,371 +12,312 @@ using System.Windows.Media;
 
 namespace SistemaHorario.UI.Dialogs.Docentes
 {
-	/// <summary>
-	/// Ventana utilizada para crear, editar o ver docentes.
-	/// 
-	/// En este formulario también se asignan las materias del docente.
-	/// Por ahora las materias se guardan como texto separado por comas,
-	/// para mantener compatibilidad con la tabla actual de docentes.
-	/// 
-	/// Cuando se conecte backend, la lista de materias disponibles
-	/// debe venir desde un endpoint de materias.
-	/// </summary>
-	public partial class AgregarEditarDocenteDialog : Window
-	{
-		private readonly AgregarEditarDocenteViewModel _viewModel;
-
-		private readonly bool _soloLectura;
-
-		/// <summary>
-		/// Materias seleccionadas para el docente en este formulario.
-		/// Al guardar, se convierten en texto separado por comas.
-		/// </summary>
-		private readonly ObservableCollection<string> _materiasSeleccionadas = new();
-
-		/// <summary>
-		/// Materias disponibles para asignar.
-		/// Actualmente vienen desde DocentesMockStore.
-		/// Después pueden venir desde backend.
-		/// </summary>
-		private readonly ObservableCollection<string> _materiasDisponibles = new();
-
-		public AgregarEditarDocenteDialog()
-		{
-			InitializeComponent();
-
-			_viewModel = new AgregarEditarDocenteViewModel();
-			_soloLectura = false;
-
-			ConfigurarModo();
-			CargarDatos();
-		}
-
-		public AgregarEditarDocenteDialog(
-			DocenteItem docente,
-			bool soloLectura = false)
-		{
-			InitializeComponent();
-
-			_viewModel = new AgregarEditarDocenteViewModel(docente);
-			_soloLectura = soloLectura;
-
-			ConfigurarModo();
-			CargarDatos();
-		}
-
-		private void ConfigurarModo()
-		{
-			if (_soloLectura)
-			{
-				TxtTitulo.Text = "Detalle docente";
-				TxtSubtitulo.Text = "Información general del docente";
-				BtnGuardar.Visibility = Visibility.Collapsed;
-
-				BloquearFormulario();
-				return;
-			}
-
-			if (_viewModel.EsEdicion)
-			{
-				TxtTitulo.Text = "Editar docente";
-				BtnGuardar.Content = "Guardar cambios";
-			}
-		}
-
-		private void BloquearFormulario()
-		{
-			TxtNombreCompleto.IsReadOnly = true;
-			TxtIdentificacion.IsReadOnly = true;
-			TxtCorreo.IsReadOnly = true;
-
-			CmbEstado.IsEnabled = false;
-			CmbMateriaDisponible.IsEnabled = false;
-
-			BtnAgregarMateria.Visibility = Visibility.Collapsed;
-			BtnDisponibilidad.IsEnabled = false;
-		}
-
-		private void CargarDatos()
-		{
-			TxtNombreCompleto.Text = _viewModel.Docente.NombreCompleto;
-			TxtIdentificacion.Text = _viewModel.Docente.Identificacion;
-			TxtCorreo.Text = _viewModel.Docente.CorreoInstitucional;
-
-			CargarMateriasDisponibles();
-			CargarMateriasSeleccionadas(_viewModel.Docente.Materias);
-			DibujarMateriasSeleccionadas();
-			ActualizarComboMaterias();
-
-			foreach (ComboBoxItem item in CmbEstado.Items)
-			{
-				if (item.Content?.ToString() == _viewModel.Docente.Estado)
-				{
-					CmbEstado.SelectedItem = item;
-					break;
-				}
-			}
-		}
-
-		private void BtnDisponibilidad_Click(
-			object sender,
-			RoutedEventArgs e)
-		{
-			DisponibilidadDocenteDialog dialog =
-				new(_viewModel.Disponibilidad)
-				{
-					Owner = this
-				};
-
-			if (dialog.ShowDialog() != true)
-				return;
-
-			_viewModel.Disponibilidad = dialog.DisponibilidadResultado;
-		}
-
-		private async void BtnGuardar_Click(
-    object sender,
-    RoutedEventArgs e)
-{
-    if (!FormularioEsValido())
-        return;
-
-    _viewModel.Docente.NombreCompleto = TxtNombreCompleto.Text.Trim();
-    _viewModel.Docente.Identificacion = TxtIdentificacion.Text.Trim();
-    _viewModel.Docente.CorreoInstitucional = TxtCorreo.Text.Trim();
-
-    _viewModel.Docente.Materias =
-        string.Join(", ", _materiasSeleccionadas);
-
-    if (CmbEstado.SelectedItem is ComboBoxItem item)
+    public partial class AgregarEditarDocenteDialog : Window
     {
-        _viewModel.Docente.Estado =
-            item.Content?.ToString() ?? "Activo";
-    }
+        private readonly AgregarEditarDocenteViewModel _viewModel;
+        private readonly bool _soloLectura;
 
-    var api = new SistemaHorario.UI.Services.DocentesApiService();
-    SistemaHorarios.Application.Common.ApiResponse<string> resp;
+        // Selected materias tracked as {IdMateria, Nombre} pairs
+        private readonly ObservableCollection<MateriaItem> _materiasSeleccionadas = new();
+        private List<MateriaItem> _todasLasMaterias = new();
 
-    if (_viewModel.EsEdicion)
-        resp = await api.ActualizarDocenteAsync(_viewModel.Docente);
-    else
-        resp = await api.CrearDocenteAsync(_viewModel.Docente);
-
-    if (!resp.Success)
-    {
-        MessageBox.Show(
-            "Error al guardar: " + resp.Message,
-            "Error",
-            MessageBoxButton.OK,
-            MessageBoxImage.Error);
-        return;
-    }
-
-    MensajeExitoDialog exito =
-        new(_viewModel.EsEdicion
-            ? "Docente actualizado"
-            : "Docente creado")
+        public AgregarEditarDocenteDialog()
         {
-            Owner = this
-        };
+            InitializeComponent();
+            _viewModel = new AgregarEditarDocenteViewModel();
+            _soloLectura = false;
+            ConfigurarModo();
+            CargarCamposBasicos();
+            Loaded += Dialog_Loaded;
+        }
 
-    exito.ShowDialog();
+        public AgregarEditarDocenteDialog(DocenteItem docente, bool soloLectura = false)
+        {
+            InitializeComponent();
+            _viewModel = new AgregarEditarDocenteViewModel(docente);
+            _soloLectura = soloLectura;
+            ConfigurarModo();
+            CargarCamposBasicos();
+            Loaded += Dialog_Loaded;
+        }
 
-    DialogResult = true;
-    Close();
-}
+        private async void Dialog_Loaded(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var api = new MateriasApiService();
+                var resp = await api.ObtenerMateriasAsync();
 
-		private bool FormularioEsValido()
-		{
-			if (string.IsNullOrWhiteSpace(TxtNombreCompleto.Text))
-			{
-				MessageBox.Show(
-					"El nombre completo es obligatorio.",
-					"⚠ Validación",
-					MessageBoxButton.OK,
-					MessageBoxImage.Warning);
+                if (resp.Success && resp.Data != null)
+                    _todasLasMaterias = resp.Data.Where(m => m.Activa).ToList();
+            }
+            catch { }
 
-				return false;
-			}
+            // Fallback: if API returned nothing, use mock store so the combo is never blank
+            if (_todasLasMaterias.Count == 0)
+            {
+                int fakeId = -1;
+                _todasLasMaterias = DocentesMockStore.ObtenerMateriasDisponibles()
+                    .Select(nombre => new MateriaItem
+                    {
+                        IdMateria = fakeId--,
+                        Nombre = nombre,
+                        Activa = true
+                    }).ToList();
+            }
 
-			if (string.IsNullOrWhiteSpace(TxtIdentificacion.Text))
-			{
-				MessageBox.Show(
-					"La identificación es obligatoria.",
-					"⚠ Validación",
-					MessageBoxButton.OK,
-					MessageBoxImage.Warning);
+            // Pre-select by ID (when IdsMateria populated) or by name (when loaded from list)
+            if (_viewModel.Docente.IdsMateria.Count > 0)
+            {
+                foreach (var id in _viewModel.Docente.IdsMateria)
+                {
+                    var m = _todasLasMaterias.FirstOrDefault(x => x.IdMateria == id);
+                    if (m != null && !_materiasSeleccionadas.Any(s => s.IdMateria == id))
+                        _materiasSeleccionadas.Add(m);
+                }
+            }
+            else if (!string.IsNullOrWhiteSpace(_viewModel.Docente.Materias))
+            {
+                var nombres = _viewModel.Docente.Materias
+                    .Split(',', System.StringSplitOptions.RemoveEmptyEntries)
+                    .Select(n => n.Trim())
+                    .ToHashSet();
 
-				return false;
-			}
+                foreach (var m in _todasLasMaterias)
+                {
+                    if (nombres.Contains(m.Nombre))
+                        _materiasSeleccionadas.Add(m);
+                }
+            }
 
-			if (string.IsNullOrWhiteSpace(TxtCorreo.Text))
-			{
-				MessageBox.Show(
-					"El correo institucional es obligatorio.",
-					"⚠ Validación",
-					MessageBoxButton.OK,
-					MessageBoxImage.Warning);
+            ActualizarComboMaterias();
+            DibujarMateriasSeleccionadas();
+        }
 
-				return false;
-			}
+        private void ConfigurarModo()
+        {
+            if (_soloLectura)
+            {
+                TxtTitulo.Text = "Detalle docente";
+                TxtSubtitulo.Text = "Información general del docente";
+                BtnGuardar.Visibility = Visibility.Collapsed;
+                BloquearFormulario();
+                return;
+            }
 
-			if (_materiasSeleccionadas.Count == 0)
-			{
-				MessageBox.Show(
-					"⚠ Debes agregar al menos una materia.",
-					"Validación",
-					MessageBoxButton.OK,
-					MessageBoxImage.Warning);
+            if (_viewModel.EsEdicion)
+            {
+                TxtTitulo.Text = "Editar docente";
+                BtnGuardar.Content = "Guardar cambios";
+            }
+        }
 
-				return false;
-			}
+        private void BloquearFormulario()
+        {
+            TxtNombreCompleto.IsReadOnly = true;
+            TxtIdentificacion.IsReadOnly = true;
+            TxtCorreo.IsReadOnly = true;
+            CmbEstado.IsEnabled = false;
+            CmbMateriaDisponible.IsEnabled = false;
+            BtnAgregarMateria.Visibility = Visibility.Collapsed;
+            BtnDisponibilidad.IsEnabled = false;
+        }
 
-			return true;
-		}
+        private void CargarCamposBasicos()
+        {
+            TxtNombreCompleto.Text = _viewModel.Docente.NombreCompleto;
+            TxtIdentificacion.Text = _viewModel.Docente.Identificacion;
+            TxtCorreo.Text = _viewModel.Docente.CorreoInstitucional;
 
-		private void BtnAgregarMateria_Click(object sender, RoutedEventArgs e)
-		{
-			if (CmbMateriaDisponible.SelectedItem is not string materia)
-				return;
+            foreach (ComboBoxItem item in CmbEstado.Items)
+            {
+                if (item.Content?.ToString() == _viewModel.Docente.Estado)
+                {
+                    CmbEstado.SelectedItem = item;
+                    break;
+                }
+            }
+        }
 
-			if (_materiasSeleccionadas.Contains(materia))
-				return;
+        private void ActualizarComboMaterias()
+        {
+            var seleccionadosIds = _materiasSeleccionadas.Select(m => m.IdMateria).ToHashSet();
+            var disponibles = _todasLasMaterias
+                .Where(m => !seleccionadosIds.Contains(m.IdMateria))
+                .ToList();
 
-			_materiasSeleccionadas.Add(materia);
+            CmbMateriaDisponible.DisplayMemberPath = "Nombre";
+            CmbMateriaDisponible.ItemsSource = disponibles;
 
-			DibujarMateriasSeleccionadas();
-			ActualizarComboMaterias();
-		}
+            if (disponibles.Count > 0)
+                CmbMateriaDisponible.SelectedIndex = 0;
+        }
 
-		private void CargarMateriasDisponibles()
-		{
-			_materiasDisponibles.Clear();
+        private void DibujarMateriasSeleccionadas()
+        {
+            PanelMateriasSeleccionadas.Children.Clear();
 
-			foreach (string materia in DocentesMockStore.ObtenerMateriasDisponibles())
-			{
-				_materiasDisponibles.Add(materia);
-			}
-		}
+            foreach (var materia in _materiasSeleccionadas)
+            {
+                Border chip = new()
+                {
+                    Background = new SolidColorBrush(Color.FromRgb(219, 234, 254)),
+                    CornerRadius = new CornerRadius(14),
+                    Padding = new Thickness(10, 5, 8, 5),
+                    Margin = new Thickness(0, 0, 8, 8)
+                };
 
-		private void CargarMateriasSeleccionadas(string materiasTexto)
-		{
-			_materiasSeleccionadas.Clear();
+                StackPanel contenido = new() { Orientation = Orientation.Horizontal };
 
-			if (string.IsNullOrWhiteSpace(materiasTexto))
-				return;
+                TextBlock texto = new()
+                {
+                    Text = materia.Nombre,
+                    Foreground = new SolidColorBrush(Color.FromRgb(30, 64, 175)),
+                    FontWeight = FontWeights.SemiBold,
+                    VerticalAlignment = VerticalAlignment.Center
+                };
 
-			string[] materias = materiasTexto.Split(',');
+                contenido.Children.Add(texto);
 
-			foreach (string materia in materias)
-			{
-				string materiaLimpia = materia.Trim();
+                if (!_soloLectura)
+                {
+                    Button quitar = new()
+                    {
+                        Content = "x",
+                        Width = 20,
+                        Height = 20,
+                        Margin = new Thickness(8, 0, 0, 0),
+                        Background = Brushes.Transparent,
+                        BorderThickness = new Thickness(0),
+                        Foreground = new SolidColorBrush(Color.FromRgb(30, 64, 175)),
+                        FontWeight = FontWeights.Bold,
+                        Cursor = Cursors.Hand,
+                        Tag = materia
+                    };
+                    quitar.Click += BtnQuitarMateria_Click;
+                    contenido.Children.Add(quitar);
+                }
 
-				if (!string.IsNullOrWhiteSpace(materiaLimpia) &&
-					!_materiasSeleccionadas.Contains(materiaLimpia))
-				{
-					_materiasSeleccionadas.Add(materiaLimpia);
-				}
-			}
-		}
+                chip.Child = contenido;
+                PanelMateriasSeleccionadas.Children.Add(chip);
+            }
+        }
 
-		private void ActualizarComboMaterias()
-		{
-			CmbMateriaDisponible.ItemsSource = null;
+        private void BtnAgregarMateria_Click(object sender, RoutedEventArgs e)
+        {
+            if (CmbMateriaDisponible.SelectedItem is not MateriaItem materia)
+                return;
 
-			List<string> disponibles = _materiasDisponibles
-				.Where(materia => !_materiasSeleccionadas.Contains(materia))
-				.ToList();
+            if (_materiasSeleccionadas.Any(m => m.IdMateria == materia.IdMateria))
+                return;
 
-			CmbMateriaDisponible.ItemsSource = disponibles;
+            _materiasSeleccionadas.Add(materia);
+            DibujarMateriasSeleccionadas();
+            ActualizarComboMaterias();
+        }
 
-			if (disponibles.Count > 0)
-				CmbMateriaDisponible.SelectedIndex = 0;
-		}
+        private void BtnQuitarMateria_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is not Button btn || btn.Tag is not MateriaItem materia)
+                return;
 
-		private void DibujarMateriasSeleccionadas()
-		{
-			PanelMateriasSeleccionadas.Children.Clear();
+            var existing = _materiasSeleccionadas.FirstOrDefault(m => m.IdMateria == materia.IdMateria);
+            if (existing != null)
+                _materiasSeleccionadas.Remove(existing);
 
-			foreach (string materia in _materiasSeleccionadas)
-			{
-				Border chip = new()
-				{
-					Background = new SolidColorBrush(Color.FromRgb(219, 234, 254)),
-					CornerRadius = new CornerRadius(14),
-					Padding = new Thickness(10, 5, 8, 5),
-					Margin = new Thickness(0, 0, 8, 8)
-				};
+            DibujarMateriasSeleccionadas();
+            ActualizarComboMaterias();
+        }
 
-				StackPanel contenido = new()
-				{
-					Orientation = Orientation.Horizontal
-				};
+        private void BtnDisponibilidad_Click(object sender, RoutedEventArgs e)
+        {
+            DisponibilidadDocenteDialog dialog = new(_viewModel.Disponibilidad) { Owner = this };
+            if (dialog.ShowDialog() != true) return;
+            _viewModel.Disponibilidad = dialog.DisponibilidadResultado;
+        }
 
-				TextBlock texto = new()
-				{
-					Text = materia,
-					Foreground = new SolidColorBrush(Color.FromRgb(30, 64, 175)),
-					FontWeight = FontWeights.SemiBold,
-					VerticalAlignment = VerticalAlignment.Center
-				};
+        private async void BtnGuardar_Click(object sender, RoutedEventArgs e)
+        {
+            if (!FormularioEsValido())
+                return;
 
-				contenido.Children.Add(texto);
+            _viewModel.Docente.NombreCompleto = TxtNombreCompleto.Text.Trim();
+            _viewModel.Docente.Identificacion = TxtIdentificacion.Text.Trim();
+            _viewModel.Docente.CorreoInstitucional = TxtCorreo.Text.Trim();
+            _viewModel.Docente.Materias = string.Join(", ", _materiasSeleccionadas.Select(m => m.Nombre));
+            _viewModel.Docente.IdsMateria = _materiasSeleccionadas.Select(m => m.IdMateria).ToList();
 
-				if (!_soloLectura)
-				{
-					Button quitar = new()
-					{
-						Content = "x",
-						Width = 20,
-						Height = 20,
-						Margin = new Thickness(8, 0, 0, 0),
-						Background = Brushes.Transparent,
-						BorderThickness = new Thickness(0),
-						Foreground = new SolidColorBrush(Color.FromRgb(30, 64, 175)),
-						FontWeight = FontWeights.Bold,
-						Cursor = Cursors.Hand,
-						Tag = materia
-					};
+            if (CmbEstado.SelectedItem is ComboBoxItem item)
+                _viewModel.Docente.Estado = item.Content?.ToString() ?? "Activo";
 
-					quitar.Click += BtnQuitarMateria_Click;
+            var api = new DocentesApiService();
+            SistemaHorarios.Application.Common.ApiResponse<string> resp;
 
-					contenido.Children.Add(quitar);
-				}
+            if (_viewModel.EsEdicion)
+                resp = await api.ActualizarDocenteAsync(_viewModel.Docente);
+            else
+                resp = await api.CrearDocenteAsync(_viewModel.Docente);
 
-				chip.Child = contenido;
-				PanelMateriasSeleccionadas.Children.Add(chip);
-			}
-		}
+            if (!resp.Success)
+            {
+                MessageBox.Show("Error al guardar: " + resp.Message, "Error",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
 
-		private void BtnQuitarMateria_Click(object sender, RoutedEventArgs e)
-		{
-			if (sender is not Button boton)
-				return;
+            MensajeExitoDialog exito = new(_viewModel.EsEdicion ? "Docente actualizado" : "Docente creado")
+            {
+                Owner = this
+            };
+            exito.ShowDialog();
 
-			if (boton.Tag is not string materia)
-				return;
+            DialogResult = true;
+            Close();
+        }
 
-			_materiasSeleccionadas.Remove(materia);
+        private bool FormularioEsValido()
+        {
+            if (string.IsNullOrWhiteSpace(TxtNombreCompleto.Text))
+            {
+                MessageBox.Show("El nombre completo es obligatorio.", "⚠ Validación",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return false;
+            }
 
-			DibujarMateriasSeleccionadas();
-			ActualizarComboMaterias();
-		}
+            if (string.IsNullOrWhiteSpace(TxtIdentificacion.Text))
+            {
+                MessageBox.Show("La identificación es obligatoria.", "⚠ Validación",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return false;
+            }
 
-		private void BtnCancelar_Click(
-			object sender,
-			RoutedEventArgs e)
-		{
-			DialogResult = false;
-			Close();
-		}
+            if (string.IsNullOrWhiteSpace(TxtCorreo.Text))
+            {
+                MessageBox.Show("El correo institucional es obligatorio.", "⚠ Validación",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return false;
+            }
 
-		private void BtnCerrar_Click(
-			object sender,
-			RoutedEventArgs e)
-		{
-			DialogResult = false;
-			Close();
-		}
-	}
+            if (_materiasSeleccionadas.Count == 0)
+            {
+                MessageBox.Show("⚠ Debes agregar al menos una materia.", "Validación",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return false;
+            }
+
+            return true;
+        }
+
+        private void BtnCancelar_Click(object sender, RoutedEventArgs e)
+        {
+            DialogResult = false;
+            Close();
+        }
+
+        private void BtnCerrar_Click(object sender, RoutedEventArgs e)
+        {
+            DialogResult = false;
+            Close();
+        }
+    }
 }

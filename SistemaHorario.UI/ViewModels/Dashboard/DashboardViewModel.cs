@@ -1,6 +1,8 @@
-﻿using SistemaHorario.UI.ViewModels.Base;
+﻿using SistemaHorario.UI.Services;
+using SistemaHorario.UI.ViewModels.Base;
 using System.Collections.ObjectModel;
 using System.Windows.Media;
+using System.Threading.Tasks;
 
 namespace SistemaHorario.UI.ViewModels.Dashboard
 {
@@ -26,50 +28,99 @@ namespace SistemaHorario.UI.ViewModels.Dashboard
 	/// </summary>
 	public class DashboardViewModel : ViewModelBase
 	{
-		/// <summary>
-		/// Total temporal de materias.
-		/// </summary>
-		public string TotalMaterias { get; } = "50";
+	private readonly DashboardApiService _api = new();
 
-		/// <summary>
-		/// Total temporal de planes académicos.
-		/// </summary>
-		public string TotalPlanesAcademicos { get; } = "4";
+	private string _totalMaterias = "50";
+	private string _totalPlanesAcademicos = "4";
+	private string _totalUsuarios = "25";
+	private string _totalGrupos = "12";
+	private string _mensajeEstado = string.Empty;
 
-		/// <summary>
-		/// Total temporal de usuarios.
-		/// </summary>
-		public string TotalUsuarios { get; } = "25";
+	/// <summary>
+	/// Total de materias.
+	/// </summary>
+	public string TotalMaterias
+	{
+		get => _totalMaterias;
+		private set => SetProperty(ref _totalMaterias, value);
+	}
 
-		/// <summary>
-		/// Total temporal de grupos.
-		///
-		/// TODO:
-		/// Este dato todavía no existe en el endpoint,
-		/// pero se deja preparada la card visual.
-		/// </summary>
-		public string TotalGrupos { get; } = "12";
+	/// <summary>
+	/// Total de planes académicos.
+	/// </summary>
+	public string TotalPlanesAcademicos
+	{
+		get => _totalPlanesAcademicos;
+		private set => SetProperty(ref _totalPlanesAcademicos, value);
+	}
 
-		/// <summary>
-		/// Lista temporal de últimos horarios generados.
-		///
-		/// La tabla debe mostrar máximo 5 registros.
-		///
-		/// TODO:
-		/// Reemplazar por endpoint real:
-		/// GET /api/dashboard/ultimos-horarios
-		/// o integrar desde dashboard/resumen si backend
-		/// decide devolverlos allí.
-		/// </summary>
-		public ObservableCollection<HorarioGeneradoItem> UltimosHorarios { get; } = new();
+	/// <summary>
+	/// Total de usuarios.
+	/// </summary>
+	public string TotalUsuarios
+	{
+		get => _totalUsuarios;
+		private set => SetProperty(ref _totalUsuarios, value);
+	}
 
-		/// <summary>
-		/// Constructor principal.
-		/// </summary>
-		public DashboardViewModel()
+	/// <summary>
+	/// Total de grupos.
+	///
+	/// TODO:
+	/// Este dato todavía no existe en el endpoint,
+	/// pero se deja preparada la card visual.
+	/// </summary>
+	public string TotalGrupos
+	{
+		get => _totalGrupos;
+		private set => SetProperty(ref _totalGrupos, value);
+	}
+
+	public string MensajeEstado
+	{
+		get => _mensajeEstado;
+		private set => SetProperty(ref _mensajeEstado, value);
+	}
+
+	/// <summary>
+	/// Lista temporal de últimos horarios generados.
+	///
+	/// La tabla debe mostrar máximo 5 registros.
+	///
+	/// TODO:
+	/// Reemplazar por endpoint real:
+	/// GET /api/dashboard/ultimos-horarios
+	/// o integrar desde dashboard/resumen si backend
+	/// decide devolverlos allí.
+	/// </summary>
+	public ObservableCollection<HorarioGeneradoItem> UltimosHorarios { get; } = new();
+
+	/// <summary>
+	/// Constructor principal.
+	/// </summary>
+	public DashboardViewModel()
+	{
+		CargarDatosTemporales();
+	}
+
+	/// <summary>
+	/// Consulta el resumen real desde backend.
+	/// </summary>
+	public async Task CargarResumenAsync()
+	{
+		var resp = await _api.ObtenerResumenAsync();
+
+		if (!resp.Success || resp.Data == null)
 		{
-			CargarDatosTemporales();
+			MensajeEstado = resp.Message;
+			return;
 		}
+
+		TotalMaterias = resp.Data.TotalMaterias.ToString();
+		TotalPlanesAcademicos = resp.Data.TotalPlanesAcademicos.ToString();
+		TotalUsuarios = resp.Data.TotalUsuarios.ToString();
+		TotalGrupos = resp.Data.TotalGrupos.ToString();
+	}
 
 		/// <summary>
 		/// Carga datos temporales únicamente para validar UI.

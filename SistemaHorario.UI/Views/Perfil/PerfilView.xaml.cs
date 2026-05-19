@@ -18,10 +18,10 @@ namespace SistemaHorario.UI.Views.Perfil
         {
             InitializeComponent();
             _viewModel = new PerfilViewModel();
-            _ = CargarDatosAsync();
+            Loaded += PerfilView_Loaded;
         }
 
-        private async System.Threading.Tasks.Task CargarDatosAsync()
+        private async void PerfilView_Loaded(object sender, RoutedEventArgs e)
         {
             await _viewModel.CargarPerfilAsync();
             CargarDatos();
@@ -63,10 +63,30 @@ namespace SistemaHorario.UI.Views.Perfil
             CargarDatos();
         }
 
-        private void BtnCambiarContrasena_Click(object sender, RoutedEventArgs e)
+        private async void BtnCambiarContrasena_Click(object sender, RoutedEventArgs e)
         {
             CambiarContrasenaDialog dialog = new() { Owner = Window.GetWindow(this) };
-            dialog.ShowDialog();
+            if (dialog.ShowDialog() != true) return;
+
+            bool ok = await _viewModel.CambiarContrasenaAsync(
+                dialog.Request.ContrasenaActual,
+                dialog.Request.NuevaContrasena);
+
+            if (!ok)
+            {
+                MessageBox.Show(
+                    "No se pudo cambiar la contraseña: " + _viewModel.MensajeEstado,
+                    "Error",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+                return;
+            }
+
+            MensajeExitoDialog exito = new("Contraseña actualizada correctamente.")
+            {
+                Owner = Window.GetWindow(this)
+            };
+            exito.ShowDialog();
         }
 
         private void BtnCerrarSesion_Click(object sender, RoutedEventArgs e)

@@ -1,4 +1,5 @@
 ﻿using SistemaHorario.UI.Models.UI;
+using SistemaHorario.UI.Services;
 using SistemaHorario.UI.ViewModels.Horarios;
 using System;
 using System.Windows;
@@ -35,19 +36,14 @@ namespace SistemaHorario.UI.Views.Horarios
 
             _viewModel = new GenerarHorarioViewModel();
 
-            CargarGrupos();
+            CmbGrupo.ItemsSource = _viewModel.Grupos;
+
+            Loaded += GenerarHorarioView_Loaded;
         }
 
-        /// <summary>
-        /// Carga los grupos disponibles en el ComboBox.
-        ///
-        /// TODO:
-        /// Reemplazar datos mock por consumo real de:
-        /// GET /api/grupos/activos.
-        /// </summary>
-        private void CargarGrupos()
+        private async void GenerarHorarioView_Loaded(object sender, RoutedEventArgs e)
         {
-            CmbGrupo.ItemsSource = _viewModel.Grupos;
+            await _viewModel.CargarGruposAsync();
 
             if (_viewModel.Grupos.Count > 0)
                 CmbGrupo.SelectedIndex = 0;
@@ -67,7 +63,7 @@ namespace SistemaHorario.UI.Views.Horarios
         /// o su identificador para consultar:
         /// GET /api/horarios/{id}/vista-previa.
         /// </summary>
-        private void BtnGenerar_Click(
+        private async void BtnGenerar_Click(
             object sender,
             RoutedEventArgs e)
         {
@@ -77,9 +73,29 @@ namespace SistemaHorario.UI.Views.Horarios
             GrupoHorarioOption grupoSeleccionado =
                 (GrupoHorarioOption)CmbGrupo.SelectedItem;
 
+            BtnGenerar.IsEnabled = false;
+            BtnGenerar.Content = "Generando...";
+
+            var api = new HorariosApiService();
+            var resp = await api.GenerarHorariosAsync(grupoSeleccionado.IdGrupo);
+
+            BtnGenerar.IsEnabled = true;
+            BtnGenerar.Content = "Generar horario";
+
+            if (!resp.Success)
+            {
+                MessageBox.Show(
+                    "Error al generar el horario:\n" + resp.Message,
+                    "Error",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+                return;
+            }
+
             HorarioItem horarioGenerado = new()
             {
                 IdHorario = 0,
+                IdGrupo = grupoSeleccionado.IdGrupo,
                 Nombre =
                     $"Horario_{grupoSeleccionado.NombreGrupo}_{DateTime.Now:yyyyMMddHHmm}",
                 Grupo = grupoSeleccionado.NombreGrupo,

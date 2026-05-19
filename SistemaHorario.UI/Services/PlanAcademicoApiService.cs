@@ -44,8 +44,8 @@ public class PlanAcademicoApiService
         return new ApiResponse<List<PlanAcademicoItem>> { Success = true, Data = lista };
     }
 
-    public async Task<ApiResponse<string>> CrearPlanAsync(PlanAcademicoItem p)
-        => await _api.PostAsync("PlanAcademico", new
+    public async Task<ApiResponse<PlanAcademicoBackendDto>> CrearPlanAsync(PlanAcademicoItem p)
+        => await _api.PostAsync<PlanAcademicoBackendDto>("PlanAcademico", new
         {
             Nombre = p.Nombre,
             Programa = string.IsNullOrWhiteSpace(p.Jornada) ? "General" : p.Jornada,

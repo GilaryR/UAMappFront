@@ -29,5 +29,7 @@ namespace SistemaHorario.UI.Models.UI
 		public string Materias { get; set; } = string.Empty;
 
 		public string Estado { get; set; } = "Activo";
+
+		public List<int> IdsMateria { get; set; } = new();
 	}
 }

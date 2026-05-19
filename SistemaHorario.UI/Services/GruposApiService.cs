@@ -72,4 +72,24 @@ public class GruposApiService
 
     public async Task<ApiResponse<string>> EliminarGrupoAsync(int id)
         => await _api.DeleteAsync($"Grupos/{id}");
+
+    public async Task<ApiResponse<List<GrupoHorarioOption>>> ObtenerGruposParaHorarioAsync()
+    {
+        var resp = await _api.GetAsync<List<GrupoBackendDto>>("Grupos");
+        if (!resp.Success || resp.Data == null)
+            return new ApiResponse<List<GrupoHorarioOption>> { Success = false, Message = resp.Message };
+
+        var lista = resp.Data
+            .Where(g => g.Activo)
+            .Select(g => new GrupoHorarioOption
+            {
+                IdGrupo = g.IdGrupo,
+                NombreGrupo = g.Nombre,
+                Semestre = g.NumeroSemestre,
+                Jornada = g.Jornada
+            })
+            .ToList();
+
+        return new ApiResponse<List<GrupoHorarioOption>> { Success = true, Data = lista };
+    }
 }

@@ -15,10 +15,7 @@ namespace SistemaHorario.UI.ViewModels.Docentes
         public ResumenDocenteItem Resumen { get; private set; } = new();
         public string MensajeEstado { get; private set; } = string.Empty;
 
-        public DocentesViewModel()
-        {
-            _ = CargarDatosAsync();
-        }
+        public DocentesViewModel() { }
 
         public async Task CargarDatosAsync()
         {
@@ -32,8 +29,6 @@ namespace SistemaHorario.UI.ViewModels.Docentes
             Docentes = _docentesBase.ToList();
             CalcularResumen();
         }
-
-        public void CargarDatos() => _ = CargarDatosAsync();
 
         public void Filtrar(string textoBusqueda, string estado)
         {

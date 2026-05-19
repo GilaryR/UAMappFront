@@ -63,25 +63,15 @@ namespace SistemaHorario.UI.ViewModels.PlanAcademico
             };
 
             var resp = await _api.CrearPlanAsync(nuevo);
-            if (!resp.Success)
+            if (!resp.Success || resp.Data == null)
             {
                 MensajeEstado = "Error: " + resp.Message;
                 return null;
             }
+
+            nuevo.IdPlanAcademico = resp.Data.IdPlanAcademico;
             await CargarPlanesAsync();
             return nuevo;
         }
-
-public PlanAcademicoItem CrearNuevoPlan()
-{
-    var t = CrearNuevoPlanAsync(CantidadSemestresNuevoPlan, JornadaNuevoPlan);
-    return new PlanAcademicoItem { Nombre = "Plan " + JornadaNuevoPlan, Jornada = JornadaNuevoPlan, TotalSemestres = CantidadSemestresNuevoPlan, EsNuevo = true };
-}
-
-public PlanAcademicoItem CrearNuevoPlan(int cantidadSemestres, string jornada)
-{
-    var t = CrearNuevoPlanAsync(cantidadSemestres, jornada);
-    return new PlanAcademicoItem { Nombre = "Plan " + jornada, Jornada = jornada, TotalSemestres = cantidadSemestres, EsNuevo = true };
-}
     }
 }

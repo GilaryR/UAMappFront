@@ -1,6 +1,8 @@
 ﻿using SistemaHorario.UI.Dialogs.Shared;
 using SistemaHorario.UI.Models.UI;
+using SistemaHorario.UI.Services;
 using SistemaHorario.UI.ViewModels.Coordinadores;
+using SistemaHorarios.Application.Common;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -18,8 +20,8 @@ namespace SistemaHorario.UI.Views.Coordinadores
 	/// </summary>
 	public partial class AgregarEditarCoordinadorView : UserControl
 	{
-		private readonly AgregarEditarCoordinadorViewModel _viewModel;
-
+	private readonly CoordinadoresApiService _api = new();
+	private readonly AgregarEditarCoordinadorViewModel _viewModel;
 		public AgregarEditarCoordinadorView(
 			CoordinadorItem? coordinador = null)
 		{
@@ -56,53 +58,70 @@ namespace SistemaHorario.UI.Views.Coordinadores
 			}
 		}
 
-		private void BtnGuardar_Click(
-			object sender,
-			RoutedEventArgs e)
+private async void BtnGuardar_Click(
+		object sender,
+		RoutedEventArgs e)
+	{
+		if (!FormularioEsValido())
+			return;
+
+		_viewModel.Coordinador.NombreCompleto =
+			TxtNombre.Text.Trim();
+
+		_viewModel.Coordinador.Cedula =
+			TxtCedula.Text.Trim();
+
+		_viewModel.Coordinador.CorreoInstitucional =
+			TxtCorreo.Text.Trim();
+
+		_viewModel.Coordinador.Celular =
+			TxtCelular.Text.Trim();
+
+		_viewModel.Coordinador.Rol = "Coordinador";
+
+		if (CmbEstado.SelectedItem is ComboBoxItem item)
 		{
-			if (!FormularioEsValido())
-				return;
-
-			_viewModel.Coordinador.NombreCompleto =
-				TxtNombre.Text.Trim();
-
-			_viewModel.Coordinador.Cedula =
-				TxtCedula.Text.Trim();
-
-			_viewModel.Coordinador.CorreoInstitucional =
-				TxtCorreo.Text.Trim();
-
-			_viewModel.Coordinador.Celular =
-				TxtCelular.Text.Trim();
-
-			_viewModel.Coordinador.Rol = "Coordinador";
-
-			if (CmbEstado.SelectedItem is ComboBoxItem item)
-			{
-				_viewModel.Coordinador.Estado =
-					item.Content?.ToString() ?? "Activo";
-			}
-
-			if (!_viewModel.EsEdicion)
-			{
-				CoordinadoresMockStore.Crear(
-					_viewModel.Coordinador);
-			}
-
-			MensajeExitoDialog dialog = new(
-				_viewModel.EsEdicion
-					? "Coordinador actualizado"
-					: "Coordinador creado")
-			{
-				Owner = Window.GetWindow(this)
-			};
-
-			dialog.ShowDialog();
-
-			VolverAPrincipal();
+			_viewModel.Coordinador.Estado =
+				item.Content?.ToString() ?? "Activo";
 		}
 
-		private bool FormularioEsValido()
+		ApiResponse<string> resultado;
+
+		if (_viewModel.EsEdicion)
+		{
+			resultado = await _api.ActualizarCoordinadorAsync(
+				_viewModel.Coordinador);
+		}
+		else
+		{
+			resultado = await _api.CrearCoordinadorAsync(
+				_viewModel.Coordinador);
+		}
+
+		if (!resultado.Success)
+		{
+			MessageBox.Show(
+				resultado.Message,
+				"Error",
+				MessageBoxButton.OK,
+				MessageBoxImage.Error);
+			return;
+		}
+
+		MensajeExitoDialog dialog = new(
+			_viewModel.EsEdicion
+				? "Coordinador actualizado"
+				: "Coordinador creado")
+		{
+			Owner = Window.GetWindow(this)
+		};
+
+		dialog.ShowDialog();
+
+		VolverAPrincipal();
+	}
+
+	private bool FormularioEsValido()
 		{
 			if (string.IsNullOrWhiteSpace(TxtNombre.Text))
 			{

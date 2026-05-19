@@ -54,26 +54,32 @@ namespace SistemaHorario.UI.Views.PlanAcademico
         /// Evento que se ejecuta al hacer clic en "Nuevo Plan".
         /// Abre un diálogo para crear un nuevo plan académico.
         /// </summary>
-        private void NuevoPlan_Click(object sender, RoutedEventArgs e)
+        private async void NuevoPlan_Click(object sender, RoutedEventArgs e)
         {
-            // Se crea el diálogo de nuevo plan
             NuevoPlanDialog dialog = new()
             {
                 Owner = Window.GetWindow(this)
             };
 
-            // Si el usuario cancela, no continúa
             if (dialog.ShowDialog() != true)
                 return;
 
-            // Se crea el nuevo plan con los datos ingresados
-            PlanAcademicoItem nuevoPlan =
-                viewModel.CrearNuevoPlan(
+            PlanAcademicoItem? nuevoPlan =
+                await viewModel.CrearNuevoPlanAsync(
                     dialog.CantidadSemestres,
                     dialog.Jornada
                 );
 
-            // Abre la malla del nuevo plan creado
+            if (nuevoPlan == null)
+            {
+                MessageBox.Show(
+                    "No se pudo crear el plan: " + viewModel.MensajeEstado,
+                    "Error",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+                return;
+            }
+
             Navegar(new MallaPlanAcademicoView(nuevoPlan.IdPlanAcademico, true));
         }
 

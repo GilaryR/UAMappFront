@@ -1,6 +1,8 @@
 ﻿using SistemaHorario.UI.Models.UI;
+using SistemaHorario.UI.Services;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace SistemaHorario.UI.ViewModels.Horarios
 {
@@ -10,17 +12,12 @@ namespace SistemaHorario.UI.ViewModels.Horarios
     /// Administra la lista visual de horarios generados,
     /// filtros, paginación y acciones temporales.
     ///
-    /// Actualmente utiliza datos mock.
-    ///
-    /// Más adelante deberá consumir:
-    /// - GET /api/horarios
-    /// - GET /api/horarios/{id}
-    /// - GET /api/horarios/{id}/vista-previa
-    /// - POST /api/horarios/{id}/aprobar
-    /// - POST /api/horarios/{id}/rechazar
+    /// Ahora consume el backend cuando está disponible.
     /// </summary>
     public class HorariosViewModel
     {
+        private readonly HorariosApiService _api = new();
+
         /// <summary>
         /// Lista completa de horarios generados.
         /// </summary>
@@ -61,6 +58,8 @@ namespace SistemaHorario.UI.ViewModels.Horarios
         /// </summary>
         public int TotalPaginas { get; private set; } = 1;
 
+        public string MensajeEstado { get; private set; } = string.Empty;
+
         /// <summary>
         /// Constructor principal.
         /// </summary>
@@ -68,33 +67,36 @@ namespace SistemaHorario.UI.ViewModels.Horarios
         {
             Horarios = new ObservableCollection<HorarioItem>();
             HorariosFiltrados = new ObservableCollection<HorarioItem>();
+        }
 
-            CargarDatosTemporales();
+        public async Task CargarDatosAsync()
+        {
+            var resp = await _api.ObtenerHorariosAsync();
+
+            Horarios.Clear();
+
+            if (!resp.Success || resp.Data == null)
+            {
+                MensajeEstado = resp.Message;
+                foreach (HorarioItem horario in HorariosMockStore.ObtenerHorarios())
+                {
+                    Horarios.Add(horario);
+                }
+            }
+            else
+            {
+                foreach (HorarioItem horario in resp.Data)
+                {
+                    Horarios.Add(horario);
+                }
+            }
+
+            PaginaActual = 1;
             AplicarFiltros();
         }
 
         /// <summary>
-        /// Carga datos temporales para validar la interfaz.
-        ///
-        /// TODO:
-        /// Reemplazar por GET /api/horarios.
-        /// </summary>
-            private void CargarDatosTemporales()
-        {
-            Horarios.Clear();
-
-            foreach (HorarioItem horario in HorariosMockStore.ObtenerHorarios())
-            {
-                Horarios.Add(horario);
-            }
-        }
-
-        /// <summary>
         /// Aplica búsqueda, filtros y paginación.
-        ///
-        /// TODO:
-        /// Si backend implementa filtros server-side,
-        /// esta lógica puede reemplazarse por query params.
         /// </summary>
         public void AplicarFiltros()
         {
@@ -183,20 +185,18 @@ namespace SistemaHorario.UI.ViewModels.Horarios
             AplicarFiltros();
         }
 
-        /// <summary>
-        /// Elimina temporalmente un horario de la lista.
-        ///
-        /// TODO:
-        /// Actualmente el endpoint DELETE /api/horarios/{id}
-        /// no aparece en el JSON. Se recomienda pedirlo a backend.
-        /// </summary>
-        public void EliminarHorario(HorarioItem horario)
+        public async Task<bool> EliminarHorarioAsync(HorarioItem horario)
         {
-            HorariosMockStore.EliminarHorario(horario);
+            var resp = await _api.EliminarHorarioAsync(horario.IdHorario);
+            if (!resp.Success)
+            {
+                MensajeEstado = resp.Message;
+                return false;
+            }
 
             Horarios.Remove(horario);
-
             AplicarFiltros();
+            return true;
         }
     }
 }

@@ -1,113 +1,80 @@
-﻿using SistemaHorario.UI.Models.UI;
+using SistemaHorario.UI.Models.UI;
+using SistemaHorario.UI.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace SistemaHorario.UI.ViewModels.HistorialCambios
 {
-	/// <summary>
-	/// ViewModel principal del módulo Historial de cambios.
-	///
-	/// Maneja:
-	/// - carga temporal de actividades,
-	/// - filtro por usuario,
-	/// - filtro por módulo,
-	/// - filtro por fecha única o rango de fechas.
-	///
-	/// TODO:
-	/// Reemplazar HistorialCambiosMockStore por consumo real:
-	///
-	/// GET /api/historial-cambios
-	///
-	/// Parámetros recomendados:
-	/// - usuario
-	/// - modulo
-	/// - fechaDesde
-	/// - fechaHasta
-	/// </summary>
-	public class HistorialCambiosViewModel
-	{
-		private List<HistorialCambioItem> _historialBase = new();
+    public class HistorialCambiosViewModel
+    {
+        private readonly HistorialCambiosApiService _api = new();
+        private List<HistorialCambioItem> _historialBase = new();
 
-		/// <summary>
-		/// Lista visual filtrada.
-		/// </summary>
-		public List<HistorialCambioItem> Actividades { get; private set; } = new();
+        public List<HistorialCambioItem> Actividades { get; private set; } = new();
+        public List<string> Usuarios { get; private set; } = new();
+        public List<string> Modulos { get; private set; } = new();
+        public string MensajeEstado { get; private set; } = string.Empty;
 
-		/// <summary>
-		/// Constructor principal.
-		/// </summary>
-		public HistorialCambiosViewModel()
-		{
-			CargarDatos();
-		}
+        public HistorialCambiosViewModel() { }
 
-		/// <summary>
-		/// Carga datos temporales.
-		/// </summary>
-		public void CargarDatos()
-		{
-			_historialBase = HistorialCambiosMockStore.ObtenerHistorial();
+        public async Task CargarDatosAsync()
+        {
+            var resp = await _api.ObtenerHistorialAsync();
+            if (resp.Success && resp.Data != null)
+            {
+                _historialBase = resp.Data;
+                Actividades = _historialBase.ToList();
+            }
+            else
+            {
+                MensajeEstado = resp.Message;
+                _historialBase = HistorialCambiosMockStore.ObtenerHistorial();
+                Actividades = _historialBase.ToList();
+            }
+            await CargarCatalogosAsync();
+        }
 
-			Actividades = _historialBase.ToList();
-		}
+        public async Task CargarCatalogosAsync()
+        {
+            var usuariosResp = await _api.ObtenerUsuariosAsync();
+            if (usuariosResp.Success && usuariosResp.Data != null)
+                Usuarios = usuariosResp.Data;
+            else
+                MensajeEstado = usuariosResp.Message;
 
-		/// <summary>
-		/// Filtra el historial por usuario, módulo y fechas.
-		/// </summary>
-		public void Filtrar(
-			string usuario,
-			string modulo,
-			DateTime? fechaDesde,
-			DateTime? fechaHasta)
-		{
-			IEnumerable<HistorialCambioItem> consulta = _historialBase;
+            var modulosResp = await _api.ObtenerModulosAsync();
+            if (modulosResp.Success && modulosResp.Data != null)
+                Modulos = modulosResp.Data;
+            else if (string.IsNullOrWhiteSpace(MensajeEstado))
+                MensajeEstado = modulosResp.Message;
+        }
 
-			if (!string.IsNullOrWhiteSpace(usuario) &&
-				usuario != "Todos")
-			{
-				consulta = consulta.Where(h =>
-					h.Usuario.Equals(usuario, StringComparison.OrdinalIgnoreCase));
-			}
+        public void Filtrar(string usuario, string modulo, DateTime? fechaDesde, DateTime? fechaHasta)
+        {
+            IEnumerable<HistorialCambioItem> consulta = _historialBase;
 
-			if (!string.IsNullOrWhiteSpace(modulo) &&
-				modulo != "Todos")
-			{
-				consulta = consulta.Where(h =>
-					h.Modulo.Equals(modulo, StringComparison.OrdinalIgnoreCase));
-			}
+            if (!string.IsNullOrWhiteSpace(usuario) && usuario != "Todos")
+                consulta = consulta.Where(h => h.Usuario.Equals(usuario, StringComparison.OrdinalIgnoreCase));
 
-			if (fechaDesde.HasValue && !fechaHasta.HasValue)
-			{
-				DateTime fecha = fechaDesde.Value.Date;
+            if (!string.IsNullOrWhiteSpace(modulo) && modulo != "Todos")
+                consulta = consulta.Where(h => h.Modulo.Equals(modulo, StringComparison.OrdinalIgnoreCase));
 
-				consulta = consulta.Where(h =>
-					h.FechaHora.Date == fecha);
-			}
+            if (fechaDesde.HasValue && !fechaHasta.HasValue)
+                consulta = consulta.Where(h => h.FechaHora.Date == fechaDesde.Value.Date);
 
-			if (fechaDesde.HasValue && fechaHasta.HasValue)
-			{
-				DateTime desde = fechaDesde.Value.Date;
-				DateTime hasta = fechaHasta.Value.Date;
+            if (fechaDesde.HasValue && fechaHasta.HasValue)
+                consulta = consulta.Where(h =>
+                    h.FechaHora.Date >= fechaDesde.Value.Date &&
+                    h.FechaHora.Date <= fechaHasta.Value.Date);
 
-				consulta = consulta.Where(h =>
-					h.FechaHora.Date >= desde &&
-					h.FechaHora.Date <= hasta);
-			}
+            Actividades = consulta.OrderByDescending(h => h.FechaHora).ToList();
+        }
 
-			Actividades = consulta
-				.OrderByDescending(h => h.FechaHora)
-				.ToList();
-		}
-
-		/// <summary>
-		/// Limpia todos los filtros y restaura la lista original.
-		/// </summary>
-		public void LimpiarFiltros()
-		{
-			Actividades = _historialBase
-				.OrderByDescending(h => h.FechaHora)
-				.ToList();
-		}
-	}
+        public void LimpiarFiltros()
+        {
+            Actividades = _historialBase.OrderByDescending(h => h.FechaHora).ToList();
+        }
+    }
 }
