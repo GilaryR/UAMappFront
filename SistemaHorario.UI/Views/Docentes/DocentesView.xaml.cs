@@ -379,28 +379,38 @@ namespace SistemaHorario.UI.Views.Docentes
 		/// <param name="docente">
 		/// Docente que será eliminado.
 		/// </param>
-		private void EliminarDocente(DocenteItem docente)
+		private async void EliminarDocente(DocenteItem docente)
+	{
+		EliminarConfirmacionDialog dialog =
+			new($"¿Deseas eliminar al docente {docente.NombreCompleto}?\nDebes escribir la palabra eliminar.")
+			{
+				Owner = Window.GetWindow(this)
+			};
+
+		if (dialog.ShowDialog() != true)
+			return;
+
+		bool ok = await _viewModel.EliminarDocenteAsync(docente.IdDocente);
+
+		if (!ok)
 		{
-			EliminarConfirmacionDialog dialog =
-				new($"¿Deseas eliminar al docente {docente.NombreCompleto}?\nDebes escribir la palabra eliminar.")
-				{
-					Owner = Window.GetWindow(this)
-				};
+			MessageBox.Show(
+				"Error al eliminar: " + _viewModel.MensajeEstado,
+				"Error",
+				MessageBoxButton.OK,
+				MessageBoxImage.Error);
+			return;
+		}
 
-			if (dialog.ShowDialog() != true)
-				return;
+		CargarDatos();
 
-			DocentesMockStore.EliminarDocente(docente);
+		MensajeExitoDialog exito =
+			new("Docente eliminado")
+			{
+				Owner = Window.GetWindow(this)
+			};
 
-			CargarDatos();
-
-			MensajeExitoDialog exito =
-				new("Docente eliminado")
-				{
-					Owner = Window.GetWindow(this)
-				};
-
-			exito.ShowDialog();
+		exito.ShowDialog();
 		}
 	}
 }
