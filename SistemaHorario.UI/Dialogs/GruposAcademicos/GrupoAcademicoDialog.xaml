@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Grupo academico"
         Width="690"
-        Height="610"
+        Height="680"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize"
         Background="#EEF0F2">
@@ -27,6 +27,8 @@
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
                     <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="22"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="22"/>
                         <RowDefinition Height="Auto"/>
@@ -68,6 +70,11 @@
                     <StackPanel Grid.Row="4" Grid.Column="2">
                         <TextBlock Text="Plazas disponibles *" FontWeight="Bold" Margin="0,0,0,8"/>
                         <TextBox x:Name="TxtPlazas" Height="34" FontSize="15" Padding="8,0" VerticalContentAlignment="Center"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="6" Grid.Column="0">
+                        <TextBlock Text="Número de semestre *" FontWeight="Bold" Margin="0,0,0,8"/>
+                        <TextBox x:Name="TxtSemestre" Height="34" FontSize="15" Padding="8,0" VerticalContentAlignment="Center"/>
                     </StackPanel>
                 </Grid>
 

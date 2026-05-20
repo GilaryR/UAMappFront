@@ -42,7 +42,7 @@ namespace SistemaHorario.UI.ViewModels.Perfil
 
         public async Task<bool> ActualizarPerfilAsync(string nombre, string telefono, string rol, string facultad)
         {
-            var resp = await _api.ActualizarPerfilAsync(nombre, Perfil.CorreoInstitucional);
+            var resp = await _api.ActualizarPerfilAsync(nombre, Perfil.CorreoInstitucional, telefono);
             if (resp.Success)
             {
                 Perfil.NombreCompleto = nombre;

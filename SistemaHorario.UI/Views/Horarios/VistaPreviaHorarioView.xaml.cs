@@ -90,6 +90,8 @@ namespace SistemaHorario.UI.Views.Horarios
         private async void VistaPreviaHorarioView_Loaded(object sender, RoutedEventArgs e)
         {
             await _viewModel.CargarBloquesAsync();
+            if (_viewModel.ModoEdicion)
+                await _viewModel.CargarFranjasAsync();
             if (_viewModel.Bloques.Count > 0)
                 ConstruirHorario();
         }
@@ -340,7 +342,7 @@ namespace SistemaHorario.UI.Views.Horarios
                 DragDropEffects.Move);
         }
 
-        private void Celda_Drop(
+        private async void Celda_Drop(
             object sender,
             DragEventArgs e)
         {
@@ -374,13 +376,20 @@ namespace SistemaHorario.UI.Views.Horarios
             _bloqueArrastrado.HoraInicio =
                 destino.RangoHora.Split('-')[0].Trim();
 
+            BloqueHorarioItem bloqueGuardar = _bloqueArrastrado;
             _bloqueArrastrado = null;
 
             ConstruirHorario();
 
-            // TODO:
-            // Al conectar API:
-            // PUT /api/horarios/{id}/asignatura
+            bool ok = await _viewModel.GuardarBloqueAsync(bloqueGuardar);
+            if (!ok)
+            {
+                MessageBox.Show(
+                    "No se pudo guardar el cambio en el servidor.",
+                    "Error",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+            }
         }
 
         private static DatosCeldaHorario? ObtenerDatosDestino(
