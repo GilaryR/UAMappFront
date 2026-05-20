@@ -59,6 +59,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="Assets\Documents\manual.pdf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
     <Resource Include="Assets\Icons\IcGrupos.png" />
   </ItemGroup>
 

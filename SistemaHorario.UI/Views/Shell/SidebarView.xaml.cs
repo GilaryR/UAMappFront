@@ -5,6 +5,8 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Diagnostics;
+using System.IO;
 
 namespace SistemaHorario.UI.Views.Shell
 {
@@ -229,28 +231,91 @@ namespace SistemaHorario.UI.Views.Shell
             return boton;
         }
 
-        /// <summary>
-        /// Evento ejecutado cuando el usuario hace clic
-        /// sobre una opción del menú.
-        /// </summary>
-        private void BtnMenu_Click(object sender, RoutedEventArgs e)
-        {
-            if (sender is not Button boton)
-                return;
+		/// <summary>
+		/// Evento ejecutado cuando el usuario hace clic
+		/// sobre una opción del menú.
+		///
+		/// Si la opción seleccionada es "Manual",
+		/// abre el archivo PDF del manual de usuario.
+		///
+		/// Para las demás opciones, mantiene la navegación normal
+		/// mediante el evento NavegacionSolicitada.
+		/// </summary>
+		private void BtnMenu_Click(object sender, RoutedEventArgs e)
+		{
+			if (sender is not Button boton)
+				return;
 
-            if (boton.Tag is not MenuItemModel opcionSeleccionada)
-                return;
+			if (boton.Tag is not MenuItemModel opcionSeleccionada)
+				return;
 
-            foreach (MenuItemModel opcion in _opcionesMenu)
-            {
-                opcion.Seleccionado = false;
-            }
+			// Si el usuario selecciona la opción Manual,
+			// se abre directamente el PDF y no se navega a otra vista.
+			if (opcionSeleccionada.VistaDestino == "Manual")
+			{
+				AbrirManualUsuario();
+				return;
+			}
 
-            opcionSeleccionada.Seleccionado = true;
+			foreach (MenuItemModel opcion in _opcionesMenu)
+			{
+				opcion.Seleccionado = false;
+			}
 
-            PintarMenu();
+			opcionSeleccionada.Seleccionado = true;
 
-            NavegacionSolicitada?.Invoke(this, opcionSeleccionada.VistaDestino);
-        }
-    }
+			PintarMenu();
+
+			NavegacionSolicitada?.Invoke(this, opcionSeleccionada.VistaDestino);
+		}
+
+		/// <summary>
+		/// Abre el manual de usuario en formato PDF.
+		///
+		/// El archivo debe estar ubicado en:
+		/// Documents/manual-placeholder.pdf
+		///
+		/// Cuando se tenga el PDF final, solo se debe cambiar
+		/// el nombre del archivo en la variable rutaManual.
+		/// </summary>
+		private void AbrirManualUsuario()
+		{
+			try
+			{
+				string rutaManual = Path.Combine(
+					AppDomain.CurrentDomain.BaseDirectory,
+                    "Assets",
+					"Documents",
+					"manual.pdf"
+				);
+
+				if (!File.Exists(rutaManual))
+				{
+					MessageBox.Show(
+						"El manual de usuario no se encuentra disponible.",
+						"Manual no encontrado",
+						MessageBoxButton.OK,
+						MessageBoxImage.Warning
+					);
+
+					return;
+				}
+
+				Process.Start(new ProcessStartInfo
+				{
+					FileName = rutaManual,
+					UseShellExecute = true
+				});
+			}
+			catch (Exception ex)
+			{
+				MessageBox.Show(
+					$"No se pudo abrir el manual de usuario.\n\nDetalle: {ex.Message}",
+					"Error al abrir manual",
+					MessageBoxButton.OK,
+					MessageBoxImage.Error
+				);
+			}
+		}
+	}
 }
