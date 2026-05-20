@@ -26,6 +26,13 @@ public class HorarioBackendDto
     public string EstadoTexto { get; set; } = string.Empty;
 }
 
+public class GenerarHorarioBackendResponse
+{
+    public int Generados { get; set; }
+    public List<string> Advertencias { get; set; } = new();
+    public List<HorarioBackendDto> Horarios { get; set; } = new();
+}
+
 public class HorariosApiService
 {
     private readonly ApiClient _api = new();
@@ -50,8 +57,8 @@ public class HorariosApiService
         return new ApiResponse<List<BloqueHorarioItem>> { Success = true, Data = bloques };
     }
 
-    public async Task<ApiResponse<string>> GenerarHorariosAsync(int idGrupo)
-        => await _api.PostAsync($"horarios/generar/{idGrupo}", new { });
+    public async Task<ApiResponse<GenerarHorarioBackendResponse>> GenerarHorariosAsync(int idGrupo)
+        => await _api.PostAsync<GenerarHorarioBackendResponse>($"horarios/generar/{idGrupo}", new { });
 
     public async Task<ApiResponse<string>> EliminarHorarioAsync(int id)
         => await _api.DeleteAsync($"horarios/{id}");
@@ -101,11 +108,11 @@ public class HorariosApiService
 
     public async Task<Dictionary<string, int>> ObtenerFranjasLookupAsync()
     {
-        var resp = await _api.GetAsync<BackendFranjasResponse>("franjas-horarias");
+        var resp = await _api.GetAsync<List<FranjaSimpleDto>>("franjas-horarias");
         var lookup = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
-        if (resp.Success && resp.Data?.Data != null)
+        if (resp.Success && resp.Data != null)
         {
-            foreach (var f in resp.Data.Data)
+            foreach (var f in resp.Data)
             {
                 string horaKey = TimeSpan.TryParse(f.HoraInicio, out var ts)
                     ? FormatearHora(ts)
@@ -133,8 +140,4 @@ public class HorariosApiService
         public string HoraInicio { get; set; } = string.Empty;
     }
 
-    private class BackendFranjasResponse
-    {
-        public List<FranjaSimpleDto>? Data { get; set; }
-    }
 }

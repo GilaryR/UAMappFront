@@ -29,7 +29,13 @@ namespace SistemaHorario.UI.Models.UI
         ///
         /// Cuando se conecte el backend, este valor debe venir desde la base de datos.
         /// </summary>
-        public int IdSemestre { get; set; }
+        public int IdSemestrePlan { get; set; }
+
+        public int IdSemestre
+        {
+            get => IdSemestrePlan;
+            set => IdSemestrePlan = value;
+        }
 
         /// <summary>
         /// Número del semestre dentro del plan académico.

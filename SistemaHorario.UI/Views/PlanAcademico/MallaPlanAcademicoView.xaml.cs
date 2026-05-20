@@ -47,6 +47,7 @@ namespace SistemaHorario.UI.Views.PlanAcademico
 
             DetalleSemestrePlanDialog dialog = new(
                 viewModel.Plan.IdPlanAcademico,
+                semestre.IdSemestrePlan,
                 semestre.NumeroSemestre,
                 viewModel.EsModoCreacion)
             {

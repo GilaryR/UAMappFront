@@ -1,6 +1,8 @@
 using SistemaHorario.UI.Models.UI;
 using SistemaHorarios.Application.Common;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace SistemaHorario.UI.Services;
 
@@ -20,16 +22,52 @@ public class GrupoBackendDto
     public string EstadoTexto { get; set; } = string.Empty;
 }
 
+public class PlanAcademicoOption
+{
+    public int IdPlanAcademico { get; set; }
+    public string Nombre { get; set; } = string.Empty;
+    public string Programa { get; set; } = string.Empty;
+    public List<int> Semestres { get; set; } = new();
+    public Dictionary<int, List<string>> MateriasPorSemestre { get; set; } = new();
+
+    public string DisplayTexto => string.IsNullOrWhiteSpace(Programa)
+        ? Nombre
+        : $"{Nombre} - {Programa}";
+}
+
 public class GruposApiService
 {
     private readonly ApiClient _api = new();
 
-    private class PlanSimpleDto { public int IdPlanAcademico { get; set; } }
-
-    private async Task<int> ObtenerPrimerPlanIdAsync()
+    public async Task<ApiResponse<List<PlanAcademicoOption>>> ObtenerPlanesParaGrupoAsync()
     {
-        var resp = await _api.GetAsync<List<PlanSimpleDto>>("PlanAcademico");
-        return resp.Success && resp.Data?.Count > 0 ? resp.Data[0].IdPlanAcademico : 0;
+        var resp = await _api.GetAsync<List<PlanAcademicoBackendDto>>("PlanAcademico");
+        if (!resp.Success || resp.Data == null)
+            return new ApiResponse<List<PlanAcademicoOption>> { Success = false, Message = resp.Message };
+
+        var planes = resp.Data
+            .Select(p => new PlanAcademicoOption
+            {
+                IdPlanAcademico = p.IdPlanAcademico,
+                Nombre = p.Nombre,
+                Programa = p.Programa,
+                Semestres = (p.Semestres ?? new())
+                    .Select(s => s.NumeroSemestre)
+                    .OrderBy(s => s)
+                    .ToList(),
+                MateriasPorSemestre = (p.Semestres ?? new())
+                    .ToDictionary(
+                        s => s.NumeroSemestre,
+                        s => (s.Materias ?? new())
+                            .Select(m => m.Nombre)
+                            .Where(nombre => !string.IsNullOrWhiteSpace(nombre))
+                            .Distinct(StringComparer.OrdinalIgnoreCase)
+                            .OrderBy(nombre => nombre)
+                            .ToList())
+            })
+            .ToList();
+
+        return new ApiResponse<List<PlanAcademicoOption>> { Success = true, Data = planes };
     }
 
     public async Task<ApiResponse<List<GrupoAcademicoItem>>> ObtenerGruposAsync()
@@ -61,8 +99,9 @@ public class GruposApiService
 
     public async Task<ApiResponse<string>> CrearGrupoAsync(GrupoAcademicoItem g)
     {
-        int idPlan = g.IdPlanAcademico > 0 ? g.IdPlanAcademico : await ObtenerPrimerPlanIdAsync();
-        int semestre = g.NumeroSemestre > 0 ? g.NumeroSemestre : 1;
+        ApiResponse<string>? validacion = ValidarPlanYSemestre(g);
+        if (validacion != null)
+            return validacion;
 
         return await _api.PostAsync("Grupos", new
         {
@@ -70,9 +109,9 @@ public class GruposApiService
             Nombre = g.NombreGrupo,
             g.Jornada,
             TipoGrupo = g.Tipo,
-            NumeroSemestre = semestre,
+            g.NumeroSemestre,
             CantidadEstudiantes = g.PlazasDisponibles,
-            IdPlanAcademico = idPlan,
+            g.IdPlanAcademico,
             Materia = g.Materia,
             Dias = string.Join(",", g.Dias)
         });
@@ -80,8 +119,9 @@ public class GruposApiService
 
     public async Task<ApiResponse<string>> ActualizarGrupoAsync(GrupoAcademicoItem g)
     {
-        int idPlan = g.IdPlanAcademico > 0 ? g.IdPlanAcademico : await ObtenerPrimerPlanIdAsync();
-        int semestre = g.NumeroSemestre > 0 ? g.NumeroSemestre : 1;
+        ApiResponse<string>? validacion = ValidarPlanYSemestre(g);
+        if (validacion != null)
+            return validacion;
 
         return await _api.PutAsync($"Grupos/{g.IdGrupoAcademico}", new
         {
@@ -89,9 +129,9 @@ public class GruposApiService
             Nombre = g.NombreGrupo,
             g.Jornada,
             TipoGrupo = g.Tipo,
-            NumeroSemestre = semestre,
+            g.NumeroSemestre,
             CantidadEstudiantes = g.PlazasDisponibles,
-            IdPlanAcademico = idPlan,
+            g.IdPlanAcademico,
             Materia = g.Materia,
             Dias = string.Join(",", g.Dias),
             Activo = g.Estado == "Activo"
@@ -112,6 +152,7 @@ public class GruposApiService
             .Select(g => new GrupoHorarioOption
             {
                 IdGrupo = g.IdGrupo,
+                IdPlanAcademico = g.IdPlanAcademico,
                 NombreGrupo = g.Nombre,
                 Semestre = g.NumeroSemestre,
                 Jornada = g.Jornada
@@ -119,5 +160,28 @@ public class GruposApiService
             .ToList();
 
         return new ApiResponse<List<GrupoHorarioOption>> { Success = true, Data = lista };
+    }
+
+    private static ApiResponse<string>? ValidarPlanYSemestre(GrupoAcademicoItem g)
+    {
+        if (g.IdPlanAcademico <= 0)
+        {
+            return new ApiResponse<string>
+            {
+                Success = false,
+                Message = "Selecciona el plan académico del grupo."
+            };
+        }
+
+        if (g.NumeroSemestre <= 0)
+        {
+            return new ApiResponse<string>
+            {
+                Success = false,
+                Message = "Selecciona el semestre del plan académico para el grupo."
+            };
+        }
+
+        return null;
     }
 }

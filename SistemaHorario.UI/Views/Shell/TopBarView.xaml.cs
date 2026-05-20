@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Windows.Controls;
 using System.Windows.Input;
+using SistemaHorario.UI.State;
 
 namespace SistemaHorario.UI.Views.Shell
 {
@@ -41,11 +42,9 @@ namespace SistemaHorario.UI.Views.Shell
         {
             InitializeComponent();
 
-            // TODO:
-            // Reemplazar por datos reales del usuario autenticado.
             ConfigurarUsuario(
-                "Administrador",
-                "administrador@uam.edu.co"
+                UsuarioSesion.NombreCompleto,
+                UsuarioSesion.CorreoInstitucional
             );
         }
 

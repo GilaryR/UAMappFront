@@ -19,6 +19,8 @@
         /// </summary>
         public int IdGrupo { get; set; }
 
+        public int IdPlanAcademico { get; set; }
+
         /// <summary>
         /// Nombre visual mostrado en el ComboBox.
         ///
@@ -49,6 +51,6 @@
         /// dentro del ComboBox.
         /// </summary>
         public string DisplayTexto =>
-            $"{NombreGrupo} | Sem {Semestre} | {Jornada}";
+            $"{NombreGrupo} | Plan {IdPlanAcademico} | Sem {Semestre} | {Jornada}";
     }
 }

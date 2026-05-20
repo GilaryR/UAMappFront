@@ -17,6 +17,9 @@ namespace SistemaHorario.UI.ViewModels.PlanAcademico
         private SemestrePlanItem? _semestre;
         private MateriaItem? _materiaSeleccionada;
         private bool _estaEditando;
+        private int _idPlanAcademico;
+        private int _idSemestrePlan;
+        private int _numeroSemestre;
 
         public PlanAcademicoItem? Plan
         {
@@ -80,20 +83,47 @@ namespace SistemaHorario.UI.ViewModels.PlanAcademico
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        public void Cargar(int idPlanAcademico, int numeroSemestre, bool modoEdicion)
+        public void Cargar(
+            int idPlanAcademico,
+            int idSemestrePlan,
+            int numeroSemestre,
+            bool modoEdicion)
         {
-            _ = CargarAsync(idPlanAcademico, numeroSemestre, modoEdicion);
+            _ = CargarAsync(idPlanAcademico, idSemestrePlan, numeroSemestre, modoEdicion);
         }
 
-        public async Task CargarAsync(int idPlanAcademico, int numeroSemestre, bool modoEdicion)
+        public async Task CargarAsync(
+            int idPlanAcademico,
+            int idSemestrePlan,
+            int numeroSemestre,
+            bool modoEdicion)
         {
+            _idPlanAcademico = idPlanAcademico;
+            _idSemestrePlan = idSemestrePlan;
+            _numeroSemestre = numeroSemestre;
             EstaEditando = modoEdicion;
+
             var resp = await _api.ObtenerPlanPorIdAsync(idPlanAcademico);
-            if (resp.Success && resp.Data != null)
+
+            if (!resp.Success || resp.Data == null)
             {
-                Plan = resp.Data;
-                Semestre = Plan.Semestres.FirstOrDefault(s => s.NumeroSemestre == numeroSemestre);
+                MensajeEstado = string.IsNullOrWhiteSpace(resp.Message)
+                    ? "No se pudo cargar el plan académico."
+                    : resp.Message;
+                await CargarMateriasDisponiblesAsync();
+                NotificarEncabezado();
+                return;
             }
+
+            Plan = resp.Data;
+            Semestre = Plan.Semestres.FirstOrDefault(s => s.IdSemestrePlan == idSemestrePlan)
+                ?? Plan.Semestres.FirstOrDefault(s => s.NumeroSemestre == numeroSemestre);
+
+            if (Semestre == null)
+            {
+                MensajeEstado = "No se encontró el semestre seleccionado en el plan.";
+            }
+
             await CargarMateriasDisponiblesAsync();
             NotificarEncabezado();
         }
@@ -103,53 +133,92 @@ namespace SistemaHorario.UI.ViewModels.PlanAcademico
             EstaEditando = true;
         }
 
-        public async Task AgregarMateriaSeleccionadaAsync()
+        public string MensajeEstado { get; private set; } = string.Empty;
+
+        public async Task<bool> AgregarMateriaSeleccionadaAsync()
         {
-            if (Semestre == null || MateriaSeleccionada == null) return;
+            MensajeEstado = string.Empty;
 
-            var resp = await _api.AgregarMateriaAsync(Semestre.IdSemestre, MateriaSeleccionada.IdMateria);
-            if (!resp.Success || resp.Data == null) return;
-
-            var nuevaMateria = new MateriaItem
+            if (Semestre == null)
             {
-                IdMateria = resp.Data.IdMateria,
-                IdMateriaPlan = resp.Data.IdMateriaPlan,
-                Codigo = resp.Data.Codigo,
-                Nombre = resp.Data.Nombre,
-                Creditos = resp.Data.Creditos,
-                IntensidadHorariaSemanal = resp.Data.IntensidadHorariaSemanal,
-                Activa = true
-            };
+                MensajeEstado = "No se encontró el semestre seleccionado.";
+                return false;
+            }
 
-            Semestre.AgregarMateria(nuevaMateria);
+            if (MateriaSeleccionada == null)
+            {
+                MensajeEstado = "Debe seleccionar una materia.";
+                return false;
+            }
+
+            var resp = await _api.AgregarMateriaAsync(
+                Semestre.IdSemestrePlan,
+                MateriaSeleccionada.IdMateria
+            );
+
+            if (!resp.Success)
+            {
+                MensajeEstado = resp.Message;
+                return false;
+            }
+
+            if (resp.Data == null)
+            {
+                MensajeEstado = "El backend no devolvió la materia agregada.";
+                return false;
+            }
+
             MarcarPlanComoModificado();
             MateriaSeleccionada = null;
-            await CargarMateriasDisponiblesAsync();
+
+            await RefrescarSemestreDesdeBackendAsync();
             NotificarEncabezado();
+
+            return true;
         }
 
-        public async Task QuitarMateriaAsync(int idMateria)
+        public async Task<bool> QuitarMateriaAsync(int idMateria)
         {
-            if (Semestre == null) return;
+            MensajeEstado = string.Empty;
+
+            if (Semestre == null)
+            {
+                MensajeEstado = "No se encontró el semestre seleccionado.";
+                return false;
+            }
 
             var materia = Semestre.Materias.FirstOrDefault(m => m.IdMateria == idMateria);
-            if (materia == null) return;
+            if (materia == null)
+            {
+                MensajeEstado = "No se encontró la materia seleccionada en el semestre.";
+                return false;
+            }
 
             var resp = await _api.EliminarMateriaAsync(materia.IdMateriaPlan);
-            if (!resp.Success) return;
+            if (!resp.Success)
+            {
+                MensajeEstado = resp.Message;
+                return false;
+            }
 
-            Semestre.QuitarMateria(idMateria);
             MarcarPlanComoModificado();
-            await CargarMateriasDisponiblesAsync();
+            await RefrescarSemestreDesdeBackendAsync();
             NotificarEncabezado();
+            return true;
         }
 
-        public async Task CargarMateriasDisponiblesAsync()
+        public async Task<bool> CargarMateriasDisponiblesAsync()
         {
             MateriasDisponibles.Clear();
 
             var resp = await _materiasApi.ObtenerMateriasAsync();
-            if (!resp.Success || resp.Data == null) return;
+            if (!resp.Success || resp.Data == null)
+            {
+                MensajeEstado = string.IsNullOrWhiteSpace(resp.Message)
+                    ? "No se pudieron cargar las materias disponibles."
+                    : resp.Message;
+                return false;
+            }
 
             var idsAsignados = Semestre?.Materias
                 .Select(m => m.IdMateria)
@@ -159,6 +228,7 @@ namespace SistemaHorario.UI.ViewModels.PlanAcademico
                 MateriasDisponibles.Add(m);
 
             OnPropertyChanged(nameof(MateriasDisponibles));
+            return true;
         }
 
         public void RefrescarResumen()
@@ -171,6 +241,20 @@ namespace SistemaHorario.UI.ViewModels.PlanAcademico
             if (Plan == null) return;
             Plan.TieneCambiosPendientes = true;
             Plan.RecalcularTotalesDesdeSemestres();
+        }
+
+        private async Task RefrescarSemestreDesdeBackendAsync()
+        {
+            if (_idPlanAcademico <= 0)
+                return;
+
+            await CargarAsync(
+                _idPlanAcademico,
+                _idSemestrePlan,
+                _numeroSemestre,
+                EstaEditando);
+
+            MarcarPlanComoModificado();
         }
 
         private void NotificarEncabezado()

@@ -46,7 +46,18 @@ namespace SistemaHorario.UI.Views.Horarios
             await _viewModel.CargarGruposAsync();
 
             if (_viewModel.Grupos.Count > 0)
+            {
                 CmbGrupo.SelectedIndex = 0;
+                return;
+            }
+
+            MessageBox.Show(
+                string.IsNullOrWhiteSpace(_viewModel.MensajeEstado)
+                    ? "No hay grupos activos disponibles para generar horarios."
+                    : _viewModel.MensajeEstado,
+                "Generar horario",
+                MessageBoxButton.OK,
+                MessageBoxImage.Warning);
         }
 
         /// <summary>
@@ -90,6 +101,25 @@ namespace SistemaHorario.UI.Views.Horarios
                     MessageBoxButton.OK,
                     MessageBoxImage.Error);
                 return;
+            }
+
+            if (resp.Data == null || resp.Data.Generados <= 0)
+            {
+                MessageBox.Show(
+                    "No fue posible generar bloques de horario con los datos actuales.",
+                    "Generar horario",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+                return;
+            }
+
+            if (resp.Data.Advertencias.Count > 0)
+            {
+                MessageBox.Show(
+                    string.Join("\n", resp.Data.Advertencias),
+                    "Horario generado con advertencias",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
             }
 
             HorarioItem horarioGenerado = new()

@@ -36,12 +36,11 @@ public class PerfilApiService
         return new ApiResponse<PerfilUsuarioItem> { Success = true, Data = perfil };
     }
 
-    public async Task<ApiResponse<string>> ActualizarPerfilAsync(string nombre, string correo, string celular)
+    public async Task<ApiResponse<string>> ActualizarPerfilAsync(string nombre, string correo)
         => await _api.PutAsync("usuarios/perfil", new
         {
             NombreCompleto = nombre,
             CorreoInstitucional = correo,
-            Celular = celular
         });
 
     public async Task<ApiResponse<string>> CambiarContrasenaAsync(string actual, string nueva)

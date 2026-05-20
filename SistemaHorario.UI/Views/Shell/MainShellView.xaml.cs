@@ -8,6 +8,9 @@ using SistemaHorario.UI.Views.Materias;
 using SistemaHorario.UI.Views.Perfil;
 using SistemaHorario.UI.Views.PlanAcademico;
 using SistemaHorario.UI.Views.Reportes;
+using SistemaHorario.UI.Services;
+using SistemaHorario.UI.State;
+using SistemaHorario.UI.Views.Auth;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -164,21 +167,20 @@ namespace SistemaHorario.UI.Views.Shell
         /// Evento ejecutado cuando el usuario selecciona
         /// la opción "Cerrar sesión".
         ///
-        /// Por ahora muestra un mensaje temporal.
-        /// Más adelante deberá limpiar sesión y volver al LoginView.
+        /// Limpia la sesión y vuelve al LoginView.
         /// </summary>
         private void UserMenuView_CerrarSesionSolicitado(
             object? sender,
             System.EventArgs e)
         {
             userMenuView.Ocultar();
+            UsuarioSesion.CerrarSesion();
+            ApiClient.Token = null;
 
-            MessageBox.Show(
-                "Cerrar sesión pendiente de conectar con LoginView.",
-                "Cerrar sesión",
-                MessageBoxButton.OK,
-                MessageBoxImage.Information
-            );
+            Window? ventanaPrincipal = Window.GetWindow(this);
+
+            if (ventanaPrincipal != null)
+                ventanaPrincipal.Content = new LoginView();
         }
 
         /// <summary>

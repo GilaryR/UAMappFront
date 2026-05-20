@@ -29,6 +29,7 @@ namespace SistemaHorario.UI.ViewModels.GruposAcademicos
         }
 
         public ObservableCollection<string> MateriasDisponibles { get; private set; } = new();
+        public ObservableCollection<PlanAcademicoOption> PlanesDisponibles { get; private set; } = new();
         public string CodigoGrupoFiltro { get => _codigoGrupoFiltro; set { _codigoGrupoFiltro = value; OnPropertyChanged(); } }
         public string EstadoFiltro { get => _estadoFiltro; set { _estadoFiltro = value; OnPropertyChanged(); } }
         public string JornadaFiltro { get => _jornadaFiltro; set { _jornadaFiltro = value; OnPropertyChanged(); } }
@@ -47,6 +48,17 @@ namespace SistemaHorario.UI.ViewModels.GruposAcademicos
             if (resp.Success && resp.Data != null)
                 _todosLosGrupos = new ObservableCollection<GrupoAcademicoItem>(resp.Data);
             else MensajeEstado = resp.Message;
+
+            var respPlanes = await _api.ObtenerPlanesParaGrupoAsync();
+            if (respPlanes.Success && respPlanes.Data != null)
+            {
+                PlanesDisponibles = new ObservableCollection<PlanAcademicoOption>(respPlanes.Data);
+                OnPropertyChanged(nameof(PlanesDisponibles));
+            }
+            else
+            {
+                MensajeEstado = respPlanes.Message;
+            }
 
             var matApi = new MateriasApiService();
             var respM = await matApi.ObtenerMateriasAsync();

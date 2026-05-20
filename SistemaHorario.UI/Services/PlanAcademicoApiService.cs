@@ -102,7 +102,7 @@ public class PlanAcademicoApiService
         Semestres = new ObservableCollection<SemestrePlanItem>(
             (p.Semestres ?? new()).Select(s => new SemestrePlanItem
             {
-                IdSemestre = s.IdSemestrePlan,
+                IdSemestrePlan = s.IdSemestrePlan,
                 NumeroSemestre = s.NumeroSemestre,
                 Materias = new ObservableCollection<MateriaItem>(
                     (s.Materias ?? new()).Select(m => new MateriaItem

@@ -11,6 +11,7 @@ namespace SistemaHorario.UI.Dialogs.PlanAcademico
 
         public DetalleSemestrePlanDialog(
             int idPlanAcademico,
+            int idSemestrePlan,
             int numeroSemestre,
             bool modoEdicion)
         {
@@ -20,6 +21,7 @@ namespace SistemaHorario.UI.Dialogs.PlanAcademico
 
             viewModel.Cargar(
                 idPlanAcademico,
+                idSemestrePlan,
                 numeroSemestre,
                 modoEdicion
             );
@@ -32,7 +34,17 @@ namespace SistemaHorario.UI.Dialogs.PlanAcademico
 
         private async void AgregarMateria_Click(object sender, RoutedEventArgs e)
         {
-            await viewModel.AgregarMateriaSeleccionadaAsync();
+            bool agregado = await viewModel.AgregarMateriaSeleccionadaAsync();
+
+            if (!agregado)
+            {
+                MessageBox.Show(
+                    "No se pudo agregar la materia: " + viewModel.MensajeEstado,
+                    "Error",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error
+                );
+            }
         }
 
         private async void QuitarMateria_Click(object sender, RoutedEventArgs e)
@@ -43,7 +55,17 @@ namespace SistemaHorario.UI.Dialogs.PlanAcademico
                 return;
             }
 
-            await viewModel.QuitarMateriaAsync(materia.IdMateria);
+            bool eliminado = await viewModel.QuitarMateriaAsync(materia.IdMateria);
+
+            if (!eliminado)
+            {
+                MessageBox.Show(
+                    "No se pudo quitar la materia: " + viewModel.MensajeEstado,
+                    "Error",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error
+                );
+            }
         }
 
         private void GuardarCambios_Click(object sender, RoutedEventArgs e)

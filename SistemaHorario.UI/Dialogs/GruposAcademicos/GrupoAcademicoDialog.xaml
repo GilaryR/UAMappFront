@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Grupo academico"
         Width="690"
-        Height="680"
+        Height="700"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize"
         Background="#EEF0F2">
@@ -73,8 +73,20 @@
                     </StackPanel>
 
                     <StackPanel Grid.Row="6" Grid.Column="0">
-                        <TextBlock Text="Número de semestre *" FontWeight="Bold" Margin="0,0,0,8"/>
-                        <TextBox x:Name="TxtSemestre" Height="34" FontSize="15" Padding="8,0" VerticalContentAlignment="Center"/>
+                        <TextBlock Text="Plan académico *" FontWeight="Bold" Margin="0,0,0,8"/>
+                        <ComboBox x:Name="CmbPlanAcademico"
+                                  Height="36"
+                                  FontSize="15"
+                                  DisplayMemberPath="DisplayTexto"
+                                  SelectionChanged="CmbPlanAcademico_SelectionChanged"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="6" Grid.Column="2">
+                        <TextBlock Text="Semestre del plan *" FontWeight="Bold" Margin="0,0,0,8"/>
+                        <ComboBox x:Name="CmbSemestre"
+                                  Height="36"
+                                  FontSize="15"
+                                  SelectionChanged="CmbSemestre_SelectionChanged"/>
                     </StackPanel>
                 </Grid>
 

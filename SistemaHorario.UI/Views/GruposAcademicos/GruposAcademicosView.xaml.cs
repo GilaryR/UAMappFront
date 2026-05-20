@@ -38,7 +38,13 @@ namespace SistemaHorario.UI.Views.GruposAcademicos
 
         private async void NuevoGrupo_Click(object sender, RoutedEventArgs e)
         {
-            GrupoAcademicoDialog dialog = new(ModoGrupoAcademicoDialog.Crear, null, _viewModel.MateriasDisponibles)
+            await _viewModel.CargarDatosAsync();
+
+            GrupoAcademicoDialog dialog = new(
+                ModoGrupoAcademicoDialog.Crear,
+                null,
+                _viewModel.MateriasDisponibles,
+                _viewModel.PlanesDisponibles)
             { Owner = Window.GetWindow(this) };
             if (dialog.ShowDialog() != true) return;
             bool ok = await _viewModel.AgregarGrupoAsync(dialog.GrupoResultado);
@@ -51,11 +57,16 @@ namespace SistemaHorario.UI.Views.GruposAcademicos
             MostrarExito("Grupo academico creado");
         }
 
-        private void VerGrupo_Click(object sender, RoutedEventArgs e)
+        private async void VerGrupo_Click(object sender, RoutedEventArgs e)
         {
             GrupoAcademicoItem? grupo = ObtenerGrupoDesdeBoton(sender);
             if (grupo == null) return;
-            GrupoAcademicoDialog dialog = new(ModoGrupoAcademicoDialog.Ver, grupo, _viewModel.MateriasDisponibles)
+            await _viewModel.CargarDatosAsync();
+            GrupoAcademicoDialog dialog = new(
+                ModoGrupoAcademicoDialog.Ver,
+                grupo,
+                _viewModel.MateriasDisponibles,
+                _viewModel.PlanesDisponibles)
             { Owner = Window.GetWindow(this) };
             dialog.ShowDialog();
         }
@@ -64,7 +75,12 @@ namespace SistemaHorario.UI.Views.GruposAcademicos
         {
             GrupoAcademicoItem? grupo = ObtenerGrupoDesdeBoton(sender);
             if (grupo == null) return;
-            GrupoAcademicoDialog dialog = new(ModoGrupoAcademicoDialog.Editar, grupo, _viewModel.MateriasDisponibles)
+            await _viewModel.CargarDatosAsync();
+            GrupoAcademicoDialog dialog = new(
+                ModoGrupoAcademicoDialog.Editar,
+                grupo,
+                _viewModel.MateriasDisponibles,
+                _viewModel.PlanesDisponibles)
             { Owner = Window.GetWindow(this) };
             if (dialog.ShowDialog() != true) return;
             bool ok = await _viewModel.ActualizarGrupoAsync(dialog.GrupoResultado);

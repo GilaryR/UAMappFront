@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using SistemaHorario.UI.Views.Auth;
 using SistemaHorario.UI.Dialogs.Shared;
+using SistemaHorario.UI.State;
 
 
 namespace SistemaHorario.UI.Views.Shell
@@ -47,12 +48,9 @@ namespace SistemaHorario.UI.Views.Shell
 
             Visibility = Visibility.Collapsed;
 
-            // TODO:
-            // Reemplazar estos datos por la información real
-            // del usuario autenticado.
             ConfigurarUsuario(
-                "Administrador",
-                "administrador@autonoma.edu.co"
+                UsuarioSesion.NombreCompleto,
+                UsuarioSesion.CorreoInstitucional
             );
         }
 
@@ -168,20 +166,11 @@ namespace SistemaHorario.UI.Views.Shell
         }
 
         /// <summary>
-        /// Cierra la sesión visual actual y retorna al LoginView.
-        ///
-        /// TODO:
-        /// Cuando exista autenticación real, limpiar aquí UsuarioSesion,
-        /// token JWT y cualquier dato persistido.
+        /// Solicita al contenedor principal cerrar la sesión actual.
         /// </summary>
         private void CerrarSesion()
         {
-            Window? ventanaPrincipal = Window.GetWindow(this);
-
-            if (ventanaPrincipal == null)
-                return;
-
-            ventanaPrincipal.Content = new LoginView();
+            CerrarSesionSolicitado?.Invoke(this, EventArgs.Empty);
         }
     }
 }

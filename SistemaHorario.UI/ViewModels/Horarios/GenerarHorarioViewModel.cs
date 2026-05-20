@@ -13,6 +13,8 @@ namespace SistemaHorario.UI.ViewModels.Horarios
 
         public GenerarHorarioRequestUI Request { get; set; }
 
+        public string MensajeEstado { get; private set; } = string.Empty;
+
         public GenerarHorarioViewModel()
         {
             Request = new GenerarHorarioRequestUI();
@@ -23,11 +25,16 @@ namespace SistemaHorario.UI.ViewModels.Horarios
         {
             var resp = await _gruposApi.ObtenerGruposParaHorarioAsync();
             Grupos.Clear();
+            MensajeEstado = string.Empty;
 
             if (resp.Success && resp.Data != null)
             {
                 foreach (var grupo in resp.Data)
                     Grupos.Add(grupo);
+            }
+            else
+            {
+                MensajeEstado = resp.Message;
             }
         }
     }

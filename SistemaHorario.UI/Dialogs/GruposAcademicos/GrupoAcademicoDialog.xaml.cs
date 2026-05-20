@@ -1,5 +1,9 @@
-﻿using SistemaHorario.UI.Models.UI;
+using SistemaHorario.UI.Models.UI;
+using SistemaHorario.UI.Services;
 using System.Collections.ObjectModel;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -15,20 +19,26 @@ namespace SistemaHorario.UI.Dialogs.GruposAcademicos
     public partial class GrupoAcademicoDialog : Window
     {
         private readonly ModoGrupoAcademicoDialog _modo;
+        private readonly ObservableCollection<string> _materiasBase;
+        private readonly ObservableCollection<PlanAcademicoOption> _planesDisponibles;
 
         public GrupoAcademicoItem GrupoResultado { get; private set; }
 
         public GrupoAcademicoDialog(
             ModoGrupoAcademicoDialog modo,
             GrupoAcademicoItem? grupo,
-            ObservableCollection<string> materiasDisponibles)
+            ObservableCollection<string> materiasDisponibles,
+            ObservableCollection<PlanAcademicoOption> planesDisponibles)
         {
             InitializeComponent();
 
             _modo = modo;
+            _materiasBase = materiasDisponibles;
+            _planesDisponibles = planesDisponibles;
             GrupoResultado = grupo?.Clonar() ?? new GrupoAcademicoItem();
 
-            CmbMateria.ItemsSource = materiasDisponibles;
+            CmbPlanAcademico.ItemsSource = _planesDisponibles;
+            CmbMateria.ItemsSource = _materiasBase;
 
             ConfigurarModo();
             CargarDatos();
@@ -56,11 +66,12 @@ namespace SistemaHorario.UI.Dialogs.GruposAcademicos
             TxtNombreGrupo.IsReadOnly = true;
             TxtCodigo.IsReadOnly = true;
             TxtPlazas.IsReadOnly = true;
-            TxtSemestre.IsReadOnly = true;
 
             CmbJornada.IsEnabled = false;
             CmbMateria.IsEnabled = false;
             CmbEstado.IsEnabled = false;
+            CmbPlanAcademico.IsEnabled = false;
+            CmbSemestre.IsEnabled = false;
 
             ChkLunes.IsEnabled = false;
             ChkMartes.IsEnabled = false;
@@ -79,14 +90,18 @@ namespace SistemaHorario.UI.Dialogs.GruposAcademicos
                 ? string.Empty
                 : GrupoResultado.PlazasDisponibles.ToString();
 
-            TxtSemestre.Text = GrupoResultado.NumeroSemestre == 0
-                ? "1"
-                : GrupoResultado.NumeroSemestre.ToString();
-
             SeleccionarComboPorTexto(CmbJornada, GrupoResultado.Jornada);
             SeleccionarComboPorTexto(CmbEstado, GrupoResultado.Estado);
 
-            CmbMateria.SelectedItem = GrupoResultado.Materia;
+            SeleccionarPlanAcademico();
+            ActualizarSemestresDisponibles();
+            SeleccionarSemestre();
+            ActualizarMateriasDisponibles();
+
+            if (!string.IsNullOrWhiteSpace(GrupoResultado.Materia))
+            {
+                CmbMateria.SelectedItem = GrupoResultado.Materia;
+            }
 
             ChkLunes.IsChecked = GrupoResultado.Dias.Contains("Lunes");
             ChkMartes.IsChecked = GrupoResultado.Dias.Contains("Martes");
@@ -112,10 +127,13 @@ namespace SistemaHorario.UI.Dialogs.GruposAcademicos
             GrupoResultado.Materia = CmbMateria.SelectedItem?.ToString() ?? string.Empty;
             GrupoResultado.Estado = ObtenerTextoCombo(CmbEstado);
             GrupoResultado.PlazasDisponibles = int.Parse(TxtPlazas.Text.Trim());
-            GrupoResultado.NumeroSemestre = int.Parse(TxtSemestre.Text.Trim());
+            GrupoResultado.IdPlanAcademico =
+                (CmbPlanAcademico.SelectedItem as PlanAcademicoOption)?.IdPlanAcademico ?? 0;
+            GrupoResultado.NumeroSemestre =
+                CmbSemestre.SelectedItem is int semestre ? semestre : 0;
             GrupoResultado.Dias = ObtenerDiasSeleccionados();
 
-            GrupoResultado.Tipo = GrupoResultado.Jornada == "Nocturno"
+            GrupoResultado.Tipo = GrupoResultado.Jornada == "Nocturna"
                 ? "TAPSI"
                 : "Regular";
 
@@ -148,6 +166,12 @@ namespace SistemaHorario.UI.Dialogs.GruposAcademicos
                 return false;
             }
 
+            if (CmbPlanAcademico.SelectedItem is not PlanAcademicoOption)
+            {
+                MessageBox.Show("⚠ Selecciona el plan académico del grupo.");
+                return false;
+            }
+
             if (CmbEstado.SelectedItem == null)
             {
                 MessageBox.Show("⚠ Selecciona el estado.");
@@ -160,9 +184,9 @@ namespace SistemaHorario.UI.Dialogs.GruposAcademicos
                 return false;
             }
 
-            if (!int.TryParse(TxtSemestre.Text.Trim(), out int semestre) || semestre <= 0)
+            if (CmbSemestre.SelectedItem is not int semestre || semestre <= 0)
             {
-                MessageBox.Show("⚠ Ingresa un número de semestre válido (ej: 1, 2, 3...).");
+                MessageBox.Show("⚠ Selecciona un semestre válido del plan académico.");
                 return false;
             }
 
@@ -173,6 +197,109 @@ namespace SistemaHorario.UI.Dialogs.GruposAcademicos
             }
 
             return true;
+        }
+
+        private void CmbPlanAcademico_SelectionChanged(
+            object sender,
+            SelectionChangedEventArgs e)
+        {
+            ActualizarSemestresDisponibles();
+            ActualizarMateriasDisponibles();
+        }
+
+        private void CmbSemestre_SelectionChanged(
+            object sender,
+            SelectionChangedEventArgs e)
+        {
+            ActualizarMateriasDisponibles();
+        }
+
+        private void SeleccionarPlanAcademico()
+        {
+            PlanAcademicoOption? plan = _planesDisponibles.FirstOrDefault(
+                p => p.IdPlanAcademico == GrupoResultado.IdPlanAcademico);
+
+            CmbPlanAcademico.SelectedItem = plan ?? _planesDisponibles.FirstOrDefault();
+        }
+
+        private void ActualizarSemestresDisponibles()
+        {
+            int? semestreActual = CmbSemestre.SelectedItem as int?;
+            PlanAcademicoOption? plan = CmbPlanAcademico.SelectedItem as PlanAcademicoOption;
+            CmbSemestre.ItemsSource = plan?.Semestres ?? new List<int>();
+
+            if (plan == null || plan.Semestres.Count == 0)
+            {
+                CmbSemestre.SelectedItem = null;
+                return;
+            }
+
+            if (GrupoResultado.NumeroSemestre > 0 &&
+                plan.Semestres.Contains(GrupoResultado.NumeroSemestre))
+            {
+                CmbSemestre.SelectedItem = GrupoResultado.NumeroSemestre;
+                return;
+            }
+
+            if (semestreActual.HasValue && plan.Semestres.Contains(semestreActual.Value))
+            {
+                CmbSemestre.SelectedItem = semestreActual.Value;
+                return;
+            }
+
+            CmbSemestre.SelectedItem = plan.Semestres.First();
+        }
+
+        private void SeleccionarSemestre()
+        {
+            if (CmbPlanAcademico.SelectedItem is not PlanAcademicoOption plan)
+                return;
+
+            if (GrupoResultado.NumeroSemestre > 0 &&
+                plan.Semestres.Contains(GrupoResultado.NumeroSemestre))
+            {
+                CmbSemestre.SelectedItem = GrupoResultado.NumeroSemestre;
+            }
+        }
+
+        private void ActualizarMateriasDisponibles()
+        {
+            string? materiaActual = CmbMateria.SelectedItem?.ToString();
+            PlanAcademicoOption? plan = CmbPlanAcademico.SelectedItem as PlanAcademicoOption;
+            int? semestre = CmbSemestre.SelectedItem as int?;
+
+            List<string> materias = new();
+            if (plan != null &&
+                semestre.HasValue &&
+                plan.MateriasPorSemestre.TryGetValue(semestre.Value, out List<string>? materiasPlan))
+            {
+                materias = materiasPlan;
+            }
+
+            if (materias.Count == 0)
+            {
+                materias = _materiasBase.ToList();
+            }
+
+            CmbMateria.ItemsSource = materias;
+
+            if (!string.IsNullOrWhiteSpace(materiaActual) &&
+                materias.Contains(materiaActual, StringComparer.OrdinalIgnoreCase))
+            {
+                CmbMateria.SelectedItem = materias.First(
+                    m => string.Equals(m, materiaActual, StringComparison.OrdinalIgnoreCase));
+                return;
+            }
+
+            if (!string.IsNullOrWhiteSpace(GrupoResultado.Materia) &&
+                materias.Contains(GrupoResultado.Materia, StringComparer.OrdinalIgnoreCase))
+            {
+                CmbMateria.SelectedItem = materias.First(
+                    m => string.Equals(m, GrupoResultado.Materia, StringComparison.OrdinalIgnoreCase));
+                return;
+            }
+
+            CmbMateria.SelectedItem = materias.FirstOrDefault();
         }
 
         private ObservableCollection<string> ObtenerDiasSeleccionados()
