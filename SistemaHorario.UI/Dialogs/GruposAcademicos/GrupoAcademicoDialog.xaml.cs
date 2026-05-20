@@ -56,6 +56,7 @@ namespace SistemaHorario.UI.Dialogs.GruposAcademicos
             TxtNombreGrupo.IsReadOnly = true;
             TxtCodigo.IsReadOnly = true;
             TxtPlazas.IsReadOnly = true;
+            TxtSemestre.IsReadOnly = true;
 
             CmbJornada.IsEnabled = false;
             CmbMateria.IsEnabled = false;
@@ -77,6 +78,10 @@ namespace SistemaHorario.UI.Dialogs.GruposAcademicos
             TxtPlazas.Text = GrupoResultado.PlazasDisponibles == 0
                 ? string.Empty
                 : GrupoResultado.PlazasDisponibles.ToString();
+
+            TxtSemestre.Text = GrupoResultado.NumeroSemestre == 0
+                ? "1"
+                : GrupoResultado.NumeroSemestre.ToString();
 
             SeleccionarComboPorTexto(CmbJornada, GrupoResultado.Jornada);
             SeleccionarComboPorTexto(CmbEstado, GrupoResultado.Estado);
@@ -107,6 +112,7 @@ namespace SistemaHorario.UI.Dialogs.GruposAcademicos
             GrupoResultado.Materia = CmbMateria.SelectedItem?.ToString() ?? string.Empty;
             GrupoResultado.Estado = ObtenerTextoCombo(CmbEstado);
             GrupoResultado.PlazasDisponibles = int.Parse(TxtPlazas.Text.Trim());
+            GrupoResultado.NumeroSemestre = int.Parse(TxtSemestre.Text.Trim());
             GrupoResultado.Dias = ObtenerDiasSeleccionados();
 
             GrupoResultado.Tipo = GrupoResultado.Jornada == "Nocturno"
@@ -151,6 +157,12 @@ namespace SistemaHorario.UI.Dialogs.GruposAcademicos
             if (!int.TryParse(TxtPlazas.Text.Trim(), out int plazas) || plazas <= 0)
             {
                 MessageBox.Show("⚠ Ingresa una cantidad válida de plazas.");
+                return false;
+            }
+
+            if (!int.TryParse(TxtSemestre.Text.Trim(), out int semestre) || semestre <= 0)
+            {
+                MessageBox.Show("⚠ Ingresa un número de semestre válido (ej: 1, 2, 3...).");
                 return false;
             }
 

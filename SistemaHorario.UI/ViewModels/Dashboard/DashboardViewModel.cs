@@ -1,6 +1,7 @@
 ﻿using SistemaHorario.UI.Services;
 using SistemaHorario.UI.ViewModels.Base;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Windows.Media;
 using System.Threading.Tasks;
 
@@ -29,6 +30,7 @@ namespace SistemaHorario.UI.ViewModels.Dashboard
 	public class DashboardViewModel : ViewModelBase
 	{
 	private readonly DashboardApiService _api = new();
+	private readonly HorariosApiService _horariosApi = new();
 
 	private string _totalMaterias = "50";
 	private string _totalPlanesAcademicos = "4";
@@ -113,14 +115,57 @@ namespace SistemaHorario.UI.ViewModels.Dashboard
 		if (!resp.Success || resp.Data == null)
 		{
 			MensajeEstado = resp.Message;
-			return;
+		}
+		else
+		{
+			TotalMaterias = resp.Data.TotalMaterias.ToString();
+			TotalPlanesAcademicos = resp.Data.TotalPlanesAcademicos.ToString();
+			TotalUsuarios = resp.Data.TotalUsuarios.ToString();
+			TotalGrupos = resp.Data.TotalGrupos.ToString();
 		}
 
-		TotalMaterias = resp.Data.TotalMaterias.ToString();
-		TotalPlanesAcademicos = resp.Data.TotalPlanesAcademicos.ToString();
-		TotalUsuarios = resp.Data.TotalUsuarios.ToString();
-		TotalGrupos = resp.Data.TotalGrupos.ToString();
+		await CargarUltimosHorariosAsync();
 	}
+
+	private async Task CargarUltimosHorariosAsync()
+	{
+		var resp = await _horariosApi.ObtenerHorariosAsync();
+		if (!resp.Success || resp.Data == null || resp.Data.Count == 0)
+			return;
+
+		UltimosHorarios.Clear();
+
+		foreach (var h in resp.Data.Take(5))
+		{
+			UltimosHorarios.Add(new HorarioGeneradoItem
+			{
+				Nombre = h.Nombre,
+				Fecha = h.FechaGeneracion,
+				Jornada = h.Jornada,
+				Grupos = h.Grupo,
+				Semestre = "-",
+				Estado = h.Estado,
+				JornadaFondo = ObtenerFondoJornada(h.Jornada),
+				JornadaColorTexto = ObtenerTextoJornada(h.Jornada)
+			});
+		}
+	}
+
+	private static SolidColorBrush ObtenerFondoJornada(string jornada) =>
+		jornada.ToLower() switch
+		{
+			"nocturna" => new SolidColorBrush(Color.FromRgb(221, 206, 255)),
+			"diurna"   => new SolidColorBrush(Color.FromRgb(191, 225, 247)),
+			_          => new SolidColorBrush(Color.FromRgb(220, 220, 220))
+		};
+
+	private static SolidColorBrush ObtenerTextoJornada(string jornada) =>
+		jornada.ToLower() switch
+		{
+			"nocturna" => new SolidColorBrush(Color.FromRgb(102, 93, 214)),
+			"diurna"   => new SolidColorBrush(Color.FromRgb(0, 106, 166)),
+			_          => new SolidColorBrush(Color.FromRgb(80, 80, 80))
+		};
 
 		/// <summary>
 		/// Carga datos temporales únicamente para validar UI.

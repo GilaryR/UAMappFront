@@ -73,6 +73,7 @@ public class HorariosApiService
         IdHorario = dto.IdHorario,
         IdMateria = dto.IdMateria,
         IdDocente = dto.IdDocente,
+        IdFranjaHoraria = dto.IdFranjaHoraria,
         Dia = dto.DiaSemana,
         HoraInicio = FormatearHora(dto.HoraInicio),
         HoraFinal = FormatearHora(dto.HoraFin),
@@ -97,4 +98,43 @@ public class HorariosApiService
 
     private static string GenerarColor(string materia)
         => _colores[Math.Abs(materia.GetHashCode()) % _colores.Length];
+
+    public async Task<Dictionary<string, int>> ObtenerFranjasLookupAsync()
+    {
+        var resp = await _api.GetAsync<BackendFranjasResponse>("franjas-horarias");
+        var lookup = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+        if (resp.Success && resp.Data?.Data != null)
+        {
+            foreach (var f in resp.Data.Data)
+            {
+                string horaKey = TimeSpan.TryParse(f.HoraInicio, out var ts)
+                    ? FormatearHora(ts)
+                    : f.HoraInicio;
+                lookup[$"{f.DiaSemana}_{horaKey}"] = f.IdFranjaHoraria;
+            }
+        }
+        return lookup;
+    }
+
+    public async Task<ApiResponse<string>> ActualizarBloqueAsync(
+        int idHorario, int idMateria, int idDocente, int idFranjaHoraria)
+        => await _api.PutAsync($"horarios/{idHorario}/asignatura", new
+        {
+            IdMateria = idMateria,
+            IdDocente = idDocente,
+            IdFranjaHoraria = idFranjaHoraria,
+            Observacion = string.Empty
+        });
+
+    private class FranjaSimpleDto
+    {
+        public int IdFranjaHoraria { get; set; }
+        public string DiaSemana { get; set; } = string.Empty;
+        public string HoraInicio { get; set; } = string.Empty;
+    }
+
+    private class BackendFranjasResponse
+    {
+        public List<FranjaSimpleDto>? Data { get; set; }
+    }
 }

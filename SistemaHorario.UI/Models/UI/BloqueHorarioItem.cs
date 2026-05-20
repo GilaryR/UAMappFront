@@ -17,6 +17,8 @@
 
         public int IdDocente { get; set; }
 
+        public int IdFranjaHoraria { get; set; }
+
         public string Dia { get; set; } = string.Empty;
 
         public string HoraInicio { get; set; } = string.Empty;

@@ -12,6 +12,7 @@ public class PerfilBackendDto
     public int IdRol { get; set; }
     public string Rol { get; set; } = string.Empty;
     public string Estado { get; set; } = string.Empty;
+    public string Celular { get; set; } = string.Empty;
 }
 
 public class PerfilApiService
@@ -29,17 +30,18 @@ public class PerfilApiService
             NombreCompleto = resp.Data.NombreCompleto,
             CorreoInstitucional = resp.Data.CorreoInstitucional,
             Rol = resp.Data.Rol,
-            Telefono = string.Empty,
+            Telefono = resp.Data.Celular,
             FacultadPrograma = "Universidad Autonoma de Manizales"
         };
         return new ApiResponse<PerfilUsuarioItem> { Success = true, Data = perfil };
     }
 
-    public async Task<ApiResponse<string>> ActualizarPerfilAsync(string nombre, string correo)
+    public async Task<ApiResponse<string>> ActualizarPerfilAsync(string nombre, string correo, string celular)
         => await _api.PutAsync("usuarios/perfil", new
         {
             NombreCompleto = nombre,
-            CorreoInstitucional = correo
+            CorreoInstitucional = correo,
+            Celular = celular
         });
 
     public async Task<ApiResponse<string>> CambiarContrasenaAsync(string actual, string nueva)

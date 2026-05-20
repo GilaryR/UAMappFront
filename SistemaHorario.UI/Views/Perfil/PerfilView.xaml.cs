@@ -59,8 +59,14 @@ namespace SistemaHorario.UI.Views.Perfil
                 dialog.PerfilResultado.Rol,
                 dialog.PerfilResultado.FacultadPrograma);
             if (!ok)
-                MessageBox.Show("Error: " + _viewModel.MensajeEstado, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            {
+                MessageBox.Show("Error al guardar: " + _viewModel.MensajeEstado, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+            await _viewModel.CargarPerfilAsync();
             CargarDatos();
+            MensajeExitoDialog exito = new("Perfil actualizado correctamente") { Owner = Window.GetWindow(this) };
+            exito.ShowDialog();
         }
 
         private async void BtnCambiarContrasena_Click(object sender, RoutedEventArgs e)
