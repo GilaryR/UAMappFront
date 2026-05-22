@@ -1,18 +1,62 @@
-using SistemaHorarios.Application.Common;
+﻿using SistemaHorarios.Application.Common;
+using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.Text.Json;
 
 namespace SistemaHorario.UI.Services;
 
 public class ApiClient
 {
+    private const string BaseUrlPorDefecto = "http://localhost:5023/api/";
+
     private static readonly HttpClient _http = new()
     {
-        BaseAddress = new Uri("http://localhost:5023/api/")
+        BaseAddress = new Uri(ObtenerBaseUrl())
     };
 
     public static string? Token { get; set; }
+
+    private static string ObtenerBaseUrl()
+    {
+        var rutaConfiguracion =
+            Path.Combine(AppContext.BaseDirectory, "appsettings.json");
+
+        if (!File.Exists(rutaConfiguracion))
+        {
+            return BaseUrlPorDefecto;
+        }
+
+        try
+        {
+            var contenido = File.ReadAllText(rutaConfiguracion);
+            using var documento = JsonDocument.Parse(contenido);
+
+            if (!documento.RootElement.TryGetProperty("ApiSettings", out JsonElement apiSettings))
+            {
+                return BaseUrlPorDefecto;
+            }
+
+            if (!apiSettings.TryGetProperty("BaseUrl", out JsonElement baseUrlElemento))
+            {
+                return BaseUrlPorDefecto;
+            }
+
+            var baseUrl = baseUrlElemento.GetString();
+
+            if (string.IsNullOrWhiteSpace(baseUrl))
+            {
+                return BaseUrlPorDefecto;
+            }
+
+            return baseUrl.EndsWith('/') ? baseUrl : baseUrl + "/";
+        }
+        catch
+        {
+            return BaseUrlPorDefecto;
+        }
+    }
 
     private void AgregarToken()
     {
