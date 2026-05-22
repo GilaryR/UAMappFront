@@ -1,6 +1,7 @@
 ﻿using Microsoft.Win32;
 using SistemaHorario.UI.Dialogs.Perfil;
 using SistemaHorario.UI.Dialogs.Shared;
+using SistemaHorario.UI.Services;
 using SistemaHorario.UI.ViewModels.Perfil;
 using SistemaHorario.UI.Views.Auth;
 using System;
@@ -17,7 +18,9 @@ namespace SistemaHorario.UI.Views.Perfil
         public PerfilView()
         {
             InitializeComponent();
+
             _viewModel = new PerfilViewModel();
+
             Loaded += PerfilView_Loaded;
         }
 
@@ -34,73 +37,140 @@ namespace SistemaHorario.UI.Views.Perfil
             TxtRol.Text = _viewModel.Perfil.Rol;
             TxtTelefono.Text = _viewModel.Perfil.Telefono;
             TxtFacultad.Text = _viewModel.Perfil.FacultadPrograma;
+
             try
             {
-                ImgPerfil.Source = new BitmapImage(new Uri(_viewModel.Perfil.RutaImagen, UriKind.RelativeOrAbsolute));
+                ImgPerfil.Source = new BitmapImage(
+                    new Uri(
+                        _viewModel.Perfil.RutaImagen,
+                        UriKind.RelativeOrAbsolute
+                    )
+                );
             }
-            catch { }
+            catch
+            {
+                ImgPerfil.Source = null;
+            }
         }
 
         private void BtnCambiarFoto_Click(object sender, RoutedEventArgs e)
         {
-            OpenFileDialog dialog = new() { Filter = "Imagenes|*.png;*.jpg;*.jpeg" };
-            if (dialog.ShowDialog() != true) return;
+            OpenFileDialog dialog = new()
+            {
+                Filter = "Imágenes|*.png;*.jpg;*.jpeg"
+            };
+
+            if (dialog.ShowDialog() != true)
+            {
+                return;
+            }
+
             _viewModel.ActualizarFoto(dialog.FileName);
-            ImgPerfil.Source = new BitmapImage(new Uri(dialog.FileName));
+
+            ImgPerfil.Source = new BitmapImage(
+                new Uri(dialog.FileName)
+            );
         }
 
         private async void BtnEditarPerfil_Click(object sender, RoutedEventArgs e)
         {
-            EditarPerfilDialog dialog = new(_viewModel.Perfil) { Owner = Window.GetWindow(this) };
-            if (dialog.ShowDialog() != true) return;
-            bool ok = await _viewModel.ActualizarPerfilAsync(
-                dialog.PerfilResultado.NombreCompleto,
-                dialog.PerfilResultado.Telefono,
-                dialog.PerfilResultado.Rol,
-                dialog.PerfilResultado.FacultadPrograma);
-            if (!ok)
+            EditarPerfilDialog dialog = new(_viewModel.Perfil)
             {
-                MessageBox.Show("Error al guardar: " + _viewModel.MensajeEstado, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                Owner = Window.GetWindow(this)
+            };
+
+            if (dialog.ShowDialog() != true)
+            {
                 return;
             }
+
+            bool actualizado = await _viewModel.ActualizarPerfilAsync(
+                dialog.PerfilResultado.NombreCompleto,
+                dialog.PerfilResultado.Telefono
+            );
+
+            if (!actualizado)
+            {
+                MessageBox.Show(
+                    "Error al guardar: " + _viewModel.MensajeEstado,
+                    "Error",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error
+                );
+
+                return;
+            }
+
             await _viewModel.CargarPerfilAsync();
             CargarDatos();
-            MensajeExitoDialog exito = new("Perfil actualizado correctamente") { Owner = Window.GetWindow(this) };
+
+            MensajeExitoDialog exito = new("Perfil actualizado correctamente.")
+            {
+                Owner = Window.GetWindow(this)
+            };
+
             exito.ShowDialog();
         }
 
         private async void BtnCambiarContrasena_Click(object sender, RoutedEventArgs e)
         {
-            CambiarContrasenaDialog dialog = new() { Owner = Window.GetWindow(this) };
-            if (dialog.ShowDialog() != true) return;
+            CambiarContrasenaDialog dialog = new()
+            {
+                Owner = Window.GetWindow(this)
+            };
 
-            bool ok = await _viewModel.CambiarContrasenaAsync(
+            if (dialog.ShowDialog() != true)
+            {
+                return;
+            }
+
+            bool actualizada = await _viewModel.CambiarContrasenaAsync(
                 dialog.Request.ContrasenaActual,
-                dialog.Request.NuevaContrasena);
+                dialog.Request.NuevaContrasena
+            );
 
-            if (!ok)
+            if (!actualizada)
             {
                 MessageBox.Show(
                     "No se pudo cambiar la contraseña: " + _viewModel.MensajeEstado,
                     "Error",
                     MessageBoxButton.OK,
-                    MessageBoxImage.Error);
+                    MessageBoxImage.Error
+                );
+
                 return;
             }
 
-            MensajeExitoDialog exito = new("Contraseña actualizada correctamente.")
-            {
-                Owner = Window.GetWindow(this)
-            };
+            MensajeExitoDialog exito =
+                new("Contraseña actualizada correctamente.")
+                {
+                    Owner = Window.GetWindow(this)
+                };
+
             exito.ShowDialog();
         }
 
         private void BtnCerrarSesion_Click(object sender, RoutedEventArgs e)
         {
-            CerrarSesionDialog dialog = new() { Owner = Window.GetWindow(this) };
-            if (dialog.ShowDialog() != true) return;
+            CerrarSesionDialog dialog = new()
+            {
+                Owner = Window.GetWindow(this)
+            };
+
+            if (dialog.ShowDialog() != true)
+            {
+                return;
+            }
+
+            ApiClient.Token = null;
+
             Window? ventanaPrincipal = Window.GetWindow(this);
-            if (ventanaPrincipal == null) return;
+
+            if (ventanaPrincipal == null)
+            {
+                return;
+            }
+
             ventanaPrincipal.Content = new LoginView();
         }
     }

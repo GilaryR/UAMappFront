@@ -1,4 +1,5 @@
 ﻿using SistemaHorario.UI.Models.UI;
+using SistemaHorario.UI.State;
 using System;
 using System.Collections.Generic;
 using System.Windows;
@@ -8,75 +9,24 @@ using System.Windows.Media.Imaging;
 
 namespace SistemaHorario.UI.Views.Shell
 {
-    /// <summary>
-    /// Vista del menú lateral principal del sistema.
-    ///
-    /// Esta vista se encarga de mostrar las opciones de navegación
-    /// disponibles para el usuario según su rol.
-    ///
-    /// Reglas actuales:
-    /// - Administrador: puede ver todas las opciones.
-    /// - Coordinador: no puede ver Coordinadores ni Historial de cambios.
-    ///
-    /// Esta vista no consume la API directamente.
-    /// Más adelante, el rol del usuario vendrá desde la sesión
-    /// después del login real.
-    /// </summary>
     public partial class SidebarView : UserControl
     {
-        /// <summary>
-        /// Color de fondo normal de la barra lateral.
-        /// </summary>
-        private readonly Brush _colorNormal = new SolidColorBrush(Color.FromRgb(83, 102, 121));
+        private readonly Brush _colorNormal =
+            new SolidColorBrush(Color.FromRgb(83, 102, 121));
 
-        /// <summary>
-        /// Color usado para marcar la opción seleccionada.
-        /// </summary>
-        private readonly Brush _colorSeleccionado = new SolidColorBrush(Color.FromRgb(0, 106, 166));
+        private readonly Brush _colorSeleccionado =
+            new SolidColorBrush(Color.FromRgb(0, 106, 166));
 
-        /// <summary>
-        /// Lista interna de opciones del menú.
-        /// </summary>
         private readonly List<MenuItemModel> _opcionesMenu = new();
 
-        /// <summary>
-        /// Evento que se ejecuta cuando el usuario selecciona
-        /// una opción del menú lateral.
-        /// </summary>
         public event EventHandler<string>? NavegacionSolicitada;
-        
-        /// <summary>
-        /// Constructor de SidebarView.
-        ///
-        /// Inicializa los componentes visuales del menú lateral.
-        ///
-        /// Actualmente se carga un rol temporal de prueba
-        /// mientras se implementa el sistema real de autenticación
-        /// y manejo de sesión.
-        ///
-        /// Más adelante:
-        /// - El rol vendrá desde Login.
-        /// - El menú se construirá dinámicamente según permisos.
-        /// </summary>
+
         public SidebarView()
         {
             InitializeComponent();
-
-            // Reemplazar el rol temporal por el rol
-            // real del usuario autenticado.
-            ConfigurarMenu("Administrador");
+            ConfigurarMenu(UsuarioSesion.Rol);
         }
 
-        /// <summary>
-        /// Configura las opciones del menú según el rol recibido.
-        ///
-        /// Este método puede ser llamado después del login,
-        /// cuando ya se conozca el rol real del usuario.
-        /// </summary>
-        /// <param name="rolUsuario">
-        /// Rol del usuario autenticado.
-        /// Ejemplo: Administrador o Coordinador.
-        /// </param>
         public void ConfigurarMenu(string rolUsuario)
         {
             _opcionesMenu.Clear();
@@ -117,7 +67,7 @@ namespace SistemaHorario.UI.Views.Shell
                 VistaDestino = "GruposAcademicos"
             });
 
-            if (rolUsuario.Equals("Administrador", StringComparison.OrdinalIgnoreCase))
+            if (EsAdministrador(rolUsuario))
             {
                 _opcionesMenu.Add(new MenuItemModel
                 {
@@ -141,7 +91,7 @@ namespace SistemaHorario.UI.Views.Shell
                 VistaDestino = "Reportes"
             });
 
-            if (rolUsuario.Equals("Administrador", StringComparison.OrdinalIgnoreCase))
+            if (EsAdministrador(rolUsuario))
             {
                 _opcionesMenu.Add(new MenuItemModel
                 {
@@ -161,9 +111,14 @@ namespace SistemaHorario.UI.Views.Shell
             PintarMenu();
         }
 
-        /// <summary>
-        /// Construye visualmente los botones del menú lateral.
-        /// </summary>
+        private bool EsAdministrador(string rolUsuario)
+        {
+            return rolUsuario.Equals(
+                "Administrador",
+                StringComparison.OrdinalIgnoreCase
+            );
+        }
+
         private void PintarMenu()
         {
             PnlMenu.Children.Clear();
@@ -175,15 +130,6 @@ namespace SistemaHorario.UI.Views.Shell
             }
         }
 
-        /// <summary>
-        /// Crea un botón visual para una opción del menú.
-        /// </summary>
-        /// <param name="opcion">
-        /// Opción del menú que se desea representar.
-        /// </param>
-        /// <returns>
-        /// Botón configurado con icono, texto y evento click.
-        /// </returns>
         private Button CrearBotonMenu(MenuItemModel opcion)
         {
             Image icono = new()
@@ -192,7 +138,9 @@ namespace SistemaHorario.UI.Views.Shell
                 Height = 28,
                 Margin = new Thickness(24, 0, 14, 0),
                 Stretch = Stretch.Uniform,
-                Source = new BitmapImage(new Uri(opcion.Icono, UriKind.RelativeOrAbsolute))
+                Source = new BitmapImage(
+                    new Uri(opcion.Icono, UriKind.RelativeOrAbsolute)
+                )
             };
 
             TextBlock texto = new()
@@ -219,7 +167,9 @@ namespace SistemaHorario.UI.Views.Shell
                 Content = contenido,
                 Tag = opcion,
                 HorizontalContentAlignment = HorizontalAlignment.Left,
-                Background = opcion.Seleccionado ? _colorSeleccionado : _colorNormal,
+                Background = opcion.Seleccionado
+                    ? _colorSeleccionado
+                    : _colorNormal,
                 BorderThickness = new Thickness(0),
                 Cursor = System.Windows.Input.Cursors.Hand
             };
@@ -229,17 +179,17 @@ namespace SistemaHorario.UI.Views.Shell
             return boton;
         }
 
-        /// <summary>
-        /// Evento ejecutado cuando el usuario hace clic
-        /// sobre una opción del menú.
-        /// </summary>
         private void BtnMenu_Click(object sender, RoutedEventArgs e)
         {
             if (sender is not Button boton)
+            {
                 return;
+            }
 
             if (boton.Tag is not MenuItemModel opcionSeleccionada)
+            {
                 return;
+            }
 
             foreach (MenuItemModel opcion in _opcionesMenu)
             {
@@ -250,7 +200,10 @@ namespace SistemaHorario.UI.Views.Shell
 
             PintarMenu();
 
-            NavegacionSolicitada?.Invoke(this, opcionSeleccionada.VistaDestino);
+            NavegacionSolicitada?.Invoke(
+                this,
+                opcionSeleccionada.VistaDestino
+            );
         }
     }
 }

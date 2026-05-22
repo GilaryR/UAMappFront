@@ -1,5 +1,6 @@
 using SistemaHorario.UI.Models.UI;
 using SistemaHorario.UI.Services;
+using SistemaHorarios.Application.Common;
 using System.Threading.Tasks;
 
 namespace SistemaHorario.UI.ViewModels.Perfil
@@ -8,7 +9,7 @@ namespace SistemaHorario.UI.ViewModels.Perfil
     {
         private readonly PerfilApiService _api = new();
 
-        public PerfilUsuarioItem Perfil { get; set; }
+        public PerfilUsuarioItem Perfil { get; private set; }
         public string MensajeEstado { get; private set; } = string.Empty;
 
         public PerfilViewModel()
@@ -19,50 +20,82 @@ namespace SistemaHorario.UI.ViewModels.Perfil
                 CorreoInstitucional = string.Empty,
                 Rol = string.Empty,
                 Telefono = string.Empty,
-                FacultadPrograma = string.Empty,
+                FacultadPrograma = "Universidad Autónoma de Manizales",
                 RutaImagen = "/Assets/Images/ImgUsuario.png"
             };
         }
 
         public async Task CargarPerfilAsync()
         {
-            var resp = await _api.ObtenerPerfilAsync();
-            if (resp.Success && resp.Data != null)
+            ApiResponse<PerfilUsuarioItem> resp =
+                await _api.ObtenerPerfilAsync();
+
+            if (!resp.Success || resp.Data == null)
             {
-                Perfil.NombreCompleto = resp.Data.NombreCompleto;
-                Perfil.CorreoInstitucional = resp.Data.CorreoInstitucional;
-                Perfil.Rol = resp.Data.Rol;
-                Perfil.FacultadPrograma = resp.Data.FacultadPrograma;
+                MensajeEstado = string.IsNullOrWhiteSpace(resp.Message)
+                    ? "No se pudo cargar el perfil."
+                    : resp.Message;
+
+                return;
             }
-            else
-            {
-                MensajeEstado = resp.Message;
-            }
+
+            Perfil = resp.Data;
+            MensajeEstado = string.Empty;
         }
 
-        public async Task<bool> ActualizarPerfilAsync(string nombre, string telefono, string rol, string facultad)
+        public async Task<bool> ActualizarPerfilAsync(
+            string nombre,
+            string telefono)
         {
-            var resp = await _api.ActualizarPerfilAsync(nombre, Perfil.CorreoInstitucional, telefono);
-            if (resp.Success)
-            {
-                Perfil.NombreCompleto = nombre;
-                Perfil.Telefono = telefono;
-                Perfil.Rol = rol;
-                Perfil.FacultadPrograma = facultad;
-                return true;
-            }
-            MensajeEstado = resp.Message;
-            return false;
-        }
+            ApiResponse<string> resp =
+                await _api.ActualizarPerfilAsync(
+                    nombre,
+                    Perfil.CorreoInstitucional,
+                    telefono
+                );
 
-        public async Task<bool> CambiarContrasenaAsync(string actual, string nueva)
-        {
-            var resp = await _api.CambiarContrasenaAsync(actual, nueva);
             if (!resp.Success)
-                MensajeEstado = resp.Message;
-            return resp.Success;
+            {
+                MensajeEstado = string.IsNullOrWhiteSpace(resp.Message)
+                    ? "No se pudo actualizar el perfil."
+                    : resp.Message;
+
+                return false;
+            }
+
+            Perfil.NombreCompleto = nombre;
+            Perfil.Telefono = telefono;
+
+            MensajeEstado = string.Empty;
+            return true;
         }
 
-        public void ActualizarFoto(string rutaImagen) => Perfil.RutaImagen = rutaImagen;
+        public async Task<bool> CambiarContrasenaAsync(
+            string contrasenaActual,
+            string nuevaContrasena)
+        {
+            ApiResponse<string> resp =
+                await _api.CambiarContrasenaAsync(
+                    contrasenaActual,
+                    nuevaContrasena
+                );
+
+            if (!resp.Success)
+            {
+                MensajeEstado = string.IsNullOrWhiteSpace(resp.Message)
+                    ? "No se pudo cambiar la contraseña."
+                    : resp.Message;
+
+                return false;
+            }
+
+            MensajeEstado = string.Empty;
+            return true;
+        }
+
+        public void ActualizarFoto(string rutaImagen)
+        {
+            Perfil.RutaImagen = rutaImagen;
+        }
     }
 }

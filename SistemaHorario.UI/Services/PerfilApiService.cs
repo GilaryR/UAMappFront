@@ -21,33 +21,59 @@ public class PerfilApiService
 
     public async Task<ApiResponse<PerfilUsuarioItem>> ObtenerPerfilAsync()
     {
-        var resp = await _api.GetAsync<PerfilBackendDto>("usuarios/perfil");
-        if (!resp.Success || resp.Data == null)
-            return new ApiResponse<PerfilUsuarioItem> { Success = false, Message = resp.Message };
+        ApiResponse<PerfilBackendDto> resp =
+            await _api.GetAsync<PerfilBackendDto>("usuarios/perfil");
 
-        var perfil = new PerfilUsuarioItem
+        if (!resp.Success || resp.Data == null)
+        {
+            return new ApiResponse<PerfilUsuarioItem>
+            {
+                Success = false,
+                Message = string.IsNullOrWhiteSpace(resp.Message)
+                    ? "No se pudo cargar el perfil del usuario."
+                    : resp.Message
+            };
+        }
+
+        PerfilUsuarioItem perfil = new PerfilUsuarioItem
         {
             NombreCompleto = resp.Data.NombreCompleto,
             CorreoInstitucional = resp.Data.CorreoInstitucional,
             Rol = resp.Data.Rol,
             Telefono = resp.Data.Celular,
-            FacultadPrograma = "Universidad Autonoma de Manizales"
+            FacultadPrograma = "Universidad Autónoma de Manizales",
+            RutaImagen = "/Assets/Images/ImgUsuario.png"
         };
-        return new ApiResponse<PerfilUsuarioItem> { Success = true, Data = perfil };
+
+        return new ApiResponse<PerfilUsuarioItem>
+        {
+            Success = true,
+            Message = "Perfil cargado correctamente.",
+            Data = perfil
+        };
     }
 
-    public async Task<ApiResponse<string>> ActualizarPerfilAsync(string nombre, string correo, string celular)
-        => await _api.PutAsync("usuarios/perfil", new
+    public async Task<ApiResponse<string>> ActualizarPerfilAsync(
+        string nombre,
+        string correo,
+        string celular)
+    {
+        return await _api.PutAsync("usuarios/perfil", new
         {
             NombreCompleto = nombre,
             CorreoInstitucional = correo,
             Celular = celular
         });
+    }
 
-    public async Task<ApiResponse<string>> CambiarContrasenaAsync(string actual, string nueva)
-        => await _api.PutAsync("usuarios/cambiar-contrasena", new
+    public async Task<ApiResponse<string>> CambiarContrasenaAsync(
+        string contrasenaActual,
+        string nuevaContrasena)
+    {
+        return await _api.PutAsync("usuarios/cambiar-contrasena", new
         {
-            ContrasenaActual = actual,
-            NuevaContrasena = nueva
+            ContrasenaActual = contrasenaActual,
+            NuevaContrasena = nuevaContrasena
         });
+    }
 }
