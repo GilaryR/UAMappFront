@@ -61,88 +61,170 @@ public class ApiClient
     private void AgregarToken()
     {
         if (!string.IsNullOrWhiteSpace(Token))
+        {
             _http.DefaultRequestHeaders.Authorization =
                 new AuthenticationHeaderValue("Bearer", Token);
+        }
         else
+        {
             _http.DefaultRequestHeaders.Authorization = null;
+        }
+    }
+
+    private static async Task<ApiResponse<T>> ProcesarRespuestaAsync<T>(
+        HttpResponseMessage response)
+    {
+        try
+        {
+            ApiResponse<T>? apiResponse =
+                await response.Content.ReadFromJsonAsync<ApiResponse<T>>();
+
+            if (apiResponse != null)
+            {
+                return apiResponse;
+            }
+
+            return new ApiResponse<T>
+            {
+                Success = false,
+                Message = "La API no devolvió una respuesta válida."
+            };
+        }
+        catch (Exception ex)
+        {
+            string contenido = await response.Content.ReadAsStringAsync();
+
+            return new ApiResponse<T>
+            {
+                Success = false,
+                Message = string.IsNullOrWhiteSpace(contenido)
+                    ? ex.Message
+                    : contenido
+            };
+        }
     }
 
     public async Task<ApiResponse<T>> GetAsync<T>(string url)
     {
         AgregarToken();
+
         try
         {
-            var data = await _http.GetFromJsonAsync<T>(url);
-            return new ApiResponse<T> { Success = true, Data = data };
+            HttpResponseMessage response = await _http.GetAsync(url);
+
+            return await ProcesarRespuestaAsync<T>(response);
         }
         catch (Exception ex)
         {
-            return new ApiResponse<T> { Success = false, Message = ex.Message };
+            return new ApiResponse<T>
+            {
+                Success = false,
+                Message = ex.Message
+            };
         }
     }
 
     public async Task<ApiResponse<string>> PostAsync(string url, object body)
     {
         AgregarToken();
+
         try
         {
-            var response = await _http.PostAsJsonAsync(url, body);
-            var mensaje = await response.Content.ReadAsStringAsync();
-            return new ApiResponse<string> { Success = response.IsSuccessStatusCode, Message = mensaje };
+            HttpResponseMessage response = await _http.PostAsJsonAsync(url, body);
+
+            ApiResponse<object> apiResponse =
+                await ProcesarRespuestaAsync<object>(response);
+
+            return new ApiResponse<string>
+            {
+                Success = apiResponse.Success,
+                Message = apiResponse.Message,
+                Data = apiResponse.Data?.ToString()
+            };
         }
         catch (Exception ex)
         {
-            return new ApiResponse<string> { Success = false, Message = ex.Message };
+            return new ApiResponse<string>
+            {
+                Success = false,
+                Message = ex.Message
+            };
         }
     }
 
     public async Task<ApiResponse<T>> PostAsync<T>(string url, object body)
     {
         AgregarToken();
+
         try
         {
-            var response = await _http.PostAsJsonAsync(url, body);
-            if (!response.IsSuccessStatusCode)
-            {
-                var msg = await response.Content.ReadAsStringAsync();
-                return new ApiResponse<T> { Success = false, Message = msg };
-            }
-            var data = await response.Content.ReadFromJsonAsync<T>();
-            return new ApiResponse<T> { Success = true, Data = data };
+            HttpResponseMessage response = await _http.PostAsJsonAsync(url, body);
+
+            return await ProcesarRespuestaAsync<T>(response);
         }
         catch (Exception ex)
         {
-            return new ApiResponse<T> { Success = false, Message = ex.Message };
+            return new ApiResponse<T>
+            {
+                Success = false,
+                Message = ex.Message
+            };
         }
     }
 
     public async Task<ApiResponse<string>> PutAsync(string url, object body)
     {
         AgregarToken();
+
         try
         {
-            var response = await _http.PutAsJsonAsync(url, body);
-            var mensaje = await response.Content.ReadAsStringAsync();
-            return new ApiResponse<string> { Success = response.IsSuccessStatusCode, Message = mensaje };
+            HttpResponseMessage response = await _http.PutAsJsonAsync(url, body);
+
+            ApiResponse<object> apiResponse =
+                await ProcesarRespuestaAsync<object>(response);
+
+            return new ApiResponse<string>
+            {
+                Success = apiResponse.Success,
+                Message = apiResponse.Message,
+                Data = apiResponse.Data?.ToString()
+            };
         }
         catch (Exception ex)
         {
-            return new ApiResponse<string> { Success = false, Message = ex.Message };
+            return new ApiResponse<string>
+            {
+                Success = false,
+                Message = ex.Message
+            };
         }
     }
 
     public async Task<ApiResponse<string>> DeleteAsync(string url)
     {
         AgregarToken();
+
         try
         {
-            var response = await _http.DeleteAsync(url);
-            var mensaje = await response.Content.ReadAsStringAsync();
-            return new ApiResponse<string> { Success = response.IsSuccessStatusCode, Message = mensaje };
+            HttpResponseMessage response = await _http.DeleteAsync(url);
+
+            ApiResponse<object> apiResponse =
+                await ProcesarRespuestaAsync<object>(response);
+
+            return new ApiResponse<string>
+            {
+                Success = apiResponse.Success,
+                Message = apiResponse.Message,
+                Data = apiResponse.Data?.ToString()
+            };
         }
         catch (Exception ex)
         {
-            return new ApiResponse<string> { Success = false, Message = ex.Message };
+            return new ApiResponse<string>
+            {
+                Success = false,
+                Message = ex.Message
+            };
         }
     }
 }
