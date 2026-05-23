@@ -21,28 +21,40 @@ public class CoordinadoresApiService
 
     public async Task<ApiResponse<List<CoordinadorItem>>> ObtenerCoordinadoresAsync()
     {
-        var resp = await _api.GetAsync<List<UsuarioBackendDto>>("usuarios");
+        ApiResponse<List<UsuarioBackendDto>> resp =
+            await _api.GetAsync<List<UsuarioBackendDto>>("usuarios");
+
         if (!resp.Success || resp.Data == null)
-            return new ApiResponse<List<CoordinadorItem>> { Success = false, Message = resp.Message };
-
-        var lista = resp.Data
-            .Where(u => u.Rol.Contains("Coordinador", StringComparison.OrdinalIgnoreCase))
-            .Select(u => new CoordinadorItem
+        {
+            return new ApiResponse<List<CoordinadorItem>>
             {
-                IdCoordinador = u.IdUsuario,
-                NombreCompleto = u.NombreCompleto,
-                Cedula = u.Cedula,
-                CorreoInstitucional = u.CorreoInstitucional,
-                Rol = u.Rol,
-                Estado = u.Estado,
-                Celular = u.Celular
-            }).ToList();
+                Success = false,
+                Message = string.IsNullOrWhiteSpace(resp.Message)
+                    ? "No se pudieron consultar los usuarios."
+                    : resp.Message,
+                Data = new List<CoordinadorItem>()
+            };
+        }
 
-        return new ApiResponse<List<CoordinadorItem>> { Success = true, Data = lista };
+        List<CoordinadorItem> lista = resp.Data
+            .Where(u => u.Rol.Contains(
+                "Coordinador",
+                StringComparison.OrdinalIgnoreCase))
+            .Select(MapearCoordinador)
+            .ToList();
+
+        return new ApiResponse<List<CoordinadorItem>>
+        {
+            Success = true,
+            Message = "Coordinadores obtenidos correctamente.",
+            Data = lista
+        };
     }
 
-    public async Task<ApiResponse<string>> CrearCoordinadorAsync(CoordinadorItem coordinador)
-        => await _api.PostAsync("usuarios", new
+    public async Task<ApiResponse<string>> CrearCoordinadorAsync(
+        CoordinadorItem coordinador)
+    {
+        return await _api.PostAsync("usuarios", new
         {
             NombreCompleto = coordinador.NombreCompleto,
             Cedula = coordinador.Cedula,
@@ -52,9 +64,12 @@ public class CoordinadoresApiService
             Estado = coordinador.Estado,
             Celular = coordinador.Celular
         });
+    }
 
-    public async Task<ApiResponse<string>> ActualizarCoordinadorAsync(CoordinadorItem coordinador)
-        => await _api.PutAsync($"usuarios/{coordinador.IdCoordinador}", new
+    public async Task<ApiResponse<string>> ActualizarCoordinadorAsync(
+        CoordinadorItem coordinador)
+    {
+        return await _api.PutAsync($"usuarios/{coordinador.IdCoordinador}", new
         {
             NombreCompleto = coordinador.NombreCompleto,
             Cedula = coordinador.Cedula,
@@ -63,7 +78,24 @@ public class CoordinadoresApiService
             Estado = coordinador.Estado,
             Celular = coordinador.Celular
         });
+    }
 
     public async Task<ApiResponse<string>> EliminarCoordinadorAsync(int id)
-        => await _api.DeleteAsync($"usuarios/{id}");
+    {
+        return await _api.DeleteAsync($"usuarios/{id}");
+    }
+
+    private static CoordinadorItem MapearCoordinador(UsuarioBackendDto usuario)
+    {
+        return new CoordinadorItem
+        {
+            IdCoordinador = usuario.IdUsuario,
+            NombreCompleto = usuario.NombreCompleto,
+            Cedula = usuario.Cedula,
+            CorreoInstitucional = usuario.CorreoInstitucional,
+            Rol = usuario.Rol,
+            Estado = usuario.Estado,
+            Celular = usuario.Celular
+        };
+    }
 }
