@@ -5,6 +5,7 @@ using SistemaHorarios.Application.Common;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace SistemaHorario.UI.ViewModels.PlanAcademico
@@ -76,14 +77,27 @@ namespace SistemaHorario.UI.ViewModels.PlanAcademico
                 return;
             }
 
-            Planes = new ObservableCollection<PlanAcademicoItem>(resp.Data);
+            Planes = new ObservableCollection<PlanAcademicoItem>(
+                resp.Data.Where(plan =>
+                    string.Equals(
+                        plan.Estado?.Trim(),
+                        "Activo",
+                        StringComparison.OrdinalIgnoreCase)));
+
             MensajeEstado = string.Empty;
         }
 
         public async Task<PlanAcademicoItem?> CrearNuevoPlanAsync(
-            int cantidadSemestres,
-            string jornada)
+    string nombrePlan,
+    int cantidadSemestres,
+    string jornada)
         {
+            if (string.IsNullOrWhiteSpace(nombrePlan))
+            {
+                MensajeEstado = "Debe ingresar el nombre del plan académico.";
+                return null;
+            }
+
             if (cantidadSemestres <= 0)
             {
                 MensajeEstado = "La cantidad de semestres debe ser mayor que cero.";
@@ -98,8 +112,9 @@ namespace SistemaHorario.UI.ViewModels.PlanAcademico
 
             PlanAcademicoItem nuevo = new()
             {
-                Nombre = $"Plan {jornada} {DateTime.Now.Year}",
+                Nombre = nombrePlan.Trim(),
                 Jornada = jornada,
+                Estado = "Activo",
                 CargaPorSemestre = "Por definir",
                 TotalSemestres = cantidadSemestres,
                 EsNuevo = true
@@ -122,8 +137,7 @@ namespace SistemaHorario.UI.ViewModels.PlanAcademico
             bool semestresCreados =
                 await CrearSemestresDelPlanAsync(
                     nuevo.IdPlanAcademico,
-                    cantidadSemestres
-                );
+                    cantidadSemestres);
 
             if (!semestresCreados)
             {
@@ -147,8 +161,7 @@ namespace SistemaHorario.UI.ViewModels.PlanAcademico
                 ApiResponse<string> semestreResp =
                     await _api.AgregarSemestreAsync(
                         idPlanAcademico,
-                        numeroSemestre
-                    );
+                        numeroSemestre);
 
                 if (!semestreResp.Success)
                 {
@@ -166,13 +179,34 @@ namespace SistemaHorario.UI.ViewModels.PlanAcademico
         public async Task<bool> EliminarPlanAsync(
             PlanAcademicoItem plan)
         {
-            ApiResponse<string> resp =
+            ApiResponse<int> resp =
                 await _api.EliminarPlanAsync(plan.IdPlanAcademico);
 
             if (!resp.Success)
             {
                 MensajeEstado = string.IsNullOrWhiteSpace(resp.Message)
                     ? "No se pudo eliminar el plan académico."
+                    : resp.Message;
+
+                return false;
+            }
+
+            await CargarPlanesAsync();
+
+            MensajeEstado = string.Empty;
+            return true;
+        }
+
+        public async Task<bool> ActivarPlanAsync(
+            PlanAcademicoItem plan)
+        {
+            ApiResponse<int> resp =
+                await _api.ActivarPlanAsync(plan.IdPlanAcademico);
+
+            if (!resp.Success)
+            {
+                MensajeEstado = string.IsNullOrWhiteSpace(resp.Message)
+                    ? "No se pudo activar el plan académico."
                     : resp.Message;
 
                 return false;

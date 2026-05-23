@@ -106,17 +106,37 @@
                                                        Text="{Binding Jornada, Mode=OneWay}"
                                                        Margin="0,0,0,14"/>
 
-                                            <Button Content="Ver Malla"
-                                                    Height="34"
-                                                    HorizontalAlignment="Stretch"
-                                                    Background="#67A734"
-                                                    Foreground="White"
-                                                    BorderThickness="0"
-                                                    FontWeight="Bold"
-                                                    FontSize="14"
-                                                    Cursor="Hand"
-                                                    CommandParameter="{Binding}"
-                                                    Click="VerMalla_Click"/>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="10"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+
+                                                <Button Grid.Column="0"
+            Content="Ver Malla"
+            Height="34"
+            Background="#67A734"
+            Foreground="White"
+            BorderThickness="0"
+            FontWeight="Bold"
+            FontSize="14"
+            Cursor="Hand"
+            CommandParameter="{Binding}"
+            Click="VerMalla_Click"/>
+
+                                                <Button Grid.Column="2"
+            Content="Eliminar"
+            Height="34"
+            Background="#C70F1A"
+            Foreground="White"
+            BorderThickness="0"
+            FontWeight="Bold"
+            FontSize="14"
+            Cursor="Hand"
+            CommandParameter="{Binding}"
+            Click="EliminarPlan_Click"/>
+                                            </Grid>
                                         </StackPanel>
                                     </Border>
                                 </StackPanel>

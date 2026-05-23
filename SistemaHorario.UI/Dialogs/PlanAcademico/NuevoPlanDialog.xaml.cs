@@ -5,6 +5,8 @@ namespace SistemaHorario.UI.Dialogs.PlanAcademico
 {
     public partial class NuevoPlanAcademicoDialog : Window
     {
+        public string NombrePlan { get; private set; } = string.Empty;
+
         public int CantidadSemestres { get; private set; }
 
         public string Jornada { get; private set; } = "Diurna";
@@ -21,9 +23,23 @@ namespace SistemaHorario.UI.Dialogs.PlanAcademico
             object sender,
             RoutedEventArgs e)
         {
+            if (string.IsNullOrWhiteSpace(TxtNombrePlan.Text))
+            {
+                MessageBox.Show(
+                    "Debe ingresar el nombre del plan académico.",
+                    "Validación",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+
+                return;
+            }
+
+            NombrePlan = TxtNombrePlan.Text.Trim();
+
             if (CmbJornada.SelectedItem is ComboBoxItem jornadaItem)
             {
-                Jornada = jornadaItem.Content?.ToString() ?? "Diurna";
+                Jornada =
+                    jornadaItem.Content?.ToString() ?? "Diurna";
             }
 
             if (CmbCantidadSemestres.SelectedItem is ComboBoxItem semestreItem)

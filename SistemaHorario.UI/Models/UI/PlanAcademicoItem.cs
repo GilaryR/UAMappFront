@@ -14,8 +14,8 @@ namespace SistemaHorario.UI.Models.UI
     /// - Plan Tapsi.
     /// - Un nuevo plan creado por el usuario.
     ///
-    /// Este modelo está preparado para que más adelante sus datos vengan
-    /// desde la base de datos por medio de endpoints.
+    /// Este modelo está preparado para recibir datos desde la base de datos
+    /// por medio de endpoints.
     /// </summary>
     public class PlanAcademicoItem : INotifyPropertyChanged
     {
@@ -30,6 +30,11 @@ namespace SistemaHorario.UI.Models.UI
         private string _jornada = string.Empty;
 
         /// <summary>
+        /// Estado interno del plan académico.
+        /// </summary>
+        private string _estado = "Activo";
+
+        /// <summary>
         /// Texto interno de la carga académica por semestre.
         /// </summary>
         private string _cargaPorSemestre = string.Empty;
@@ -41,8 +46,6 @@ namespace SistemaHorario.UI.Models.UI
 
         /// <summary>
         /// Identificador del plan académico.
-        ///
-        /// Cuando se conecte el backend, este valor debe venir desde la base de datos.
         /// </summary>
         public int IdPlanAcademico { get; set; }
 
@@ -72,6 +75,22 @@ namespace SistemaHorario.UI.Models.UI
             set
             {
                 _jornada = value;
+                OnPropertyChanged();
+            }
+        }
+
+        /// <summary>
+        /// Estado del plan académico.
+        ///
+        /// Permite ocultar planes inactivos sin eliminarlos físicamente
+        /// de la base de datos.
+        /// </summary>
+        public string Estado
+        {
+            get => _estado;
+            set
+            {
+                _estado = value;
                 OnPropertyChanged();
             }
         }
@@ -136,7 +155,6 @@ namespace SistemaHorario.UI.Models.UI
         /// Lista de semestres que pertenecen al plan académico.
         ///
         /// Cada semestre contiene sus propias materias.
-        /// En la versión final, esta información debe venir desde la base de datos.
         /// </summary>
         public ObservableCollection<SemestrePlanItem> Semestres { get; set; } = new();
 
@@ -169,7 +187,8 @@ namespace SistemaHorario.UI.Models.UI
         /// <summary>
         /// Notifica a WPF que una propiedad cambió para actualizar la pantalla.
         /// </summary>
-        protected void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+        protected void OnPropertyChanged(
+            [CallerMemberName] string? propertyName = null)
         {
             PropertyChanged?.Invoke(
                 this,
