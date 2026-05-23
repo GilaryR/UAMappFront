@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Editar perfil"
         Width="760"
-        Height="440"
+        Height="360"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize"
         WindowStyle="None"
@@ -29,7 +29,6 @@
                 </Grid.ColumnDefinitions>
 
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="78"/>
                     <RowDefinition Height="78"/>
                     <RowDefinition Height="78"/>
                     <RowDefinition Height="78"/>
@@ -73,17 +72,16 @@
                 </StackPanel>
 
                 <StackPanel Grid.Row="1" Grid.Column="2">
-                    <TextBlock Text="Rol *"
+                    <TextBlock Text="Rol"
                                FontWeight="Bold"
                                FontSize="15"
                                Margin="0,0,0,8"/>
 
-                    <ComboBox x:Name="CmbRol"
-                              Height="34"
-                              FontSize="14">
-                        <ComboBoxItem Content="Administrador"/>
-                        <ComboBoxItem Content="Coordinador"/>
-                    </ComboBox>
+                    <TextBox x:Name="TxtRol"
+                             Height="34"
+                             FontSize="14"
+                             Padding="10,5"
+                             IsEnabled="False"/>
                 </StackPanel>
 
                 <StackPanel Grid.Row="2"
@@ -97,7 +95,8 @@
                     <TextBox x:Name="TxtFacultadPrograma"
                              Height="34"
                              FontSize="14"
-                             Padding="10,5"/>
+                             Padding="10,5"
+                             IsEnabled="False"/>
                 </StackPanel>
             </Grid>
 

@@ -58,6 +58,88 @@ public class ApiClient
         }
     }
 
+
+    public async Task<ApiResponse<T>> PutFileAsync<T>(
+    string url,
+    string nombreCampo,
+    string rutaArchivo)
+{
+    AgregarToken();
+
+    try
+    {
+        using MultipartFormDataContent form = new();
+
+        await using FileStream stream =
+            File.OpenRead(rutaArchivo);
+
+        StreamContent fileContent = new(stream);
+
+        fileContent.Headers.ContentType =
+            new MediaTypeHeaderValue(
+                ObtenerContentType(rutaArchivo)
+            );
+
+        form.Add(
+            fileContent,
+            nombreCampo,
+            Path.GetFileName(rutaArchivo)
+        );
+
+        HttpResponseMessage response =
+            await _http.PutAsync(url, form);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            string mensaje =
+                await response.Content.ReadAsStringAsync();
+
+            return new ApiResponse<T>
+            {
+                Success = false,
+                Message = mensaje
+            };
+        }
+
+        ApiResponse<T>? resultado =
+            await response.Content.ReadFromJsonAsync<ApiResponse<T>>();
+
+        if (resultado == null)
+        {
+            return new ApiResponse<T>
+            {
+                Success = false,
+                Message = "No se pudo leer la respuesta del servidor."
+            };
+        }
+
+        return resultado;
+    }
+    catch (Exception ex)
+    {
+        return new ApiResponse<T>
+        {
+            Success = false,
+            Message = ex.Message
+        };
+    }
+}
+
+private static string ObtenerContentType(string rutaArchivo)
+{
+    string extension =
+        Path.GetExtension(rutaArchivo).ToLower();
+
+    return extension switch
+    {
+        ".jpg" => "image/jpeg",
+        ".jpeg" => "image/jpeg",
+        ".png" => "image/png",
+        ".bmp" => "image/bmp",
+        _ => "application/octet-stream"
+    };
+}
+
     private void AgregarToken()
     {
         if (!string.IsNullOrWhiteSpace(Token))

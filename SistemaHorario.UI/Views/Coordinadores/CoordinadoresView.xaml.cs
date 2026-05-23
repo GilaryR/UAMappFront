@@ -1,5 +1,4 @@
 ﻿using SistemaHorario.UI.Controls;
-using SistemaHorario.UI.Dialogs.Coordinadores;
 using SistemaHorario.UI.Dialogs.Shared;
 using SistemaHorario.UI.Models.UI;
 using SistemaHorario.UI.Services;
@@ -222,77 +221,72 @@ namespace SistemaHorario.UI.Views.Coordinadores
 			}
 		}
 
-		/// <summary>
-		/// Inicia el flujo de creación:
-		/// primero verifica credenciales y luego abre formulario.
-		/// </summary>
-		private void BtnAgregar_Click(
+        /// <summary>
+        /// Inicia el flujo de creación:
+        /// primero verifica credenciales y luego abre formulario.
+        /// </summary>
+        private void BtnAgregar_Click(
 			object sender,
 			RoutedEventArgs e)
-		{
-			VerificarCredencialesDialog dialog =
-				new()
-				{
-					Owner = Window.GetWindow(this)
-				};
+        {
+            NavegarAFormulario();
+        }
 
-			bool? resultado = dialog.ShowDialog();
-
-			if (resultado != true)
-				return;
-
-			NavegarAFormulario();
-		}
-
-		/// <summary>
-		/// Abre formulario de edición.
-		/// </summary>
-		private void EditarCoordinador(
+        /// <summary>
+        /// Abre formulario de edición.
+        /// </summary>
+        private void EditarCoordinador(
 			CoordinadorItem coordinador)
 		{
 			NavegarAFormulario(coordinador);
 		}
 
-		/// <summary>
-		/// Elimina un coordinador usando diálogo de confirmación.
-		/// </summary>
-		private async void EliminarCoordinador(
+        /// <summary>
+        /// Elimina un coordinador usando diálogo de confirmación.
+        /// </summary>
+        private async void EliminarCoordinador(
 			CoordinadorItem coordinador)
-		{
-			EliminarConfirmacionDialog dialog =
-				new($"¿Deseas eliminar al coordinador {coordinador.NombreCompleto}?\nDebes escribir la palabra eliminar.")
-				{
-					Owner = Window.GetWindow(this)
-				};
+        {
+            EliminarConfirmacionDialog dialog =
+                new($"¿Deseas eliminar al coordinador {coordinador.NombreCompleto}?\nDebes escribir la palabra eliminar.")
+                {
+                    Owner = Window.GetWindow(this)
+                };
 
-			if (dialog.ShowDialog() != true)
-				return;
+            if (dialog.ShowDialog() != true)
+            {
+                return;
+            }
 
-			var resultado = await _api.EliminarCoordinadorAsync(
-				coordinador.IdCoordinador);
+            bool eliminado =
+                await _viewModel.EliminarCoordinadorAsync(coordinador);
 
-			if (!resultado.Success)
-			{
-				MessageBox.Show(resultado.Message, "Error al eliminar", MessageBoxButton.OK, MessageBoxImage.Error);
-				return;
-			}
+            if (!eliminado)
+            {
+                MessageBox.Show(
+                    _viewModel.MensajeEstado,
+                    "Error al eliminar",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
 
-			await _viewModel.CargarDatosAsync();
-			CargarDatos();
+                return;
+            }
 
-			MensajeExitoDialog exito =
-				new("Coordinador eliminado")
-				{
-					Owner = Window.GetWindow(this)
-				};
+            CargarDatos();
 
-			exito.ShowDialog();
-		}
+            MensajeExitoDialog exito =
+                new("Coordinador eliminado correctamente.")
+                {
+                    Owner = Window.GetWindow(this)
+                };
 
-		/// <summary>
-		/// Navega al formulario de crear o editar coordinador.
-		/// </summary>
-		private void NavegarAFormulario(
+            exito.ShowDialog();
+        }
+
+        /// <summary>
+        /// Navega al formulario de crear o editar coordinador.
+        /// </summary>
+        private void NavegarAFormulario(
 			CoordinadorItem? coordinador = null)
 		{
 			ContentControl? contentArea =

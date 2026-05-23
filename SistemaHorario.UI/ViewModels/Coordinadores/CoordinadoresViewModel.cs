@@ -9,52 +9,108 @@ namespace SistemaHorario.UI.ViewModels.Coordinadores
     public class CoordinadoresViewModel
     {
         private readonly CoordinadoresApiService _api = new();
+
         private List<CoordinadorItem> _coordinadoresBase = new();
 
         public List<CoordinadorItem> Coordinadores { get; private set; } = new();
-        public ResumenCoordinadorItem Resumen { get; private set; } = new();
-        public string MensajeEstado { get; private set; } = string.Empty;
 
-        public CoordinadoresViewModel()
-        {
-        }
+        public ResumenCoordinadorItem Resumen { get; private set; } = new();
+
+        public string MensajeEstado { get; private set; } = string.Empty;
 
         public async Task CargarDatosAsync()
         {
             var resp = await _api.ObtenerCoordinadoresAsync();
+
             if (!resp.Success || resp.Data == null)
             {
-                MensajeEstado = resp.Message;
+                MensajeEstado = string.IsNullOrWhiteSpace(resp.Message)
+                    ? "No se pudieron cargar los coordinadores."
+                    : resp.Message;
+
+                _coordinadoresBase = new List<CoordinadorItem>();
+                Coordinadores = new List<CoordinadorItem>();
+                CalcularResumen();
+
                 return;
             }
+
             _coordinadoresBase = resp.Data;
             Coordinadores = _coordinadoresBase.ToList();
+
+            MensajeEstado = string.Empty;
+
             CalcularResumen();
         }
 
-        public void Filtrar(string textoBusqueda, string filtroBusqueda, string estado)
+        public void Filtrar(
+            string textoBusqueda,
+            string filtroBusqueda,
+            string estado)
         {
             IEnumerable<CoordinadorItem> query = _coordinadoresBase;
+
             if (!string.IsNullOrWhiteSpace(textoBusqueda))
             {
-                textoBusqueda = textoBusqueda.ToLower();
+                string texto = textoBusqueda.ToLower();
+
                 switch (filtroBusqueda.ToLower())
                 {
                     case "nombre":
-                        query = query.Where(x => x.NombreCompleto.ToLower().Contains(textoBusqueda));
+                        query = query.Where(x =>
+                            x.NombreCompleto.ToLower().Contains(texto));
                         break;
+
                     case "cedula":
-                        query = query.Where(x => x.Cedula.ToLower().Contains(textoBusqueda));
+                    case "cédula":
+                        query = query.Where(x =>
+                            x.Cedula.ToLower().Contains(texto));
                         break;
+
                     case "correo":
-                        query = query.Where(x => x.CorreoInstitucional.ToLower().Contains(textoBusqueda));
+                        query = query.Where(x =>
+                            x.CorreoInstitucional.ToLower().Contains(texto));
+                        break;
+
+                    default:
+                        query = query.Where(x =>
+                            x.NombreCompleto.ToLower().Contains(texto) ||
+                            x.Cedula.ToLower().Contains(texto) ||
+                            x.CorreoInstitucional.ToLower().Contains(texto));
                         break;
                 }
             }
-            if (estado != "Todos")
+
+            if (!string.IsNullOrWhiteSpace(estado) && estado != "Todos")
+            {
                 query = query.Where(x => x.Estado == estado);
+            }
+
             Coordinadores = query.ToList();
+
             CalcularResumen();
+        }
+
+        public async Task<bool> EliminarCoordinadorAsync(
+            CoordinadorItem coordinador)
+        {
+            var resp = await _api.EliminarCoordinadorAsync(
+                coordinador.IdCoordinador);
+
+            if (!resp.Success)
+            {
+                MensajeEstado = string.IsNullOrWhiteSpace(resp.Message)
+                    ? "No se pudo eliminar el coordinador."
+                    : resp.Message;
+
+                return false;
+            }
+
+            await CargarDatosAsync();
+
+            MensajeEstado = string.Empty;
+
+            return true;
         }
 
         private void CalcularResumen()

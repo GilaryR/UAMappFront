@@ -12,241 +12,256 @@ using System.Windows.Controls;
 
 namespace SistemaHorario.UI.Views.Reportes
 {
-	/// <summary>
-	/// Vista principal de reportes académicos.
-	/// 
-	/// Usa TablaPaginada para listar reportes.
-	/// PDF y CSV se manejan como acciones de la tabla para no modificar
-	/// el control compartido.
-	/// </summary>
-	public partial class ReportesAcademicosView : UserControl
-	{
-		private readonly ReportesAcademicosViewModel _viewModel = new();
+    public partial class ReportesAcademicosView : UserControl
+    {
+        private readonly ReportesAcademicosViewModel _viewModel = new();
 
-		public ReportesAcademicosView()
-		{
-			InitializeComponent();
+        public ReportesAcademicosView()
+        {
+            InitializeComponent();
 
-			DataContext = _viewModel;
-			Loaded += ReportesAcademicosView_Loaded;
-		}
+            DataContext = _viewModel;
+            Loaded += ReportesAcademicosView_Loaded;
+        }
 
-		private async void ReportesAcademicosView_Loaded(object sender, RoutedEventArgs e)
-		{
-			await _viewModel.CargarCatalogosAsync();
-			ConfigurarFiltros();
-			ConfigurarTabla();
-			await _viewModel.CargarReportesAsync();
-			CargarTabla();
-		}
+        private async void ReportesAcademicosView_Loaded(
+            object sender,
+            RoutedEventArgs e)
+        {
+            await _viewModel.CargarCatalogosAsync();
 
-		private void ConfigurarFiltros()
-		{
-			List<string> tipos = new()
-			{
-				"Todos los tipos"
-			};
+            ConfigurarFiltros();
+            ConfigurarTabla();
 
-			tipos.AddRange(_viewModel.TiposReporte);
+            await _viewModel.CargarReportesAsync();
 
-			CmbTipoReporte.ItemsSource = tipos;
-			CmbTipoReporte.SelectedIndex = 0;
-		}
+            CargarTabla();
+        }
 
-		private void ConfigurarTabla()
-		{
-			TablaReportes.ConfigurarColumnas(new List<TableColumnDefinition>
-			{
-				new TableColumnDefinition
-				{
-					Header = "Fecha",
-					Binding = "FechaTexto",
-					Width = 1
-				},
-				new TableColumnDefinition
-				{
-					Header = "Tipo",
-					Binding = "TipoReporte",
-					Width = 1.5
-				},
-				new TableColumnDefinition
-				{
-					Header = "Usuario",
-					Binding = "Usuario",
-					Width = 1
-				},
-				new TableColumnDefinition
-				{
-					Header = "Detalle",
-					Binding = "Detalle",
-					Width = 1
-				}
-			});
+        private void ConfigurarFiltros()
+        {
+            List<string> tipos = new()
+            {
+                "Todos los tipos"
+            };
 
-			TablaReportes.ConfigurarAcciones(new List<TableActionDefinition>
-			{
-				new TableActionDefinition
-				{
-					Nombre = "Ver",
-					Texto = "👁"
-				},
-				new TableActionDefinition
-				{
-					Nombre = "DescargarPdf",
-					Texto = "PDF"
-				},
-				new TableActionDefinition
-				{
-					Nombre = "DescargarCsv",
-					Texto = "CSV"
-				}
-			});
+            tipos.AddRange(_viewModel.TiposReporte);
 
-			TablaReportes.AccionEjecutada += TablaReportes_AccionEjecutada;
-		}
+            CmbTipoReporte.ItemsSource = tipos;
+            CmbTipoReporte.SelectedIndex = 0;
+        }
 
-		private void CargarTabla()
-		{
-			TablaReportes.CargarDatos(_viewModel.Reportes);
-		}
+        private void ConfigurarTabla()
+        {
+            TablaReportes.ConfigurarColumnas(new List<TableColumnDefinition>
+            {
+                new TableColumnDefinition
+                {
+                    Header = "Fecha",
+                    Binding = "FechaTexto",
+                    Width = 1
+                },
+                new TableColumnDefinition
+                {
+                    Header = "Tipo",
+                    Binding = "TipoReporte",
+                    Width = 1.5
+                },
+                new TableColumnDefinition
+                {
+                    Header = "Usuario",
+                    Binding = "Usuario",
+                    Width = 1
+                },
+                new TableColumnDefinition
+                {
+                    Header = "Detalle",
+                    Binding = "Detalle",
+                    Width = 1
+                }
+            });
 
-		private void BtnCrearReporte_Click(object sender, RoutedEventArgs e)
-		{
-			ReporteAcademicoDialog dialog = new(
-				_viewModel.TiposReporte,
-				_viewModel.Periodos)
-			{
-				Owner = Window.GetWindow(this)
-			};
+            TablaReportes.ConfigurarAcciones(new List<TableActionDefinition>
+            {
+                new TableActionDefinition
+                {
+                    Nombre = "Ver",
+                    Texto = "👁"
+                },
+                new TableActionDefinition
+                {
+                    Nombre = "DescargarPdf",
+                    Texto = "PDF"
+                },
+                new TableActionDefinition
+                {
+                    Nombre = "DescargarCsv",
+                    Texto = "CSV"
+                }
+            });
 
-			if (dialog.ShowDialog() != true)
-				return;
+            TablaReportes.AccionEjecutada += TablaReportes_AccionEjecutada;
+        }
 
-			_viewModel.AgregarReporte(dialog.ReporteResultado);
+        private void CargarTabla()
+        {
+            TablaReportes.CargarDatos(_viewModel.Reportes);
+        }
 
-			CargarTabla();
+        private async void BtnCrearReporte_Click(
+            object sender,
+            RoutedEventArgs e)
+        {
+            await _viewModel.CargarReportesAsync();
 
-			MensajeExitoDialog exito = new("Reporte generado")
-			{
-				Owner = Window.GetWindow(this)
-			};
+            CargarTabla();
 
-			exito.ShowDialog();
-		}
+            MensajeExitoDialog exito = new(
+                "Reportes actualizados desde la API.")
+            {
+                Owner = Window.GetWindow(this)
+            };
 
-		private void BtnFiltrar_Click(object sender, RoutedEventArgs e)
-		{
-			_viewModel.Busqueda = TxtBusqueda.Text.Trim();
-			_viewModel.TipoSeleccionado =
-				CmbTipoReporte.SelectedItem?.ToString() ?? "Todos los tipos";
-			_viewModel.FechaSeleccionada = DpFecha.SelectedDate;
+            exito.ShowDialog();
+        }
 
-			_viewModel.AplicarFiltros();
-			CargarTabla();
-		}
+        private void BtnFiltrar_Click(
+            object sender,
+            RoutedEventArgs e)
+        {
+            _viewModel.Busqueda = TxtBusqueda.Text.Trim();
 
-		private void BtnLimpiar_Click(object sender, RoutedEventArgs e)
-		{
-			TxtBusqueda.Clear();
-			CmbTipoReporte.SelectedIndex = 0;
-			DpFecha.SelectedDate = null;
+            _viewModel.TipoSeleccionado =
+                CmbTipoReporte.SelectedItem?.ToString()
+                ?? "Todos los tipos";
 
-			_viewModel.LimpiarFiltros();
-			CargarTabla();
-		}
+            _viewModel.FechaSeleccionada = DpFecha.SelectedDate;
 
-		private void TablaReportes_AccionEjecutada(object? sender, TableActionEventArgs e)
-		{
-			if (e.Fila is not ReporteAcademicoItem reporte)
-				return;
+            _viewModel.AplicarFiltros();
 
-			if (e.Accion == "Ver")
-			{
-				VisualizarReporte(reporte);
-				return;
-			}
+            CargarTabla();
+        }
 
-			if (e.Accion == "DescargarPdf")
-			{
-				DescargarReporte(reporte, "PDF");
-				return;
-			}
+        private void BtnLimpiar_Click(
+            object sender,
+            RoutedEventArgs e)
+        {
+            TxtBusqueda.Clear();
 
-			if (e.Accion == "DescargarCsv")
-			{
-				DescargarReporte(reporte, "CSV");
-			}
-		}
+            CmbTipoReporte.SelectedIndex = 0;
 
-		private void VisualizarReporte(ReporteAcademicoItem reporte)
-		{
-			ReporteAcademicoDialog dialog = new(
-				reporte,
-				_viewModel.TiposReporte,
-				_viewModel.Periodos)
-			{
-				Owner = Window.GetWindow(this)
-			};
+            DpFecha.SelectedDate = null;
 
-			dialog.ShowDialog();
-		}
+            _viewModel.LimpiarFiltros();
 
-		private void DescargarReporte(
-			ReporteAcademicoItem reporte,
-			string formato)
-		{
-			SaveFileDialog dialog = new()
-			{
-				Title = $"Descargar reporte {formato}",
-				FileName = $"reporte_{reporte.IdReporte}.{formato.ToLower()}",
-				Filter = formato == "PDF"
-					? "Archivo PDF (*.pdf)|*.pdf"
-					: "Archivo CSV (*.csv)|*.csv"
-			};
+            CargarTabla();
+        }
 
-			if (dialog.ShowDialog() != true)
-				return;
+        private void TablaReportes_AccionEjecutada(
+            object? sender,
+            TableActionEventArgs e)
+        {
+            if (e.Fila is not ReporteAcademicoItem reporte)
+            {
+                return;
+            }
 
-			if (formato == "CSV")
-			{
-				File.WriteAllText(
-					dialog.FileName,
-					CrearContenidoCsv(reporte),
-					Encoding.UTF8);
-			}
-			else
-			{
-				File.WriteAllText(
-					dialog.FileName,
-					CrearContenidoPdfTemporal(reporte),
-					Encoding.UTF8);
-			}
+            if (e.Accion == "Ver")
+            {
+                VisualizarReporte(reporte);
+                return;
+            }
 
-			MensajeExitoDialog exito = new($"Reporte {formato} descargado")
-			{
-				Owner = Window.GetWindow(this)
-			};
+            if (e.Accion == "DescargarPdf")
+            {
+                DescargarReporte(reporte, "PDF");
+                return;
+            }
 
-			exito.ShowDialog();
-		}
+            if (e.Accion == "DescargarCsv")
+            {
+                DescargarReporte(reporte, "CSV");
+            }
+        }
 
-		private static string CrearContenidoCsv(ReporteAcademicoItem reporte)
-		{
-			return
-				"Fecha,Tipo,Usuario,Detalle,Periodo,Descripcion\n" +
-				$"{reporte.FechaTexto},{reporte.TipoReporte},{reporte.Usuario},{reporte.Detalle},{reporte.Periodo},{reporte.Descripcion}";
-		}
+        private void VisualizarReporte(ReporteAcademicoItem reporte)
+        {
+            ReporteAcademicoDialog dialog = new(
+                reporte,
+                _viewModel.TiposReporte,
+                _viewModel.Periodos)
+            {
+                Owner = Window.GetWindow(this)
+            };
 
-		private static string CrearContenidoPdfTemporal(ReporteAcademicoItem reporte)
-		{
-			return
-				"Reporte académico\n\n" +
-				$"Fecha: {reporte.FechaTexto}\n" +
-				$"Tipo: {reporte.TipoReporte}\n" +
-				$"Usuario: {reporte.Usuario}\n" +
-				$"Detalle: {reporte.Detalle}\n" +
-				$"Periodo: {reporte.Periodo}\n\n" +
-				reporte.Descripcion;
-		}
-	}
+            dialog.ShowDialog();
+        }
+
+        private void DescargarReporte(
+            ReporteAcademicoItem reporte,
+            string formato)
+        {
+            if (formato == "PDF")
+            {
+                MessageBox.Show(
+                    "La descarga en PDF aún no está conectada al backend.\n\n" +
+                    "Se requiere implementar un endpoint real para generar el archivo PDF.",
+                    "PDF no disponible",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information
+                );
+
+                return;
+            }
+
+            SaveFileDialog dialog = new()
+            {
+                Title = "Descargar reporte CSV",
+                FileName = $"reporte_{reporte.IdReporte}.csv",
+                Filter = "Archivo CSV (*.csv)|*.csv"
+            };
+
+            if (dialog.ShowDialog() != true)
+            {
+                return;
+            }
+
+            File.WriteAllText(
+                dialog.FileName,
+                CrearContenidoCsv(reporte),
+                Encoding.UTF8);
+
+            MensajeExitoDialog exito = new("Reporte CSV descargado")
+            {
+                Owner = Window.GetWindow(this)
+            };
+
+            exito.ShowDialog();
+        }
+
+        private static string CrearContenidoCsv(
+            ReporteAcademicoItem reporte)
+        {
+            return
+                "Fecha,Tipo,Usuario,Detalle,Periodo,Descripcion\n" +
+                $"{EscaparCsv(reporte.FechaTexto)}," +
+                $"{EscaparCsv(reporte.TipoReporte)}," +
+                $"{EscaparCsv(reporte.Usuario)}," +
+                $"{EscaparCsv(reporte.Detalle)}," +
+                $"{EscaparCsv(reporte.Periodo)}," +
+                $"{EscaparCsv(reporte.Descripcion)}";
+        }
+
+        private static string EscaparCsv(string valor)
+        {
+            if (string.IsNullOrWhiteSpace(valor))
+            {
+                return string.Empty;
+            }
+
+            string limpio = valor.Replace("\"", "\"\"");
+
+            return $"\"{limpio}\"";
+        }
+    }
 }

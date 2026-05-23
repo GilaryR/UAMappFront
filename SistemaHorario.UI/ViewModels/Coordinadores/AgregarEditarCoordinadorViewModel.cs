@@ -1,35 +1,71 @@
 ﻿using SistemaHorario.UI.Models.UI;
+using SistemaHorario.UI.Services;
+using SistemaHorarios.Application.Common;
+using System.Threading.Tasks;
 
 namespace SistemaHorario.UI.ViewModels.Coordinadores
 {
-	/// <summary>
-	/// ViewModel utilizado para:
-	/// - crear coordinadores,
-	/// - editar coordinadores.
-	/// </summary>
-	public class AgregarEditarCoordinadorViewModel
-	{
-		public CoordinadorItem Coordinador { get; set; }
+    public class AgregarEditarCoordinadorViewModel
+    {
+        private readonly CoordinadoresApiService _api = new();
 
-		public bool EsEdicion { get; set; }
+        public CoordinadorItem Coordinador { get; private set; }
 
-		public AgregarEditarCoordinadorViewModel()
-		{
-			Coordinador = new CoordinadorItem
-			{
-				Rol = "Coordinador",
-				Estado = "Activo"
-			};
+        public bool EsEdicion { get; private set; }
 
-			EsEdicion = false;
-		}
+        public string MensajeEstado { get; private set; } = string.Empty;
 
-		public AgregarEditarCoordinadorViewModel(
-			CoordinadorItem coordinador)
-		{
-			Coordinador = coordinador;
+        public AgregarEditarCoordinadorViewModel()
+        {
+            EsEdicion = false;
 
-			EsEdicion = true;
-		}
-	}
+            Coordinador = new CoordinadorItem
+            {
+                NombreCompleto = string.Empty,
+                Cedula = string.Empty,
+                CorreoInstitucional = string.Empty,
+                Celular = string.Empty,
+                Rol = "Coordinador",
+                Estado = "Activo"
+            };
+        }
+
+        public AgregarEditarCoordinadorViewModel(
+            CoordinadorItem coordinador)
+        {
+            EsEdicion = true;
+
+            Coordinador = new CoordinadorItem
+            {
+                IdCoordinador = coordinador.IdCoordinador,
+                NombreCompleto = coordinador.NombreCompleto,
+                Cedula = coordinador.Cedula,
+                CorreoInstitucional = coordinador.CorreoInstitucional,
+                Celular = coordinador.Celular,
+                Rol = "Coordinador",
+                Estado = coordinador.Estado
+            };
+        }
+
+        public async Task<bool> GuardarAsync()
+        {
+            Coordinador.Rol = "Coordinador";
+
+            ApiResponse<string> resp = EsEdicion
+                ? await _api.ActualizarCoordinadorAsync(Coordinador)
+                : await _api.CrearCoordinadorAsync(Coordinador);
+
+            if (!resp.Success)
+            {
+                MensajeEstado = string.IsNullOrWhiteSpace(resp.Message)
+                    ? "No se pudo guardar el coordinador."
+                    : resp.Message;
+
+                return false;
+            }
+
+            MensajeEstado = string.Empty;
+            return true;
+        }
+    }
 }

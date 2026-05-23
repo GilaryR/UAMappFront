@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using SistemaHorario.UI.Services;
 
 namespace SistemaHorario.UI.Views.Horarios
 {
@@ -35,6 +36,8 @@ namespace SistemaHorario.UI.Views.Horarios
     /// </summary>
     public partial class VistaPreviaHorarioView : UserControl
     {
+
+        private readonly HorariosApiService _horariosApi = new();
         private readonly VistaPreviaHorarioViewModel _viewModel;
         private readonly bool _modoAprobacion;
 
@@ -418,15 +421,40 @@ namespace SistemaHorario.UI.Views.Horarios
                 true));
         }
 
-        private void BtnAprobar_Click(
-            object sender,
-            RoutedEventArgs e)
+        private async void BtnAprobar_Click(
+    object sender,
+    RoutedEventArgs e)
         {
-            HorariosMockStore.GuardarHorarioAprobado(
-                _viewModel.Horario);
+            if (_viewModel.Horario.IdHorario <= 0)
+            {
+                MessageBox.Show(
+                    "No se puede aprobar el horario porque no tiene un identificador válido.",
+                    "Error",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning
+                );
+
+                return;
+            }
+
+            var resp = await _horariosApi.AprobarHorarioAsync(
+                _viewModel.Horario.IdHorario
+            );
+
+            if (!resp.Success)
+            {
+                MessageBox.Show(
+                    "No se pudo aprobar el horario:\n" + resp.Message,
+                    "Error",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error
+                );
+
+                return;
+            }
 
             MensajeExitoDialog dialog = new(
-                "Horario aprobado.")
+                "Horario aprobado correctamente.")
             {
                 Owner = Window.GetWindow(this)
             };
@@ -436,17 +464,44 @@ namespace SistemaHorario.UI.Views.Horarios
             NavegarA(new HorariosView());
         }
 
-        private void BtnRechazar_Click(
-            object sender,
-            RoutedEventArgs e)
+        private async void BtnRechazar_Click(
+    object sender,
+    RoutedEventArgs e)
         {
-            _viewModel.Horario.Estado = "Rechazado";
+            if (_viewModel.Horario.IdHorario <= 0)
+            {
+                MessageBox.Show(
+                    "No se puede rechazar el horario porque no tiene un identificador válido.",
+                    "Error",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning
+                );
+
+                return;
+            }
+
+            var resp = await _horariosApi.RechazarHorarioAsync(
+                _viewModel.Horario.IdHorario
+            );
+
+            if (!resp.Success)
+            {
+                MessageBox.Show(
+                    "No se pudo rechazar el horario:\n" + resp.Message,
+                    "Error",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error
+                );
+
+                return;
+            }
 
             MessageBox.Show(
-                "Horario rechazado.",
+                "Horario rechazado correctamente.",
                 "Rechazo",
                 MessageBoxButton.OK,
-                MessageBoxImage.Warning);
+                MessageBoxImage.Information
+            );
 
             NavegarA(new HorariosView());
         }

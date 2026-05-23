@@ -1,191 +1,170 @@
 ﻿using SistemaHorario.UI.Dialogs.Shared;
 using SistemaHorario.UI.Models.UI;
-using SistemaHorario.UI.Services;
 using SistemaHorario.UI.ViewModels.Coordinadores;
-using SistemaHorarios.Application.Common;
 using System.Windows;
 using System.Windows.Controls;
 
 namespace SistemaHorario.UI.Views.Coordinadores
 {
-	/// <summary>
-	/// Formulario visual para crear o editar coordinadores.
-	///
-	/// El rol se mantiene fijo como Coordinador.
-	///
-	/// TODO:
-	/// Conectar con:
-	/// POST /api/coordinadores
-	/// PUT /api/coordinadores/{id}
-	/// </summary>
-	public partial class AgregarEditarCoordinadorView : UserControl
-	{
-	private readonly CoordinadoresApiService _api = new();
-	private readonly AgregarEditarCoordinadorViewModel _viewModel;
-		public AgregarEditarCoordinadorView(
-			CoordinadorItem? coordinador = null)
-		{
-			InitializeComponent();
+    public partial class AgregarEditarCoordinadorView : UserControl
+    {
+        private readonly AgregarEditarCoordinadorViewModel _viewModel;
 
-			_viewModel = coordinador == null
-				? new AgregarEditarCoordinadorViewModel()
-				: new AgregarEditarCoordinadorViewModel(coordinador);
+        public AgregarEditarCoordinadorView(
+            CoordinadorItem? coordinador = null)
+        {
+            InitializeComponent();
 
-			CargarDatos();
-		}
+            _viewModel = coordinador == null
+                ? new AgregarEditarCoordinadorViewModel()
+                : new AgregarEditarCoordinadorViewModel(coordinador);
 
-		private void CargarDatos()
-		{
-			TxtNombre.Text = _viewModel.Coordinador.NombreCompleto;
-			TxtCedula.Text = _viewModel.Coordinador.Cedula;
-			TxtCorreo.Text = _viewModel.Coordinador.CorreoInstitucional;
-			TxtCelular.Text = _viewModel.Coordinador.Celular;
-			TxtRol.Text = "Coordinador";
+            CargarDatos();
+        }
 
-			foreach (ComboBoxItem item in CmbEstado.Items)
-			{
-				if (item.Content?.ToString() ==
-					_viewModel.Coordinador.Estado)
-				{
-					CmbEstado.SelectedItem = item;
-					break;
-				}
-			}
+        private void CargarDatos()
+        {
+            TxtTitulo.Text = _viewModel.EsEdicion
+                ? "Editar coordinador"
+                : "Agregar coordinador";
 
-			if (_viewModel.EsEdicion)
-			{
-				TxtTitulo.Text = "Editar coordinador";
-			}
-		}
+            TxtNombre.Text = _viewModel.Coordinador.NombreCompleto;
+            TxtCedula.Text = _viewModel.Coordinador.Cedula;
+            TxtCorreo.Text = _viewModel.Coordinador.CorreoInstitucional;
+            TxtCelular.Text = _viewModel.Coordinador.Celular;
+            TxtRol.Text = "Coordinador";
 
-private async void BtnGuardar_Click(
-		object sender,
-		RoutedEventArgs e)
-	{
-		if (!FormularioEsValido())
-			return;
+            SeleccionarEstado(_viewModel.Coordinador.Estado);
+        }
 
-		_viewModel.Coordinador.NombreCompleto =
-			TxtNombre.Text.Trim();
+        private void SeleccionarEstado(string estado)
+        {
+            foreach (ComboBoxItem item in CmbEstado.Items)
+            {
+                if (item.Content?.ToString() == estado)
+                {
+                    CmbEstado.SelectedItem = item;
+                    return;
+                }
+            }
 
-		_viewModel.Coordinador.Cedula =
-			TxtCedula.Text.Trim();
+            CmbEstado.SelectedIndex = 0;
+        }
 
-		_viewModel.Coordinador.CorreoInstitucional =
-			TxtCorreo.Text.Trim();
+        private async void BtnGuardar_Click(
+            object sender,
+            RoutedEventArgs e)
+        {
+            if (!FormularioEsValido())
+            {
+                return;
+            }
 
-		_viewModel.Coordinador.Celular =
-			TxtCelular.Text.Trim();
+            _viewModel.Coordinador.NombreCompleto = TxtNombre.Text.Trim();
+            _viewModel.Coordinador.Cedula = TxtCedula.Text.Trim();
+            _viewModel.Coordinador.CorreoInstitucional = TxtCorreo.Text.Trim();
+            _viewModel.Coordinador.Celular = TxtCelular.Text.Trim();
+            _viewModel.Coordinador.Rol = "Coordinador";
 
-		_viewModel.Coordinador.Rol = "Coordinador";
+            if (CmbEstado.SelectedItem is ComboBoxItem item)
+            {
+                _viewModel.Coordinador.Estado =
+                    item.Content?.ToString() ?? "Activo";
+            }
 
-		if (CmbEstado.SelectedItem is ComboBoxItem item)
-		{
-			_viewModel.Coordinador.Estado =
-				item.Content?.ToString() ?? "Activo";
-		}
+            bool guardado = await _viewModel.GuardarAsync();
 
-		ApiResponse<string> resultado;
+            if (!guardado)
+            {
+                MessageBox.Show(
+                    _viewModel.MensajeEstado,
+                    "Error",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
 
-		if (_viewModel.EsEdicion)
-		{
-			resultado = await _api.ActualizarCoordinadorAsync(
-				_viewModel.Coordinador);
-		}
-		else
-		{
-			resultado = await _api.CrearCoordinadorAsync(
-				_viewModel.Coordinador);
-		}
+                return;
+            }
 
-		if (!resultado.Success)
-		{
-			MessageBox.Show(
-				resultado.Message,
-				"Error",
-				MessageBoxButton.OK,
-				MessageBoxImage.Error);
-			return;
-		}
+            MensajeExitoDialog dialog = new(
+                _viewModel.EsEdicion
+                    ? "Coordinador actualizado correctamente."
+                    : "Coordinador creado correctamente.")
+            {
+                Owner = Window.GetWindow(this)
+            };
 
-		MensajeExitoDialog dialog = new(
-			_viewModel.EsEdicion
-				? "Coordinador actualizado"
-				: "Coordinador creado")
-		{
-			Owner = Window.GetWindow(this)
-		};
+            dialog.ShowDialog();
 
-		dialog.ShowDialog();
+            VolverAPrincipal();
+        }
 
-		VolverAPrincipal();
-	}
+        private bool FormularioEsValido()
+        {
+            if (string.IsNullOrWhiteSpace(TxtNombre.Text))
+            {
+                MostrarValidacion("El nombre completo es obligatorio.");
+                return false;
+            }
 
-	private bool FormularioEsValido()
-		{
-			if (string.IsNullOrWhiteSpace(TxtNombre.Text))
-			{
-				MessageBox.Show(
-					"El nombre completo es obligatorio.",
-					"⚠ Validación",
-					MessageBoxButton.OK,
-					MessageBoxImage.Warning);
+            if (string.IsNullOrWhiteSpace(TxtCedula.Text))
+            {
+                MostrarValidacion("La cédula es obligatoria.");
+                return false;
+            }
 
-				return false;
-			}
+            if (string.IsNullOrWhiteSpace(TxtCorreo.Text))
+            {
+                MostrarValidacion("El correo institucional es obligatorio.");
+                return false;
+            }
 
-			if (string.IsNullOrWhiteSpace(TxtCedula.Text))
-			{
-				MessageBox.Show(
-					"La cédula es obligatoria.",
-					"⚠ Validación",
-					MessageBoxButton.OK,
-					MessageBoxImage.Warning);
+            if (!TxtCorreo.Text.Contains("@"))
+            {
+                MostrarValidacion("El correo institucional no tiene un formato válido.");
+                return false;
+            }
 
-				return false;
-			}
+            return true;
+        }
 
-			if (string.IsNullOrWhiteSpace(TxtCorreo.Text))
-			{
-				MessageBox.Show(
-					"El correo institucional es obligatorio.",
-					"⚠ Validación",
-					MessageBoxButton.OK,
-					MessageBoxImage.Warning);
+        private static void MostrarValidacion(string mensaje)
+        {
+            MessageBox.Show(
+                mensaje,
+                "Validación",
+                MessageBoxButton.OK,
+                MessageBoxImage.Warning);
+        }
 
-				return false;
-			}
+        private void VolverAPrincipal()
+        {
+            ContentControl? contentArea = BuscarContentArea();
 
-			return true;
-		}
+            if (contentArea == null)
+            {
+                return;
+            }
 
-		private void VolverAPrincipal()
-		{
-			ContentControl? contentArea = BuscarContentArea();
+            contentArea.Content = new CoordinadoresView();
+        }
 
-			if (contentArea == null)
-				return;
+        private ContentControl? BuscarContentArea()
+        {
+            DependencyObject? actual = this;
 
-			contentArea.Content = new CoordinadoresView();
-		}
+            while (actual != null)
+            {
+                if (actual is ContentControl content &&
+                    content.Name == "ContentArea")
+                {
+                    return content;
+                }
 
-		private ContentControl? BuscarContentArea()
-		{
-			DependencyObject? actual = this;
+                actual =
+                    System.Windows.Media.VisualTreeHelper.GetParent(actual);
+            }
 
-			while (actual != null)
-			{
-				if (actual is ContentControl content &&
-					content.Name == "ContentArea")
-				{
-					return content;
-				}
-
-				actual =
-					System.Windows.Media.VisualTreeHelper.GetParent(actual);
-			}
-
-			return null;
-		}
-	}
+            return null;
+        }
+    }
 }
