@@ -1,4 +1,4 @@
-using SistemaHorario.UI.Models.UI;
+﻿using SistemaHorario.UI.Models.UI;
 using SistemaHorarios.Application.Common;
 using System.Collections.ObjectModel;
 
@@ -99,7 +99,7 @@ public class GruposApiService
     }
 
     public async Task<ApiResponse<string>> EliminarGrupoAsync(int id)
-        => await _api.DeleteAsync($"Grupos/{id}");
+        => await _api.DeleteAsync<string>($"grupos/{id}");
 
     public async Task<ApiResponse<List<GrupoHorarioOption>>> ObtenerGruposParaHorarioAsync()
     {
@@ -121,3 +121,4 @@ public class GruposApiService
         return new ApiResponse<List<GrupoHorarioOption>> { Success = true, Data = lista };
     }
 }
+

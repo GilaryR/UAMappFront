@@ -1,4 +1,4 @@
-using SistemaHorario.UI.Models.UI;
+﻿using SistemaHorario.UI.Models.UI;
 using SistemaHorarios.Application.Common;
 using System.Collections.ObjectModel;
 
@@ -76,7 +76,7 @@ public class PlanAcademicoApiService
             new { IdMateria = idMateria });
 
     public async Task<ApiResponse<string>> EliminarMateriaAsync(int idMateriaPlan)
-        => await _api.DeleteAsync($"PlanAcademico/materias/{idMateriaPlan}");
+        => await _api.DeleteAsync<string>($"PlanAcademico/materias/{idMateriaPlan}");
 
     public async Task<ApiResponse<string>> ActualizarPlanAsync(PlanAcademicoItem p)
         => await _api.PutAsync($"PlanAcademico/{p.IdPlanAcademico}", new
@@ -88,7 +88,7 @@ public class PlanAcademicoApiService
         });
 
     public async Task<ApiResponse<string>> EliminarPlanAsync(int id)
-        => await _api.DeleteAsync($"PlanAcademico/{id}");
+        => await _api.DeleteAsync<string>($"PlanAcademico/{id}");
 
     private static PlanAcademicoItem MapearItem(PlanAcademicoBackendDto p) => new()
     {
@@ -120,3 +120,5 @@ public class PlanAcademicoApiService
         )
     };
 }
+
+

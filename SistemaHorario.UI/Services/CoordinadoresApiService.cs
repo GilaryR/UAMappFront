@@ -82,7 +82,7 @@ public class CoordinadoresApiService
 
     public async Task<ApiResponse<string>> EliminarCoordinadorAsync(int id)
     {
-        return await _api.DeleteAsync($"usuarios/{id}");
+        return await _api.DeleteAsync<string>($"usuarios/{id}");
     }
 
     private static CoordinadorItem MapearCoordinador(UsuarioBackendDto usuario)

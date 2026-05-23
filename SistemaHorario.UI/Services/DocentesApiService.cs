@@ -1,4 +1,4 @@
-using SistemaHorario.UI.Models.UI;
+﻿using SistemaHorario.UI.Models.UI;
 using SistemaHorarios.Application.Common;
 
 namespace SistemaHorario.UI.Services;
@@ -65,7 +65,7 @@ public class DocentesApiService
         });
 
     public async Task<ApiResponse<string>> EliminarDocenteAsync(int id)
-        => await _api.DeleteAsync($"Docentes/{id}");
+        => await _api.DeleteAsync<string>($"docentes/{id}");
 
     public async Task<ApiResponse<List<DisponibilidadDocenteItem>>> ObtenerDisponibilidadAsync(int idDocente)
     {
@@ -96,3 +96,4 @@ public class DocentesApiService
             }).ToList()
         });
 }
+
