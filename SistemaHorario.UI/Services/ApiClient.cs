@@ -234,6 +234,46 @@ private static string ObtenerContentType(string rutaArchivo)
         }
     }
 
+
+    public async Task<ApiResponse<T>> PatchAsync<T>(string url, object data)
+    {
+        AgregarToken();
+
+        try
+        {
+            HttpResponseMessage response =
+                await _http.PatchAsJsonAsync(url, data);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                string mensaje =
+                    await response.Content.ReadAsStringAsync();
+
+                return new ApiResponse<T>
+                {
+                    Success = false,
+                    Message = mensaje
+                };
+            }
+
+            ApiResponse<T>? resultado =
+                await response.Content.ReadFromJsonAsync<ApiResponse<T>>();
+
+            return resultado ?? new ApiResponse<T>
+            {
+                Success = false,
+                Message = "No se pudo leer la respuesta del servidor."
+            };
+        }
+        catch (Exception ex)
+        {
+            return new ApiResponse<T>
+            {
+                Success = false,
+                Message = ex.Message
+            };
+        }
+    }
     public async Task<ApiResponse<T>> PostAsync<T>(string url, object body)
     {
         AgregarToken();
@@ -282,27 +322,39 @@ private static string ObtenerContentType(string rutaArchivo)
         }
     }
 
-    public async Task<ApiResponse<string>> DeleteAsync(string url)
+    public async Task<ApiResponse<T>> DeleteAsync<T>(string url)
     {
         AgregarToken();
 
         try
         {
-            HttpResponseMessage response = await _http.DeleteAsync(url);
+            HttpResponseMessage response =
+                await _http.DeleteAsync(url);
 
-            ApiResponse<object> apiResponse =
-                await ProcesarRespuestaAsync<object>(response);
-
-            return new ApiResponse<string>
+            if (!response.IsSuccessStatusCode)
             {
-                Success = apiResponse.Success,
-                Message = apiResponse.Message,
-                Data = apiResponse.Data?.ToString()
+                string mensaje =
+                    await response.Content.ReadAsStringAsync();
+
+                return new ApiResponse<T>
+                {
+                    Success = false,
+                    Message = mensaje
+                };
+            }
+
+            ApiResponse<T>? resultado =
+                await response.Content.ReadFromJsonAsync<ApiResponse<T>>();
+
+            return resultado ?? new ApiResponse<T>
+            {
+                Success = false,
+                Message = "No se pudo leer la respuesta del servidor."
             };
         }
         catch (Exception ex)
         {
-            return new ApiResponse<string>
+            return new ApiResponse<T>
             {
                 Success = false,
                 Message = ex.Message

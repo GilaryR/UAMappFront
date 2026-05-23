@@ -170,14 +170,33 @@ namespace SistemaHorario.UI.ViewModels.Materias
             return true;
         }
 
-        public async Task<bool> EliminarMateriaAsync(MateriaItem materia)
+        public async Task<bool> InactivarMateriaAsync(MateriaItem materia)
         {
-            var resp = await _api.EliminarMateriaAsync(materia.IdMateria);
+            var resp = await _api.InactivarMateriaAsync(materia.IdMateria);
 
             if (!resp.Success)
             {
                 MensajeEstado = string.IsNullOrWhiteSpace(resp.Message)
-                    ? "No se pudo eliminar la materia."
+                    ? "No se pudo inactivar la materia."
+                    : resp.Message;
+
+                return false;
+            }
+
+            await CargarMateriasAsync();
+
+            MensajeEstado = string.Empty;
+            return true;
+        }
+
+        public async Task<bool> ActivarMateriaAsync(MateriaItem materia)
+        {
+            var resp = await _api.ActivarMateriaAsync(materia.IdMateria);
+
+            if (!resp.Success)
+            {
+                MensajeEstado = string.IsNullOrWhiteSpace(resp.Message)
+                    ? "No se pudo activar la materia."
                     : resp.Message;
 
                 return false;

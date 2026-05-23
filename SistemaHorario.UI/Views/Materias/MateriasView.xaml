@@ -52,13 +52,11 @@
                             <ColumnDefinition Width="140"/>
                         </Grid.ColumnDefinitions>
 
-                        <!-- SearchBox -->
                         <controls:SearchBox x:Name="SearchBoxMaterias"
                                             Grid.Column="0"
                                             Placeholder="Buscar por código o nombre"
                                             BusquedaCambiada="SearchBoxMaterias_BusquedaCambiada"/>
 
-                        <!-- Semestre -->
                         <StackPanel Grid.Column="2">
 
                             <TextBlock Text="Semestre"
@@ -86,7 +84,6 @@
                             </ComboBox>
                         </StackPanel>
 
-                        <!-- Estado -->
                         <StackPanel Grid.Column="4">
 
                             <TextBlock Text="Estado"
@@ -106,7 +103,6 @@
                             </ComboBox>
                         </StackPanel>
 
-                        <!-- Limpiar -->
                         <Button Grid.Column="6"
                                 Content="Limpiar filtros"
                                 Height="34"
@@ -130,7 +126,10 @@
                               BorderThickness="0"
                               RowHeight="42"
                               ColumnHeaderHeight="38"
-                              FontSize="13">
+                              FontSize="13"
+                              MaxHeight="520"
+                              ScrollViewer.VerticalScrollBarVisibility="Auto"
+                              ScrollViewer.HorizontalScrollBarVisibility="Auto">
 
                         <DataGrid.Resources>
 
@@ -249,7 +248,7 @@
 
                             <!-- Acciones -->
                             <DataGridTemplateColumn Header="Acciones"
-                                                    Width="120">
+                                                    Width="150">
 
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
@@ -264,16 +263,62 @@
                                                     Background="#73AFE0"
                                                     BorderThickness="0"
                                                     Cursor="Hand"
+                                                    ToolTip="Editar"
                                                     Click="BtnEditar_Click"/>
 
-                                            <Button Content="🗑"
+                                            <!-- Inactivar: solo aparece cuando la materia está activa -->
+                                            <Button Content="⛔"
                                                     Width="26"
                                                     Height="24"
                                                     Margin="2"
                                                     Background="#EBB6B6"
                                                     BorderThickness="0"
                                                     Cursor="Hand"
-                                                    Click="BtnEliminar_Click"/>
+                                                    ToolTip="Inactivar"
+                                                    Click="BtnInactivar_Click">
+
+                                                <Button.Style>
+                                                    <Style TargetType="Button">
+                                                        <Setter Property="Visibility"
+                                                                Value="Visible"/>
+
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding Activa}"
+                                                                         Value="False">
+                                                                <Setter Property="Visibility"
+                                                                        Value="Collapsed"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Button.Style>
+                                            </Button>
+
+                                            <!-- Reactivar: solo aparece cuando la materia está inactiva -->
+                                            <Button Content="↻"
+                                                    Width="26"
+                                                    Height="24"
+                                                    Margin="2"
+                                                    Background="#B9EFC2"
+                                                    BorderThickness="0"
+                                                    Cursor="Hand"
+                                                    ToolTip="Reactivar"
+                                                    Click="BtnReactivar_Click">
+
+                                                <Button.Style>
+                                                    <Style TargetType="Button">
+                                                        <Setter Property="Visibility"
+                                                                Value="Collapsed"/>
+
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding Activa}"
+                                                                         Value="False">
+                                                                <Setter Property="Visibility"
+                                                                        Value="Visible"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Button.Style>
+                                            </Button>
 
                                             <Button Content="👁"
                                                     Width="26"
@@ -282,6 +327,7 @@
                                                     Background="#DDCE73"
                                                     BorderThickness="0"
                                                     Cursor="Hand"
+                                                    ToolTip="Ver"
                                                     Click="BtnVer_Click"/>
                                         </StackPanel>
 

@@ -1,4 +1,4 @@
-using SistemaHorario.UI.Models.UI;
+﻿using SistemaHorario.UI.Models.UI;
 using SistemaHorarios.Application.Common;
 using System;
 using System.Collections.Generic;
@@ -99,7 +99,7 @@ public class HorariosApiService
 
     public async Task<ApiResponse<string>> EliminarHorarioAsync(int idHorario)
     {
-        return await _api.DeleteAsync($"horarios/{idHorario}");
+        return await _api.DeleteAsync<string>($"horarios/{idHorario}");
     }
 
     public async Task<ApiResponse<string>> AprobarHorarioAsync(int idHorario)
@@ -167,7 +167,7 @@ public class HorariosApiService
         {
             IdHorario = dto.IdHorario,
             IdGrupo = dto.IdGrupo,
-            Nombre = $"{dto.NombreMateria} – {dto.NombreDocente}",
+            Nombre = $"{dto.NombreMateria} â€“ {dto.NombreDocente}",
             Grupo = dto.NombreGrupo,
             Tipo = dto.TipoGrupo,
             Jornada = dto.Jornada,

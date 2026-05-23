@@ -49,7 +49,6 @@ namespace SistemaHorario.UI.Views.Materias
                     MessageBoxImage.Error);
             }
         }
-
         private async void BtnAgregarMateria_Click(
             object sender,
             RoutedEventArgs e)
@@ -159,9 +158,9 @@ namespace SistemaHorario.UI.Views.Materias
             dialog.ShowDialog();
         }
 
-        private async void BtnEliminar_Click(
-            object sender,
-            RoutedEventArgs e)
+        private async void BtnInactivar_Click(
+    object sender,
+    RoutedEventArgs e)
         {
             MateriaItem? materia =
                 ObtenerMateriaDesdeBoton(sender);
@@ -182,10 +181,10 @@ namespace SistemaHorario.UI.Views.Materias
                 return;
             }
 
-            bool eliminada =
-                await _viewModel.EliminarMateriaAsync(materia);
+            bool inactivada =
+                await _viewModel.InactivarMateriaAsync(materia);
 
-            if (!eliminada)
+            if (!inactivada)
             {
                 MostrarError(_viewModel.MensajeEstado);
                 return;
@@ -194,7 +193,39 @@ namespace SistemaHorario.UI.Views.Materias
             ActualizarResumen();
 
             MensajeExitoDialog exito =
-                new("Materia eliminada correctamente.")
+                new("Materia inactivada correctamente.")
+                {
+                    Owner = Window.GetWindow(this)
+                };
+
+            exito.ShowDialog();
+        }
+
+        private async void BtnReactivar_Click(
+            object sender,
+            RoutedEventArgs e)
+        {
+            MateriaItem? materia =
+                ObtenerMateriaDesdeBoton(sender);
+
+            if (materia == null)
+            {
+                return;
+            }
+
+            bool reactivada =
+                await _viewModel.ActivarMateriaAsync(materia);
+
+            if (!reactivada)
+            {
+                MostrarError(_viewModel.MensajeEstado);
+                return;
+            }
+
+            ActualizarResumen();
+
+            MensajeExitoDialog exito =
+                new("Materia reactivada correctamente.")
                 {
                     Owner = Window.GetWindow(this)
                 };

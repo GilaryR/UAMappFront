@@ -33,6 +33,9 @@ public class MateriasApiService
             materia.Activa
         });
 
-    public async Task<ApiResponse<string>> EliminarMateriaAsync(int idMateria)
-        => await _api.DeleteAsync($"materias/{idMateria}");
+    public async Task<ApiResponse<int>> InactivarMateriaAsync(int idMateria)
+        => await _api.DeleteAsync<int>($"materias/{idMateria}");
+
+    public async Task<ApiResponse<int>> ActivarMateriaAsync(int idMateria)
+        => await _api.PatchAsync<int>($"materias/{idMateria}/activar", new { });
 }
