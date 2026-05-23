@@ -1,5 +1,4 @@
-﻿
-using SistemaHorario.UI.Models.UI;
+﻿using SistemaHorario.UI.Models.UI;
 using SistemaHorario.UI.Services;
 using SistemaHorario.UI.ViewModels.Base;
 using System.Collections.ObjectModel;
@@ -18,73 +17,110 @@ namespace SistemaHorario.UI.ViewModels.Materias
         private string _mensajeEstado = string.Empty;
 
         public ObservableCollection<MateriaItem> Materias { get; } = new();
+
         public ObservableCollection<MateriaItem> MateriasFiltradas { get; } = new();
 
         public string Busqueda
         {
             get => _busqueda;
-            set { if (SetProperty(ref _busqueda, value)) AplicarFiltros(); }
+            set
+            {
+                if (SetProperty(ref _busqueda, value))
+                {
+                    AplicarFiltros();
+                }
+            }
         }
 
         public string SemestreSeleccionado
         {
             get => _semestreSeleccionado;
-            set { if (SetProperty(ref _semestreSeleccionado, value)) AplicarFiltros(); }
+            set
+            {
+                if (SetProperty(ref _semestreSeleccionado, value))
+                {
+                    AplicarFiltros();
+                }
+            }
         }
 
         public string EstadoSeleccionado
         {
             get => _estadoSeleccionado;
-            set { if (SetProperty(ref _estadoSeleccionado, value)) AplicarFiltros(); }
+            set
+            {
+                if (SetProperty(ref _estadoSeleccionado, value))
+                {
+                    AplicarFiltros();
+                }
+            }
         }
 
         public string MensajeEstado
         {
             get => _mensajeEstado;
-            set => SetProperty(ref _mensajeEstado, value);
-        }
-
-        public MateriasViewModel()
-        {
-            _ = CargarMateriasAsync();
+            private set => SetProperty(ref _mensajeEstado, value);
         }
 
         public async Task CargarMateriasAsync()
         {
             var resp = await _api.ObtenerMateriasAsync();
+
+            Materias.Clear();
+
             if (!resp.Success || resp.Data == null)
             {
-                MensajeEstado = "Error al cargar materias: " + resp.Message;
+                MensajeEstado = string.IsNullOrWhiteSpace(resp.Message)
+                    ? "No se pudieron cargar las materias."
+                    : resp.Message;
+
+                AplicarFiltros();
                 return;
             }
-            Materias.Clear();
-            foreach (var m in resp.Data)
-                Materias.Add(m);
+
+            foreach (MateriaItem materia in resp.Data)
+            {
+                Materias.Add(materia);
+            }
+
+            MensajeEstado = string.Empty;
             AplicarFiltros();
-            MensajeEstado = Materias.Count + " materias cargadas.";
         }
 
         public void AplicarFiltros()
         {
             var resultado = Materias.AsEnumerable();
+
             if (!string.IsNullOrWhiteSpace(Busqueda))
             {
-                string b = Busqueda.ToLower();
+                string busqueda = Busqueda.ToLower();
+
                 resultado = resultado.Where(m =>
-                    m.Codigo.ToLower().Contains(b) ||
-                    m.Nombre.ToLower().Contains(b));
+                    m.Codigo.ToLower().Contains(busqueda) ||
+                    m.Nombre.ToLower().Contains(busqueda));
             }
+
             if (SemestreSeleccionado != "Todos" &&
-                int.TryParse(SemestreSeleccionado, out int sem))
-                resultado = resultado.Where(m => m.Semestre == sem);
+                int.TryParse(SemestreSeleccionado, out int semestre))
+            {
+                resultado = resultado.Where(m =>
+                    m.Semestre == semestre);
+            }
+
             if (EstadoSeleccionado != "Todos")
             {
                 bool activa = EstadoSeleccionado == "Activa";
-                resultado = resultado.Where(m => m.Activa == activa);
+
+                resultado = resultado.Where(m =>
+                    m.Activa == activa);
             }
+
             MateriasFiltradas.Clear();
-            foreach (var m in resultado)
-                MateriasFiltradas.Add(m);
+
+            foreach (MateriaItem materia in resultado)
+            {
+                MateriasFiltradas.Add(materia);
+            }
         }
 
         public void LimpiarFiltros()
@@ -92,47 +128,83 @@ namespace SistemaHorario.UI.ViewModels.Materias
             Busqueda = string.Empty;
             SemestreSeleccionado = "Todos";
             EstadoSeleccionado = "Todos";
+
             AplicarFiltros();
         }
 
         public async Task<bool> AgregarMateriaAsync(MateriaItem materia)
         {
             var resp = await _api.CrearMateriaAsync(materia);
-            if (resp.Success) { await CargarMateriasAsync(); return true; }
-            MensajeEstado = "Error al crear: " + resp.Message;
-            return false;
+
+            if (!resp.Success)
+            {
+                MensajeEstado = string.IsNullOrWhiteSpace(resp.Message)
+                    ? "No se pudo crear la materia."
+                    : resp.Message;
+
+                return false;
+            }
+
+            await CargarMateriasAsync();
+
+            MensajeEstado = string.Empty;
+            return true;
         }
 
         public async Task<bool> ActualizarMateriaAsync(MateriaItem materia)
         {
             var resp = await _api.ActualizarMateriaAsync(materia);
-            if (resp.Success) { await CargarMateriasAsync(); return true; }
-            MensajeEstado = "Error al actualizar: " + resp.Message;
-            return false;
+
+            if (!resp.Success)
+            {
+                MensajeEstado = string.IsNullOrWhiteSpace(resp.Message)
+                    ? "No se pudo actualizar la materia."
+                    : resp.Message;
+
+                return false;
+            }
+
+            await CargarMateriasAsync();
+
+            MensajeEstado = string.Empty;
+            return true;
         }
 
         public async Task<bool> EliminarMateriaAsync(MateriaItem materia)
         {
             var resp = await _api.EliminarMateriaAsync(materia.IdMateria);
-            if (resp.Success) { Materias.Remove(materia); AplicarFiltros(); return true; }
-            MensajeEstado = "Error al eliminar: " + resp.Message;
-            return false;
-        }
 
-        public void AgregarMateria(MateriaItem materia) => _ = AgregarMateriaAsync(materia);
-        public void ActualizarMateria(MateriaItem materia) => _ = ActualizarMateriaAsync(materia);
-        public void EliminarMateria(MateriaItem materia) => _ = EliminarMateriaAsync(materia);
+            if (!resp.Success)
+            {
+                MensajeEstado = string.IsNullOrWhiteSpace(resp.Message)
+                    ? "No se pudo eliminar la materia."
+                    : resp.Message;
+
+                return false;
+            }
+
+            await CargarMateriasAsync();
+
+            MensajeEstado = string.Empty;
+            return true;
+        }
 
         public ObservableCollection<MateriaItem> ObtenerMateriasDisponiblesComoPrerrequisito(
             MateriaItem? materiaActual = null)
         {
             ObservableCollection<MateriaItem> resultado = new();
-            foreach (var m in Materias)
+
+            foreach (MateriaItem materia in Materias)
             {
-                if (materiaActual != null && m.IdMateria == materiaActual.IdMateria)
+                if (materiaActual != null &&
+                    materia.IdMateria == materiaActual.IdMateria)
+                {
                     continue;
-                resultado.Add(m);
+                }
+
+                resultado.Add(materia);
             }
+
             return resultado;
         }
     }

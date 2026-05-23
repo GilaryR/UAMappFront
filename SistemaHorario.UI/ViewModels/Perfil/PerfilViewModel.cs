@@ -93,9 +93,28 @@ namespace SistemaHorario.UI.ViewModels.Perfil
             return true;
         }
 
-        public void ActualizarFoto(string rutaImagen)
+        public async Task<bool> ActualizarFotoAsync(string rutaArchivo)
         {
-            Perfil.RutaImagen = rutaImagen;
+            ApiResponse<string> resp =
+                await _api.ActualizarFotoPerfilAsync(rutaArchivo);
+
+            if (!resp.Success || string.IsNullOrWhiteSpace(resp.Data))
+            {
+                MensajeEstado = string.IsNullOrWhiteSpace(resp.Message)
+                    ? "No se pudo actualizar la foto de perfil."
+                    : resp.Message;
+
+                return false;
+            }
+
+            string rutaFoto = resp.Data.StartsWith("http")
+                ? resp.Data
+                : "http://localhost:5023" + resp.Data;
+
+            Perfil.RutaImagen = rutaFoto;
+
+            MensajeEstado = string.Empty;
+            return true;
         }
     }
 }

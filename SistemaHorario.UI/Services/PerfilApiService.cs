@@ -13,42 +13,41 @@ public class PerfilBackendDto
     public string Rol { get; set; } = string.Empty;
     public string Estado { get; set; } = string.Empty;
     public string Celular { get; set; } = string.Empty;
+    public string? FotoPerfilUrl { get; set; }
 }
 
 public class PerfilApiService
 {
+    private const string UrlBackend = "http://localhost:5023";
+
     private readonly ApiClient _api = new();
 
     public async Task<ApiResponse<PerfilUsuarioItem>> ObtenerPerfilAsync()
     {
-        ApiResponse<PerfilBackendDto> resp =
-            await _api.GetAsync<PerfilBackendDto>("usuarios/perfil");
+        var resp = await _api.GetAsync<PerfilBackendDto>("usuarios/perfil");
 
         if (!resp.Success || resp.Data == null)
         {
             return new ApiResponse<PerfilUsuarioItem>
             {
                 Success = false,
-                Message = string.IsNullOrWhiteSpace(resp.Message)
-                    ? "No se pudo cargar el perfil del usuario."
-                    : resp.Message
+                Message = resp.Message
             };
         }
 
-        PerfilUsuarioItem perfil = new PerfilUsuarioItem
+        var perfil = new PerfilUsuarioItem
         {
             NombreCompleto = resp.Data.NombreCompleto,
             CorreoInstitucional = resp.Data.CorreoInstitucional,
             Rol = resp.Data.Rol,
             Telefono = resp.Data.Celular,
             FacultadPrograma = "Universidad Autónoma de Manizales",
-            RutaImagen = "/Assets/Images/ImgUsuario.png"
+            RutaImagen = ResolverRutaFoto(resp.Data.FotoPerfilUrl)
         };
 
         return new ApiResponse<PerfilUsuarioItem>
         {
             Success = true,
-            Message = "Perfil cargado correctamente.",
             Data = perfil
         };
     }
@@ -67,13 +66,38 @@ public class PerfilApiService
     }
 
     public async Task<ApiResponse<string>> CambiarContrasenaAsync(
-        string contrasenaActual,
-        string nuevaContrasena)
+        string actual,
+        string nueva)
     {
         return await _api.PutAsync("usuarios/cambiar-contrasena", new
         {
-            ContrasenaActual = contrasenaActual,
-            NuevaContrasena = nuevaContrasena
+            ContrasenaActual = actual,
+            NuevaContrasena = nueva
         });
+    }
+
+    public async Task<ApiResponse<string>> ActualizarFotoPerfilAsync(
+        string rutaArchivo)
+    {
+        return await _api.PutFileAsync<string>(
+            "usuarios/perfil/foto",
+            "foto",
+            rutaArchivo
+        );
+    }
+
+    private static string ResolverRutaFoto(string? fotoPerfilUrl)
+    {
+        if (string.IsNullOrWhiteSpace(fotoPerfilUrl))
+        {
+            return "/Assets/Images/ImgUsuario.png";
+        }
+
+        if (fotoPerfilUrl.StartsWith("http"))
+        {
+            return fotoPerfilUrl;
+        }
+
+        return UrlBackend + fotoPerfilUrl;
     }
 }
