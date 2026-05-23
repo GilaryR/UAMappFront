@@ -1,6 +1,9 @@
 ﻿using SistemaHorario.UI.Models.UI;
 using SistemaHorario.UI.Services;
 using SistemaHorario.UI.ViewModels.Base;
+using SistemaHorarios.Application.Common;
+using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 
@@ -9,80 +12,176 @@ namespace SistemaHorario.UI.ViewModels.PlanAcademico
     public class PlanAcademicoViewModel : ViewModelBase
     {
         private readonly PlanAcademicoApiService _api = new();
+
         private ObservableCollection<PlanAcademicoItem> _planes = new();
         private int _cantidadSemestresNuevoPlan = 10;
-        private string _jornadaNuevoPlan = "Por definir";
+        private string _jornadaNuevoPlan = "Diurna";
+        private string _mensajeEstado = string.Empty;
 
         public ObservableCollection<PlanAcademicoItem> Planes
         {
             get => _planes;
-            set { _planes = value; OnPropertyChanged(); }
+            private set
+            {
+                _planes = value;
+                OnPropertyChanged();
+            }
         }
 
         public int CantidadSemestresNuevoPlan
         {
             get => _cantidadSemestresNuevoPlan;
-            set { _cantidadSemestresNuevoPlan = value; OnPropertyChanged(); }
+            set
+            {
+                _cantidadSemestresNuevoPlan = value;
+                OnPropertyChanged();
+            }
         }
 
         public string JornadaNuevoPlan
         {
             get => _jornadaNuevoPlan;
-            set { _jornadaNuevoPlan = value; OnPropertyChanged(); }
+            set
+            {
+                _jornadaNuevoPlan = value;
+                OnPropertyChanged();
+            }
         }
 
-        public string MensajeEstado { get; private set; } = string.Empty;
+        public string MensajeEstado
+        {
+            get => _mensajeEstado;
+            private set
+            {
+                _mensajeEstado = value;
+                OnPropertyChanged();
+            }
+        }
 
         public string NotaComparativa =>
-            "Ambos planes contienen las mismas materias y creditos. La diferencia principal esta en la distribucion por semestre.";
-
-        public PlanAcademicoViewModel() { _ = CargarPlanesAsync(); }
+            "Los planes académicos conservan la misma base curricular. La diferencia principal está en la distribución por semestre y jornada.";
 
         public async Task CargarPlanesAsync()
         {
-            var resp = await _api.ObtenerPlanesAsync();
+            ApiResponse<List<PlanAcademicoItem>> resp =
+                await _api.ObtenerPlanesAsync();
+
             if (!resp.Success || resp.Data == null)
             {
-                MensajeEstado = "Error: " + resp.Message;
+                MensajeEstado = string.IsNullOrWhiteSpace(resp.Message)
+                    ? "No se pudieron cargar los planes académicos."
+                    : resp.Message;
+
+                Planes = new ObservableCollection<PlanAcademicoItem>();
                 return;
             }
+
             Planes = new ObservableCollection<PlanAcademicoItem>(resp.Data);
+            MensajeEstado = string.Empty;
         }
 
-        public void CargarPlanes() => _ = CargarPlanesAsync();
-
-        public async Task<PlanAcademicoItem?> CrearNuevoPlanAsync(int cantidadSemestres, string jornada)
+        public async Task<PlanAcademicoItem?> CrearNuevoPlanAsync(
+            int cantidadSemestres,
+            string jornada)
         {
-            var nuevo = new PlanAcademicoItem
+            if (cantidadSemestres <= 0)
             {
-                Nombre = "Plan " + jornada + " " + System.DateTime.Now.Year,
+                MensajeEstado = "La cantidad de semestres debe ser mayor que cero.";
+                return null;
+            }
+
+            if (string.IsNullOrWhiteSpace(jornada))
+            {
+                MensajeEstado = "Debe seleccionar una jornada.";
+                return null;
+            }
+
+            PlanAcademicoItem nuevo = new()
+            {
+                Nombre = $"Plan {jornada} {DateTime.Now.Year}",
                 Jornada = jornada,
                 CargaPorSemestre = "Por definir",
                 TotalSemestres = cantidadSemestres,
                 EsNuevo = true
             };
 
-            var resp = await _api.CrearPlanAsync(nuevo);
+            ApiResponse<PlanAcademicoBackendDto> resp =
+                await _api.CrearPlanAsync(nuevo);
+
             if (!resp.Success || resp.Data == null)
             {
-                MensajeEstado = "Error: " + resp.Message;
+                MensajeEstado = string.IsNullOrWhiteSpace(resp.Message)
+                    ? "No se pudo crear el plan académico."
+                    : resp.Message;
+
                 return null;
             }
 
             nuevo.IdPlanAcademico = resp.Data.IdPlanAcademico;
 
-            for (int i = 1; i <= cantidadSemestres; i++)
+            bool semestresCreados =
+                await CrearSemestresDelPlanAsync(
+                    nuevo.IdPlanAcademico,
+                    cantidadSemestres
+                );
+
+            if (!semestresCreados)
             {
-                var sResp = await _api.AgregarSemestreAsync(nuevo.IdPlanAcademico, i);
-                if (!sResp.Success)
-                {
-                    MensajeEstado = "Error al crear semestre " + i + ": " + sResp.Message;
-                    return null;
-                }
+                return null;
             }
 
             await CargarPlanesAsync();
+
+            MensajeEstado = string.Empty;
             return nuevo;
+        }
+
+        private async Task<bool> CrearSemestresDelPlanAsync(
+            int idPlanAcademico,
+            int cantidadSemestres)
+        {
+            for (int numeroSemestre = 1;
+                 numeroSemestre <= cantidadSemestres;
+                 numeroSemestre++)
+            {
+                ApiResponse<string> semestreResp =
+                    await _api.AgregarSemestreAsync(
+                        idPlanAcademico,
+                        numeroSemestre
+                    );
+
+                if (!semestreResp.Success)
+                {
+                    MensajeEstado =
+                        $"No se pudo crear el semestre {numeroSemestre}: " +
+                        semestreResp.Message;
+
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        public async Task<bool> EliminarPlanAsync(
+            PlanAcademicoItem plan)
+        {
+            ApiResponse<string> resp =
+                await _api.EliminarPlanAsync(plan.IdPlanAcademico);
+
+            if (!resp.Success)
+            {
+                MensajeEstado = string.IsNullOrWhiteSpace(resp.Message)
+                    ? "No se pudo eliminar el plan académico."
+                    : resp.Message;
+
+                return false;
+            }
+
+            await CargarPlanesAsync();
+
+            MensajeEstado = string.Empty;
+            return true;
         }
     }
 }

@@ -3,36 +3,58 @@ using System.Windows.Controls;
 
 namespace SistemaHorario.UI.Dialogs.PlanAcademico
 {
-    public partial class NuevoPlanDialog : Window
+    public partial class NuevoPlanAcademicoDialog : Window
     {
-        public int CantidadSemestres { get; private set; } = 10;
+        public int CantidadSemestres { get; private set; }
 
-        public string Jornada { get; private set; } = "Por definir";
+        public string Jornada { get; private set; } = "Diurna";
 
-        public NuevoPlanDialog()
+        public NuevoPlanAcademicoDialog()
         {
             InitializeComponent();
+
+            CantidadSemestres = 10;
+            Jornada = "Diurna";
         }
 
-        private void BtnCancelar_Click(object sender, RoutedEventArgs e)
+        private void BtnCrear_Click(
+            object sender,
+            RoutedEventArgs e)
         {
-            DialogResult = false;
-        }
-
-        private void BtnContinuar_Click(object sender, RoutedEventArgs e)
-        {
-            if (CmbCantidadSemestres.SelectedItem is ComboBoxItem semestreItem &&
-                int.TryParse(semestreItem.Tag?.ToString(), out int cantidad))
+            if (CmbJornada.SelectedItem is ComboBoxItem jornadaItem)
             {
+                Jornada = jornadaItem.Content?.ToString() ?? "Diurna";
+            }
+
+            if (CmbCantidadSemestres.SelectedItem is ComboBoxItem semestreItem)
+            {
+                string textoSemestres =
+                    semestreItem.Content?.ToString() ?? "10";
+
+                if (!int.TryParse(textoSemestres, out int cantidad))
+                {
+                    MessageBox.Show(
+                        "La cantidad de semestres no es válida.",
+                        "Validación",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Warning);
+
+                    return;
+                }
+
                 CantidadSemestres = cantidad;
             }
 
-            if (CmbJornada.SelectedItem is ComboBoxItem jornadaItem)
-            {
-                Jornada = jornadaItem.Content?.ToString() ?? "Por definir";
-            }
-
             DialogResult = true;
+            Close();
+        }
+
+        private void BtnCancelar_Click(
+            object sender,
+            RoutedEventArgs e)
+        {
+            DialogResult = false;
+            Close();
         }
     }
 }

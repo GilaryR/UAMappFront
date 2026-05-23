@@ -221,21 +221,21 @@ namespace SistemaHorario.UI.Views.Coordinadores
 			}
 		}
 
-		/// <summary>
-		/// Inicia el flujo de creación:
-		/// primero verifica credenciales y luego abre formulario.
-		/// </summary>
-		private void BtnAgregar_Click(
-            object sender,
-            RoutedEventArgs e)
+        /// <summary>
+        /// Inicia el flujo de creación:
+        /// primero verifica credenciales y luego abre formulario.
+        /// </summary>
+        private void BtnAgregar_Click(
+			object sender,
+			RoutedEventArgs e)
         {
             NavegarAFormulario();
         }
 
-		/// <summary>
-		/// Abre formulario de edición.
-		/// </summary>
-		private void EditarCoordinador(
+        /// <summary>
+        /// Abre formulario de edición.
+        /// </summary>
+        private void EditarCoordinador(
 			CoordinadorItem coordinador)
 		{
 			NavegarAFormulario(coordinador);
@@ -245,7 +245,7 @@ namespace SistemaHorario.UI.Views.Coordinadores
         /// Elimina un coordinador usando diálogo de confirmación.
         /// </summary>
         private async void EliminarCoordinador(
-    CoordinadorItem coordinador)
+			CoordinadorItem coordinador)
         {
             EliminarConfirmacionDialog dialog =
                 new($"¿Deseas eliminar al coordinador {coordinador.NombreCompleto}?\nDebes escribir la palabra eliminar.")
