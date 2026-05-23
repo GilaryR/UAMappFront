@@ -322,6 +322,49 @@ private static string ObtenerContentType(string rutaArchivo)
         }
     }
 
+    public async Task<ApiResponse<T>> PutAsync<T>(
+    string url,
+    object data)
+{
+    AgregarToken();
+
+    try
+    {
+        HttpResponseMessage response =
+            await _http.PutAsJsonAsync(url, data);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            string mensaje =
+                await response.Content.ReadAsStringAsync();
+
+            return new ApiResponse<T>
+            {
+                Success = false,
+                Message = mensaje
+            };
+        }
+
+        ApiResponse<T>? resultado =
+            await response.Content.ReadFromJsonAsync<ApiResponse<T>>();
+
+        return resultado ?? new ApiResponse<T>
+        {
+            Success = false,
+            Message = "No se pudo leer la respuesta del servidor."
+        };
+    }
+    catch (Exception ex)
+    {
+        return new ApiResponse<T>
+        {
+            Success = false,
+            Message = ex.Message
+        };
+    }
+}
+    
+
     public async Task<ApiResponse<T>> DeleteAsync<T>(string url)
     {
         AgregarToken();

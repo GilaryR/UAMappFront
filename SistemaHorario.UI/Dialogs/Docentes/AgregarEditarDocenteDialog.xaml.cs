@@ -9,6 +9,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Threading.Tasks;
 
 namespace SistemaHorario.UI.Dialogs.Docentes
 {
@@ -132,7 +133,9 @@ namespace SistemaHorario.UI.Dialogs.Docentes
             CmbEstado.IsEnabled = false;
             CmbMateriaDisponible.IsEnabled = false;
             BtnAgregarMateria.Visibility = Visibility.Collapsed;
-            BtnDisponibilidad.IsEnabled = false;
+
+            BtnDisponibilidad.IsEnabled = true;
+            BtnDisponibilidad.Content = "Ver disponibilidad";
         }
 
         private void CargarCamposBasicos()
@@ -241,11 +244,32 @@ namespace SistemaHorario.UI.Dialogs.Docentes
             ActualizarComboMaterias();
         }
 
-        private void BtnDisponibilidad_Click(object sender, RoutedEventArgs e)
+        private async void BtnDisponibilidad_Click(
+            object sender,
+            RoutedEventArgs e)
         {
-            DisponibilidadDocenteDialog dialog = new(_viewModel.Disponibilidad) { Owner = this };
-            if (dialog.ShowDialog() != true) return;
-            _viewModel.Disponibilidad = dialog.DisponibilidadResultado;
+            await CargarDisponibilidadDesdeBackendAsync();
+
+            DisponibilidadDocenteDialog dialog =
+                new(_viewModel.Disponibilidad, _soloLectura)
+                {
+                    Owner = this
+                };
+
+            bool? resultado = dialog.ShowDialog();
+
+            if (_soloLectura)
+            {
+                return;
+            }
+
+            if (resultado != true)
+            {
+                return;
+            }
+
+            _viewModel.Disponibilidad =
+                dialog.DisponibilidadResultado;
         }
 
         private async void BtnGuardar_Click(object sender, RoutedEventArgs e)
@@ -288,10 +312,19 @@ namespace SistemaHorario.UI.Dialogs.Docentes
                 idDocente = resp.Data.IdDocente;
             }
 
-            if (_viewModel.Disponibilidad.Count > 0)
+            var dispResp =
+                await api.ActualizarDisponibilidadAsync(
+                    idDocente,
+                    _viewModel.Disponibilidad);
+
+            if (!dispResp.Success)
             {
-                try { await api.ActualizarDisponibilidadAsync(idDocente, _viewModel.Disponibilidad); }
-                catch { }
+                MessageBox.Show(
+                    "El docente fue guardado, pero no se pudo guardar la disponibilidad: " +
+                    dispResp.Message,
+                    "Disponibilidad docente",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
             }
 
             MensajeExitoDialog exito = new(_viewModel.EsEdicion ? "Docente actualizado" : "Docente creado")
@@ -335,6 +368,26 @@ namespace SistemaHorario.UI.Dialogs.Docentes
             }
 
             return true;
+        }
+
+        private async Task CargarDisponibilidadDesdeBackendAsync()
+        {
+            if (!_viewModel.EsEdicion ||
+                _viewModel.Docente.IdDocente <= 0)
+            {
+                return;
+            }
+
+            DocentesApiService api = new();
+
+            var resp =
+                await api.ObtenerDisponibilidadAsync(
+                    _viewModel.Docente.IdDocente);
+
+            if (resp.Success && resp.Data != null)
+            {
+                _viewModel.Disponibilidad = resp.Data;
+            }
         }
 
         private void BtnCancelar_Click(object sender, RoutedEventArgs e)

@@ -28,8 +28,15 @@ public class DocentesApiService
     public async Task<ApiResponse<List<DocenteItem>>> ObtenerDocentesAsync()
     {
         var resp = await _api.GetAsync<List<DocenteBackendDto>>("Docentes");
+
         if (!resp.Success || resp.Data == null)
-            return new ApiResponse<List<DocenteItem>> { Success = false, Message = resp.Message };
+        {
+            return new ApiResponse<List<DocenteItem>>
+            {
+                Success = false,
+                Message = resp.Message
+            };
+        }
 
         var lista = resp.Data.Select(d => new DocenteItem
         {
@@ -41,37 +48,64 @@ public class DocentesApiService
             Estado = d.Activo ? "Activo" : "Inactivo"
         }).ToList();
 
-        return new ApiResponse<List<DocenteItem>> { Success = true, Data = lista };
+        return new ApiResponse<List<DocenteItem>>
+        {
+            Success = true,
+            Data = lista
+        };
     }
 
-    public async Task<ApiResponse<DocenteBackendDto>> CrearDocenteAsync(DocenteItem d)
-        => await _api.PostAsync<DocenteBackendDto>("Docentes", new
-        {
-            d.NombreCompleto,
-            d.Identificacion,
-            d.CorreoInstitucional,
-            Activo = d.Estado == "Activo",
-            IdsMateria = d.IdsMateria
-        });
-
-    public async Task<ApiResponse<string>> ActualizarDocenteAsync(DocenteItem d)
-        => await _api.PutAsync($"Docentes/{d.IdDocente}", new
-        {
-            d.NombreCompleto,
-            d.Identificacion,
-            d.CorreoInstitucional,
-            Activo = d.Estado == "Activo",
-            IdsMateria = d.IdsMateria
-        });
-
-    public async Task<ApiResponse<string>> EliminarDocenteAsync(int id)
-        => await _api.DeleteAsync<string>($"docentes/{id}");
-
-    public async Task<ApiResponse<List<DisponibilidadDocenteItem>>> ObtenerDisponibilidadAsync(int idDocente)
+    public async Task<ApiResponse<DocenteBackendDto>> CrearDocenteAsync(
+        DocenteItem docente)
     {
-        var resp = await _api.GetAsync<List<DisponibilidadBackendDto>>($"Docentes/{idDocente}/disponibilidad");
+        return await _api.PostAsync<DocenteBackendDto>("Docentes", new
+        {
+            docente.NombreCompleto,
+            docente.Identificacion,
+            docente.CorreoInstitucional,
+            Activo = docente.Estado == "Activo",
+            IdsMateria = docente.IdsMateria
+        });
+    }
+
+    public async Task<ApiResponse<int>> ActualizarDocenteAsync(
+        DocenteItem docente)
+    {
+        return await _api.PutAsync<int>($"Docentes/{docente.IdDocente}", new
+        {
+            docente.NombreCompleto,
+            docente.Identificacion,
+            docente.CorreoInstitucional,
+            Activo = docente.Estado == "Activo",
+            IdsMateria = docente.IdsMateria
+        });
+    }
+
+    public async Task<ApiResponse<int>> InactivarDocenteAsync(int id)
+    {
+        return await _api.DeleteAsync<int>($"Docentes/{id}");
+    }
+
+    public async Task<ApiResponse<int>> ActivarDocenteAsync(int id)
+    {
+        return await _api.PatchAsync<int>($"Docentes/{id}/activar", new { });
+    }
+
+    public async Task<ApiResponse<List<DisponibilidadDocenteItem>>> ObtenerDisponibilidadAsync(
+        int idDocente)
+    {
+        var resp =
+            await _api.GetAsync<List<DisponibilidadBackendDto>>(
+                $"Docentes/{idDocente}/disponibilidad");
+
         if (!resp.Success || resp.Data == null)
-            return new ApiResponse<List<DisponibilidadDocenteItem>> { Success = false, Message = resp.Message };
+        {
+            return new ApiResponse<List<DisponibilidadDocenteItem>>
+            {
+                Success = false,
+                Message = resp.Message
+            };
+        }
 
         var lista = resp.Data.Select(d => new DisponibilidadDocenteItem
         {
@@ -81,19 +115,26 @@ public class DocentesApiService
             Disponible = d.Disponible
         }).ToList();
 
-        return new ApiResponse<List<DisponibilidadDocenteItem>> { Success = true, Data = lista };
+        return new ApiResponse<List<DisponibilidadDocenteItem>>
+        {
+            Success = true,
+            Data = lista
+        };
     }
 
-    public async Task<ApiResponse<string>> ActualizarDisponibilidadAsync(int idDocente, List<DisponibilidadDocenteItem> disponibilidad)
-        => await _api.PutAsync($"Docentes/{idDocente}/disponibilidad", new
+    public async Task<ApiResponse<int>> ActualizarDisponibilidadAsync(
+        int idDocente,
+        List<DisponibilidadDocenteItem> disponibilidad)
+    {
+        return await _api.PutAsync<int>($"Docentes/{idDocente}/disponibilidad", new
         {
             Disponibilidades = disponibilidad.Select(d => new
             {
                 d.Dia,
-                HoraInicio = TimeSpan.TryParse(d.HoraInicio, out var hi) ? hi : TimeSpan.Zero,
-                HoraFin = TimeSpan.TryParse(d.HoraFin, out var hf) ? hf : TimeSpan.Zero,
+                d.HoraInicio,
+                d.HoraFin,
                 d.Disponible
             }).ToList()
         });
+    }
 }
-
