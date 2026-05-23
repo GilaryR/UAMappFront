@@ -10,38 +10,40 @@
         Background="Transparent"
         AllowsTransparency="True">
 
-	<Border Background="White"
+    <Border Background="White"
             CornerRadius="18"
             Padding="28">
 
-		<Grid>
+        <Grid>
 
-			<Grid.RowDefinitions>
-				<RowDefinition Height="Auto"/>
-				<RowDefinition Height="*"/>
-				<RowDefinition Height="Auto"/>
-			</Grid.RowDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
 
-			<Grid Margin="0,0,0,22">
+            <Grid Margin="0,0,0,22">
 
-				<Grid.ColumnDefinitions>
-					<ColumnDefinition Width="*"/>
-					<ColumnDefinition Width="Auto"/>
-				</Grid.ColumnDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
 
-				<StackPanel>
-					<TextBlock Text="Disponibilidad docente"
+                <StackPanel>
+                    <TextBlock x:Name="TxtTitulo"
+                               Text="Disponibilidad docente"
                                FontSize="30"
                                FontWeight="Bold"
                                Foreground="#111827"/>
 
-					<TextBlock Text="Seleccione las franjas horarias disponibles"
+                    <TextBlock x:Name="TxtSubtitulo"
+                               Text="Seleccione las franjas horarias disponibles"
                                Margin="0,8,0,0"
                                FontSize="14"
                                Foreground="#6B7280"/>
-				</StackPanel>
+                </StackPanel>
 
-				<Button Grid.Column="1"
+                <Button Grid.Column="1"
                         Width="36"
                         Height="36"
                         Content="✕"
@@ -51,26 +53,27 @@
                         BorderThickness="0"
                         Cursor="Hand"
                         Click="BtnCerrar_Click"/>
-			</Grid>
+            </Grid>
 
-			<ScrollViewer Grid.Row="1"
+            <ScrollViewer Grid.Row="1"
                           VerticalScrollBarVisibility="Auto"
                           HorizontalScrollBarVisibility="Disabled">
 
-				<Grid x:Name="GridDisponibilidad"/>
-			</ScrollViewer>
+                <Grid x:Name="GridDisponibilidad"/>
+            </ScrollViewer>
 
-			<Grid Grid.Row="2"
+            <Grid Grid.Row="2"
                   Margin="0,24,0,0">
 
-				<Grid.ColumnDefinitions>
-					<ColumnDefinition Width="*"/>
-					<ColumnDefinition Width="Auto"/>
-					<ColumnDefinition Width="14"/>
-					<ColumnDefinition Width="Auto"/>
-				</Grid.ColumnDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="14"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
 
-				<Button Grid.Column="1"
+                <Button x:Name="BtnCancelar"
+                        Grid.Column="1"
                         Width="130"
                         Height="40"
                         Content="Cancelar"
@@ -81,7 +84,8 @@
                         Cursor="Hand"
                         Click="BtnCancelar_Click"/>
 
-				<Button Grid.Column="3"
+                <Button x:Name="BtnGuardar"
+                        Grid.Column="3"
                         Width="150"
                         Height="40"
                         Content="Guardar"
@@ -91,7 +95,7 @@
                         FontWeight="Bold"
                         Cursor="Hand"
                         Click="BtnGuardar_Click"/>
-			</Grid>
-		</Grid>
-	</Border>
+            </Grid>
+        </Grid>
+    </Border>
 </Window>
