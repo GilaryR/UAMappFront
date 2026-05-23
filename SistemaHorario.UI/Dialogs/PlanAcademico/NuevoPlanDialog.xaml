@@ -2,8 +2,8 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Nuevo plan académico"
-        Width="430"
-        Height="330"
+        Width="460"
+        Height="420"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize">
 
@@ -17,6 +17,15 @@
                        FontWeight="Bold"
                        Margin="0,0,0,22"/>
 
+            <TextBlock Text="Nombre del plan"
+                       FontWeight="SemiBold"/>
+
+            <TextBox x:Name="TxtNombrePlan"
+                     Height="36"
+                     Margin="0,8,0,18"
+                     FontSize="14"
+                     VerticalContentAlignment="Center"/>
+
             <TextBlock Text="Jornada"
                        FontWeight="SemiBold"/>
 
@@ -24,6 +33,7 @@
                       Height="36"
                       Margin="0,8,0,18"
                       SelectedIndex="0">
+
                 <ComboBoxItem Content="Diurna"/>
                 <ComboBoxItem Content="Nocturna"/>
             </ComboBox>
@@ -35,6 +45,7 @@
                       Height="36"
                       Margin="0,8,0,28"
                       SelectedIndex="0">
+
                 <ComboBoxItem Content="10"/>
                 <ComboBoxItem Content="12"/>
             </ComboBox>

@@ -10,7 +10,7 @@ namespace SistemaHorario.UI.Views.PlanAcademico
 {
     /// <summary>
     /// Vista principal del módulo Plan Académico.
-    /// Carga los planes desde la API y permite abrir la malla curricular.
+    /// Carga los planes activos desde la API y permite abrir la malla curricular.
     /// </summary>
     public partial class PlanAcademicoView : UserControl
     {
@@ -37,8 +37,7 @@ namespace SistemaHorario.UI.Views.PlanAcademico
                     viewModel.MensajeEstado,
                     "Plan académico",
                     MessageBoxButton.OK,
-                    MessageBoxImage.Warning
-                );
+                    MessageBoxImage.Warning);
             }
         }
 
@@ -57,10 +56,10 @@ namespace SistemaHorario.UI.Views.PlanAcademico
             }
 
             PlanAcademicoItem? nuevoPlan =
-                await viewModel.CrearNuevoPlanAsync(
+                 await viewModel.CrearNuevoPlanAsync(
+                    dialog.NombrePlan,
                     dialog.CantidadSemestres,
-                    dialog.Jornada
-                );
+                    dialog.Jornada);
 
             if (nuevoPlan == null)
             {
@@ -68,8 +67,7 @@ namespace SistemaHorario.UI.Views.PlanAcademico
                     viewModel.MensajeEstado,
                     "Error",
                     MessageBoxButton.OK,
-                    MessageBoxImage.Error
-                );
+                    MessageBoxImage.Error);
 
                 return;
             }
@@ -85,9 +83,7 @@ namespace SistemaHorario.UI.Views.PlanAcademico
             Navegar(
                 new MallaPlanAcademicoView(
                     nuevoPlan.IdPlanAcademico,
-                    true
-                )
-            );
+                    true));
         }
 
         private void VerMalla_Click(
@@ -107,9 +103,56 @@ namespace SistemaHorario.UI.Views.PlanAcademico
             Navegar(
                 new MallaPlanAcademicoView(
                     plan.IdPlanAcademico,
-                    false
-                )
-            );
+                    false));
+        }
+
+        private async void EliminarPlan_Click(
+            object sender,
+            RoutedEventArgs e)
+        {
+            if (sender is not Button button)
+            {
+                return;
+            }
+
+            if (button.CommandParameter is not PlanAcademicoItem plan)
+            {
+                return;
+            }
+
+            MessageBoxResult confirmacion =
+                MessageBox.Show(
+                    $"¿Deseas eliminar el plan académico {plan.Nombre}?\n\nEl plan no se borrará de la base de datos, solo quedará inactivo.",
+                    "Eliminar plan académico",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Warning);
+
+            if (confirmacion != MessageBoxResult.Yes)
+            {
+                return;
+            }
+
+            bool eliminado =
+                await viewModel.EliminarPlanAsync(plan);
+
+            if (!eliminado)
+            {
+                MessageBox.Show(
+                    viewModel.MensajeEstado,
+                    "Error",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+
+                return;
+            }
+
+            MensajeExitoDialog exito =
+                new("Plan académico eliminado correctamente.")
+                {
+                    Owner = Window.GetWindow(this)
+                };
+
+            exito.ShowDialog();
         }
 
         private void Navegar(UserControl vista)

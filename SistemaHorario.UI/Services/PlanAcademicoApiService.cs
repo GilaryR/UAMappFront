@@ -87,38 +87,42 @@ public class PlanAcademicoApiService
             Estado = "Activo"
         });
 
-    public async Task<ApiResponse<string>> EliminarPlanAsync(int id)
-        => await _api.DeleteAsync<string>($"PlanAcademico/{id}");
+    public async Task<ApiResponse<int>> EliminarPlanAsync(int id)
+        => await _api.DeleteAsync<int>($"PlanAcademico/{id}");
+
+    public async Task<ApiResponse<int>> ActivarPlanAsync(int id)
+        => await _api.PatchAsync<int>($"PlanAcademico/{id}/activar", new { });
 
     private static PlanAcademicoItem MapearItem(PlanAcademicoBackendDto p) => new()
-    {
-        IdPlanAcademico = p.IdPlanAcademico,
-        Nombre = p.Nombre,
-        Jornada = p.Programa,
-        CargaPorSemestre = "Por definir",
-        TotalSemestres = p.Semestres?.Count ?? 0,
-        TotalMaterias = p.Semestres?.Sum(s => s.Materias?.Count ?? 0) ?? 0,
-        TotalCreditos = p.Semestres?.Sum(s => s.Materias?.Sum(m => m.Creditos) ?? 0) ?? 0,
-        Semestres = new ObservableCollection<SemestrePlanItem>(
-            (p.Semestres ?? new()).Select(s => new SemestrePlanItem
-            {
-                IdSemestre = s.IdSemestrePlan,
-                NumeroSemestre = s.NumeroSemestre,
-                Materias = new ObservableCollection<MateriaItem>(
-                    (s.Materias ?? new()).Select(m => new MateriaItem
-                    {
-                        IdMateria = m.IdMateria,
-                        IdMateriaPlan = m.IdMateriaPlan,
-                        Codigo = m.Codigo,
-                        Nombre = m.Nombre,
-                        Creditos = m.Creditos,
-                        IntensidadHorariaSemanal = m.IntensidadHorariaSemanal,
-                        Activa = true
-                    })
-                )
-            })
-        )
-    };
+{
+    IdPlanAcademico = p.IdPlanAcademico,
+    Nombre = p.Nombre,
+    Jornada = p.Programa,
+    Estado = string.IsNullOrWhiteSpace(p.Estado) ? "Activo" : p.Estado,
+    CargaPorSemestre = "Por definir",
+    TotalSemestres = p.Semestres?.Count ?? 0,
+    TotalMaterias = p.Semestres?.Sum(s => s.Materias?.Count ?? 0) ?? 0,
+    TotalCreditos = p.Semestres?.Sum(s => s.Materias?.Sum(m => m.Creditos) ?? 0) ?? 0,
+    Semestres = new ObservableCollection<SemestrePlanItem>(
+        (p.Semestres ?? new()).Select(s => new SemestrePlanItem
+        {
+            IdSemestre = s.IdSemestrePlan,
+            NumeroSemestre = s.NumeroSemestre,
+            Materias = new ObservableCollection<MateriaItem>(
+                (s.Materias ?? new()).Select(m => new MateriaItem
+                {
+                    IdMateria = m.IdMateria,
+                    IdMateriaPlan = m.IdMateriaPlan,
+                    Codigo = m.Codigo,
+                    Nombre = m.Nombre,
+                    Creditos = m.Creditos,
+                    IntensidadHorariaSemanal = m.IntensidadHorariaSemanal,
+                    Activa = true
+                })
+            )
+        })
+    )
+};
 }
 
 
