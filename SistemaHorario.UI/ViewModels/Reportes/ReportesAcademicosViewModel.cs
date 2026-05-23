@@ -7,223 +7,287 @@ using System.Threading.Tasks;
 
 namespace SistemaHorario.UI.ViewModels.Reportes
 {
-	/// <summary>
-	/// Maneja la información que usa la vista de reportes.
-	/// 
-	/// Aquí se cargan reportes, tipos de reporte, periodos y filtros.
-	/// Cuando se conecte backend, se reemplaza el MockStore por servicios.
-	/// </summary>
-	public class ReportesAcademicosViewModel
-	{
-		private readonly ReportesApiService _api = new();
-		private List<ReporteAcademicoItem> _reportesBase = new();
+    /// <summary>
+    /// Maneja la información real del módulo de reportes académicos.
+    /// </summary>
+    public class ReportesAcademicosViewModel
+    {
+        private readonly ReportesApiService _api = new();
 
-		public List<ReporteAcademicoItem> Reportes { get; private set; } = new();
+        private List<ReporteAcademicoItem> _reportesBase = new();
 
-		public List<string> TiposReporte { get; private set; } = new();
+        public List<ReporteAcademicoItem> Reportes { get; private set; } = new();
 
-		public List<string> Periodos { get; private set; } = new();
+        public List<string> TiposReporte { get; private set; } = new();
 
-		public string MensajeEstado { get; private set; } = string.Empty;
+        public List<string> Periodos { get; private set; } = new();
 
-		public string Busqueda { get; set; } = string.Empty;
+        public string MensajeEstado { get; private set; } = string.Empty;
 
-		public string TipoSeleccionado { get; set; } = "Todos los tipos";
+        public string Busqueda { get; set; } = string.Empty;
 
-		public DateTime? FechaSeleccionada { get; set; }
+        public string TipoSeleccionado { get; set; } = "Todos los tipos";
 
-		public ReportesAcademicosViewModel()
-		{
-			CargarDatos();
-		}
+        public DateTime? FechaSeleccionada { get; set; }
 
-		public void CargarDatos()
-		{
-			TiposReporte = ReportesAcademicosMockStore.ObtenerTiposReporte();
-			Periodos = ReportesAcademicosMockStore.ObtenerPeriodos();
+        public async Task CargarCatalogosAsync()
+        {
+            MensajeEstado = string.Empty;
 
-			_reportesBase = ReportesAcademicosMockStore.ObtenerReportes();
-			Reportes = _reportesBase.ToList();
-		}
+            await CargarTiposReporteAsync();
+            await CargarPeriodosAsync();
+        }
 
-		public async Task CargarCatalogosAsync()
-		{
-			var tiposResp = await _api.ObtenerTiposReporteAsync();
-			if (tiposResp.Success && tiposResp.Data != null && tiposResp.Data.Count > 0)
-			{
-				TiposReporte = tiposResp.Data;
-			}
-			else
-			{
-				MensajeEstado = tiposResp.Message;
-			}
+        private async Task CargarTiposReporteAsync()
+        {
+            var tiposResp = await _api.ObtenerTiposReporteAsync();
 
-			var periodosResp = await _api.ObtenerSemestresAsync();
-			if (periodosResp.Success && periodosResp.Data != null && periodosResp.Data.Count > 0)
-			{
-				Periodos = periodosResp.Data.Select(x => x.ToString()).ToList();
-			}
-			else if (string.IsNullOrWhiteSpace(MensajeEstado))
-			{
-				MensajeEstado = periodosResp.Message;
-			}
-		}
+            if (!tiposResp.Success || tiposResp.Data == null)
+            {
+                TiposReporte = new List<string>();
 
-		public async Task CargarReportesAsync()
-		{
-			var reportes = new List<ReporteAcademicoItem>();
+                MensajeEstado = string.IsNullOrWhiteSpace(tiposResp.Message)
+                    ? "No se pudieron cargar los tipos de reporte."
+                    : tiposResp.Message;
 
-			var generalResp = await _api.ObtenerReporteGeneralAsync();
-			if (generalResp.Success && generalResp.Data != null)
-			{
-				reportes.Add(new ReporteAcademicoItem
-				{
-					IdReporte = 1,
-					Fecha = DateTime.Now,
-					TipoReporte = "Reporte general",
-					Usuario = "Sistema",
-					Detalle = "Resumen de métricas generales",
-					Periodo = "Global",
-					FormatoInicial = "PDF",
-					Descripcion = $"Usuarios: {generalResp.Data.TotalUsuarios}, Materias: {generalResp.Data.TotalMaterias}, Planes: {generalResp.Data.TotalPlanesAcademicos}"
-				});
-			}
+                return;
+            }
 
-			var usuariosRolResp = await _api.ObtenerUsuariosPorRolAsync();
-			if (usuariosRolResp.Success && usuariosRolResp.Data != null)
-			{
-				reportes.AddRange(usuariosRolResp.Data.Select((item, index) => new ReporteAcademicoItem
-				{
-					IdReporte = 10 + index,
-					Fecha = DateTime.Now,
-					TipoReporte = "Usuarios por rol",
-					Usuario = "Sistema",
-					Detalle = item.Rol,
-					Periodo = "Global",
-					FormatoInicial = "CSV",
-					Descripcion = $"Usuarios totales para el rol {item.Rol}: {item.TotalUsuarios}"
-				}));
-			}
+            TiposReporte = tiposResp.Data;
+        }
 
-			var materiasResp = await _api.ObtenerMateriasPorSemestreAsync();
-			if (materiasResp.Success && materiasResp.Data != null)
-			{
-				reportes.AddRange(materiasResp.Data.Select(item => new ReporteAcademicoItem
-				{
-					IdReporte = 20 + item.Semestre,
-					Fecha = DateTime.Now,
-					TipoReporte = "Materias por semestre",
-					Usuario = "Sistema",
-					Detalle = $"Semestre {item.Semestre}",
-					Periodo = item.Semestre.ToString(),
-					FormatoInicial = "CSV",
-					Descripcion = $"Total materias: {item.TotalMaterias}."
-				}));
-			}
+        private async Task CargarPeriodosAsync()
+        {
+            var periodosResp = await _api.ObtenerSemestresAsync();
 
-			var franjasResp = await _api.ObtenerFranjasPorDiaAsync();
-			if (franjasResp.Success && franjasResp.Data != null)
-			{
-				reportes.AddRange(franjasResp.Data.Select((item, index) => new ReporteAcademicoItem
-				{
-					IdReporte = 40 + index,
-					Fecha = DateTime.Now,
-					TipoReporte = "Franjas por día",
-					Usuario = "Sistema",
-					Detalle = item.Dia,
-					Periodo = "Global",
-					FormatoInicial = "PDF",
-					Descripcion = $"Total franjas: {item.TotalFranjas}."
-				}));
-			}
+            if (!periodosResp.Success || periodosResp.Data == null)
+            {
+                Periodos = new List<string>();
 
-			var planesResp = await _api.ObtenerPlanesAcademicosAsync();
-			if (planesResp.Success && planesResp.Data != null)
-			{
-				reportes.AddRange(planesResp.Data.Select(item => new ReporteAcademicoItem
-				{
-					IdReporte = 60 + item.IdPlanAcademico,
-					Fecha = DateTime.Now,
-					TipoReporte = "Planes académicos",
-					Usuario = "Sistema",
-					Detalle = item.Nombre,
-					Periodo = item.Anio.ToString(),
-					FormatoInicial = "PDF",
-					Descripcion = $"Programa: {item.Programa}, Materias: {item.TotalMaterias}."
-				}));
-			}
+                if (string.IsNullOrWhiteSpace(MensajeEstado))
+                {
+                    MensajeEstado = string.IsNullOrWhiteSpace(periodosResp.Message)
+                        ? "No se pudieron cargar los periodos."
+                        : periodosResp.Message;
+                }
 
-			if (reportes.Count > 0)
-			{
-				_reportesBase = reportes.OrderByDescending(r => r.Fecha).ToList();
-				Reportes = _reportesBase.ToList();
-				return;
-			}
+                return;
+            }
 
-			MensajeEstado = string.IsNullOrWhiteSpace(MensajeEstado)
-				? "No se encontraron reportes desde el backend. Se usan datos locales."
-				: MensajeEstado;
+            Periodos = periodosResp.Data
+                .Select(x => x.ToString())
+                .ToList();
+        }
 
-			_reportesBase = ReportesAcademicosMockStore.ObtenerReportes();
-			Reportes = _reportesBase.ToList();
-		}
+        public async Task CargarReportesAsync()
+        {
+            MensajeEstado = string.Empty;
 
-		public void AplicarFiltros()
-		{
-			IEnumerable<ReporteAcademicoItem> consulta = _reportesBase;
+            List<ReporteAcademicoItem> reportes = new();
 
-			if (!string.IsNullOrWhiteSpace(Busqueda))
-			{
-				string busqueda = Busqueda.Trim().ToLower();
+            await AgregarReporteGeneralAsync(reportes);
+            await AgregarReporteUsuariosPorRolAsync(reportes);
+            await AgregarReporteMateriasPorSemestreAsync(reportes);
+            await AgregarReporteFranjasPorDiaAsync(reportes);
+            await AgregarReportePlanesAcademicosAsync(reportes);
 
-				consulta = consulta.Where(reporte =>
-					reporte.TipoReporte.ToLower().Contains(busqueda) ||
-					reporte.Usuario.ToLower().Contains(busqueda) ||
-					reporte.Detalle.ToLower().Contains(busqueda) ||
-					reporte.Periodo.ToLower().Contains(busqueda));
-			}
+            _reportesBase = reportes
+                .OrderByDescending(r => r.Fecha)
+                .ToList();
 
-			if (!string.IsNullOrWhiteSpace(TipoSeleccionado) &&
-				TipoSeleccionado != "Todos los tipos")
-			{
-				consulta = consulta.Where(reporte =>
-					reporte.TipoReporte == TipoSeleccionado);
-			}
+            Reportes = _reportesBase.ToList();
 
-			if (FechaSeleccionada.HasValue)
-			{
-				consulta = consulta.Where(reporte =>
-					reporte.Fecha.Date == FechaSeleccionada.Value.Date);
-			}
+            if (Reportes.Count == 0)
+            {
+                MensajeEstado = "No se encontraron reportes disponibles desde la API.";
+            }
+        }
 
-			Reportes = consulta.ToList();
-		}
+        private async Task AgregarReporteGeneralAsync(
+            List<ReporteAcademicoItem> reportes)
+        {
+            var resp = await _api.ObtenerReporteGeneralAsync();
 
-		public void LimpiarFiltros()
-		{
-			Busqueda = string.Empty;
-			TipoSeleccionado = "Todos los tipos";
-			FechaSeleccionada = null;
+            if (!resp.Success || resp.Data == null)
+            {
+                return;
+            }
 
-			Reportes = _reportesBase.ToList();
-		}
+            reportes.Add(new ReporteAcademicoItem
+            {
+                IdReporte = 1,
+                Fecha = DateTime.Now,
+                TipoReporte = "Reporte general",
+                Usuario = "Sistema",
+                Detalle = "Resumen general",
+                Periodo = "Global",
+                FormatoInicial = "PDF",
+                Descripcion =
+                    $"Usuarios: {resp.Data.TotalUsuarios}, " +
+                    $"Roles: {resp.Data.TotalRoles}, " +
+                    $"Materias: {resp.Data.TotalMaterias}, " +
+                    $"Planes académicos: {resp.Data.TotalPlanesAcademicos}, " +
+                    $"Franjas horarias: {resp.Data.TotalFranjasHorarias}"
+            });
+        }
 
-		public void AgregarReporte(ReporteAcademicoItem reporte)
-		{
-			if (reporte.IdReporte == 0)
-				reporte.IdReporte = _reportesBase.Count > 0
-					? _reportesBase.Max(r => r.IdReporte) + 1
-					: 1;
+        private async Task AgregarReporteUsuariosPorRolAsync(
+            List<ReporteAcademicoItem> reportes)
+        {
+            var resp = await _api.ObtenerUsuariosPorRolAsync();
 
-			if (string.IsNullOrWhiteSpace(reporte.Usuario))
-				reporte.Usuario = "admin";
+            if (!resp.Success || resp.Data == null)
+            {
+                return;
+            }
 
-			if (string.IsNullOrWhiteSpace(reporte.Detalle))
-				reporte.Detalle = "-";
+            int contador = 10;
 
-			_reportesBase.Insert(0, reporte);
-			AplicarFiltros();
-		}
-		
-	}
+            foreach (ReporteUsuariosPorRolBackendDto item in resp.Data)
+            {
+                reportes.Add(new ReporteAcademicoItem
+                {
+                    IdReporte = contador,
+                    Fecha = DateTime.Now,
+                    TipoReporte = "Usuarios por rol",
+                    Usuario = "Sistema",
+                    Detalle = item.Rol,
+                    Periodo = "Global",
+                    FormatoInicial = "CSV",
+                    Descripcion =
+                        $"Usuarios registrados con rol {item.Rol}: {item.TotalUsuarios}"
+                });
+
+                contador++;
+            }
+        }
+
+        private async Task AgregarReporteMateriasPorSemestreAsync(
+            List<ReporteAcademicoItem> reportes)
+        {
+            var resp = await _api.ObtenerMateriasPorSemestreAsync();
+
+            if (!resp.Success || resp.Data == null)
+            {
+                return;
+            }
+
+            foreach (ReporteMateriasPorSemestreBackendDto item in resp.Data)
+            {
+                reportes.Add(new ReporteAcademicoItem
+                {
+                    IdReporte = 100 + item.Semestre,
+                    Fecha = DateTime.Now,
+                    TipoReporte = "Materias por semestre",
+                    Usuario = "Sistema",
+                    Detalle = $"Semestre {item.Semestre}",
+                    Periodo = item.Semestre.ToString(),
+                    FormatoInicial = "CSV",
+                    Descripcion =
+                        $"Total materias: {item.TotalMaterias}. " +
+                        $"Materias: {string.Join(", ", item.Materias)}"
+                });
+            }
+        }
+
+        private async Task AgregarReporteFranjasPorDiaAsync(
+            List<ReporteAcademicoItem> reportes)
+        {
+            var resp = await _api.ObtenerFranjasPorDiaAsync();
+
+            if (!resp.Success || resp.Data == null)
+            {
+                return;
+            }
+
+            int contador = 200;
+
+            foreach (ReporteFranjaHorariaBackendDto item in resp.Data)
+            {
+                reportes.Add(new ReporteAcademicoItem
+                {
+                    IdReporte = contador,
+                    Fecha = DateTime.Now,
+                    TipoReporte = "Franjas por día",
+                    Usuario = "Sistema",
+                    Detalle = item.Dia,
+                    Periodo = "Global",
+                    FormatoInicial = "PDF",
+                    Descripcion = $"Total de franjas para {item.Dia}: {item.TotalFranjas}"
+                });
+
+                contador++;
+            }
+        }
+
+        private async Task AgregarReportePlanesAcademicosAsync(
+            List<ReporteAcademicoItem> reportes)
+        {
+            var resp = await _api.ObtenerPlanesAcademicosAsync();
+
+            if (!resp.Success || resp.Data == null)
+            {
+                return;
+            }
+
+            foreach (ReportePlanAcademicoBackendDto item in resp.Data)
+            {
+                reportes.Add(new ReporteAcademicoItem
+                {
+                    IdReporte = 300 + item.IdPlanAcademico,
+                    Fecha = DateTime.Now,
+                    TipoReporte = "Planes académicos",
+                    Usuario = "Sistema",
+                    Detalle = item.Nombre,
+                    Periodo = item.Anio.ToString(),
+                    FormatoInicial = "PDF",
+                    Descripcion =
+                        $"Programa: {item.Programa}. " +
+                        $"Semestres: {item.TotalSemestres}. " +
+                        $"Materias: {item.TotalMaterias}."
+                });
+            }
+        }
+
+        public void AplicarFiltros()
+        {
+            IEnumerable<ReporteAcademicoItem> consulta = _reportesBase;
+
+            if (!string.IsNullOrWhiteSpace(Busqueda))
+            {
+                string busqueda = Busqueda.Trim().ToLower();
+
+                consulta = consulta.Where(reporte =>
+                    reporte.TipoReporte.ToLower().Contains(busqueda) ||
+                    reporte.Usuario.ToLower().Contains(busqueda) ||
+                    reporte.Detalle.ToLower().Contains(busqueda) ||
+                    reporte.Periodo.ToLower().Contains(busqueda) ||
+                    reporte.Descripcion.ToLower().Contains(busqueda));
+            }
+
+            if (!string.IsNullOrWhiteSpace(TipoSeleccionado) &&
+                TipoSeleccionado != "Todos los tipos")
+            {
+                consulta = consulta.Where(reporte =>
+                    reporte.TipoReporte == TipoSeleccionado);
+            }
+
+            if (FechaSeleccionada.HasValue)
+            {
+                consulta = consulta.Where(reporte =>
+                    reporte.Fecha.Date == FechaSeleccionada.Value.Date);
+            }
+
+            Reportes = consulta.ToList();
+        }
+
+        public void LimpiarFiltros()
+        {
+            Busqueda = string.Empty;
+            TipoSeleccionado = "Todos los tipos";
+            FechaSeleccionada = null;
+
+            Reportes = _reportesBase.ToList();
+        }
+    }
 }
