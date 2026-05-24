@@ -63,16 +63,33 @@ namespace SistemaHorario.UI.ViewModels.GruposAcademicos
         public void AplicarFiltros()
         {
             IEnumerable<GrupoAcademicoItem> resultado = _todosLosGrupos;
+
             if (!string.IsNullOrWhiteSpace(CodigoGrupoFiltro))
             {
                 string t = CodigoGrupoFiltro.Trim();
-                resultado = resultado.Where(g => g.Codigo.Contains(t, StringComparison.OrdinalIgnoreCase) || g.NombreGrupo.Contains(t, StringComparison.OrdinalIgnoreCase));
+
+                resultado = resultado.Where(g =>
+                    g.Codigo.Contains(t, StringComparison.OrdinalIgnoreCase) ||
+                    g.NombreGrupo.Contains(t, StringComparison.OrdinalIgnoreCase));
             }
-            if (!string.IsNullOrWhiteSpace(EstadoFiltro) && EstadoFiltro != "Todos")
-                resultado = resultado.Where(g => g.Estado.Equals(EstadoFiltro, StringComparison.OrdinalIgnoreCase));
-            if (!string.IsNullOrWhiteSpace(JornadaFiltro) && JornadaFiltro != "Todas")
-                resultado = resultado.Where(g => g.Jornada.Equals(JornadaFiltro, StringComparison.OrdinalIgnoreCase));
-            _gruposFiltrados = new ObservableCollection<GrupoAcademicoItem>(resultado);
+
+            if (!string.IsNullOrWhiteSpace(EstadoFiltro) &&
+                EstadoFiltro != "Todos")
+            {
+                resultado = resultado.Where(g =>
+                    g.Estado.Equals(EstadoFiltro, StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (!string.IsNullOrWhiteSpace(JornadaFiltro) &&
+                JornadaFiltro != "Todas")
+            {
+                resultado = resultado.Where(g =>
+                    g.Jornada.Equals(JornadaFiltro, StringComparison.OrdinalIgnoreCase));
+            }
+
+            _gruposFiltrados =
+                new ObservableCollection<GrupoAcademicoItem>(resultado);
+
             PaginaActual = 1;
             CargarPagina();
         }
@@ -102,6 +119,30 @@ namespace SistemaHorario.UI.ViewModels.GruposAcademicos
             MensajeEstado = r.Message; return false;
         }
 
+        public async Task<bool> CambiarEstadoGrupoAsync(GrupoAcademicoItem grupo)
+        {
+            if (grupo == null)
+            {
+                MensajeEstado = "No se seleccionó un grupo válido.";
+                return false;
+            }
+
+            bool estaActivo =
+                grupo.Estado.Equals("Activo", StringComparison.OrdinalIgnoreCase);
+
+            var respuesta = estaActivo
+                ? await _api.EliminarGrupoAsync(grupo.IdGrupoAcademico)
+                : await _api.ActivarGrupoAsync(grupo.IdGrupoAcademico);
+
+            if (respuesta.Success)
+            {
+                await CargarDatosAsync();
+                return true;
+            }
+
+            MensajeEstado = respuesta.Message;
+            return false;
+        }
         public void AgregarGrupo(GrupoAcademicoItem g) => _ = AgregarGrupoAsync(g);
         public void ActualizarGrupo(GrupoAcademicoItem g) => _ = ActualizarGrupoAsync(g);
         public void EliminarGrupo(int id) => _ = EliminarGrupoAsync(id);

@@ -24,88 +24,138 @@ public class GruposApiService
 {
     private readonly ApiClient _api = new();
 
-    private class PlanSimpleDto { public int IdPlanAcademico { get; set; } }
+    private class PlanSimpleDto
+    {
+        public int IdPlanAcademico { get; set; }
+    }
 
     private async Task<int> ObtenerPrimerPlanIdAsync()
     {
-        var resp = await _api.GetAsync<List<PlanSimpleDto>>("PlanAcademico");
-        return resp.Success && resp.Data?.Count > 0 ? resp.Data[0].IdPlanAcademico : 0;
+        var resp =
+            await _api.GetAsync<List<PlanSimpleDto>>("PlanAcademico");
+
+        return resp.Success && resp.Data?.Count > 0
+            ? resp.Data[0].IdPlanAcademico
+            : 0;
     }
 
     public async Task<ApiResponse<List<GrupoAcademicoItem>>> ObtenerGruposAsync()
     {
-        var resp = await _api.GetAsync<List<GrupoBackendDto>>("Grupos");
+        var resp =
+            await _api.GetAsync<List<GrupoBackendDto>>("Grupos");
+
         if (!resp.Success || resp.Data == null)
-            return new ApiResponse<List<GrupoAcademicoItem>> { Success = false, Message = resp.Message };
-
-        var lista = resp.Data.Where(g => g.Activo).Select(g => new GrupoAcademicoItem
         {
-            IdGrupoAcademico = g.IdGrupo,
-            IdPlanAcademico = g.IdPlanAcademico,
-            NumeroSemestre = g.NumeroSemestre,
-            Codigo = g.Codigo,
-            NombreGrupo = g.Nombre,
-            Jornada = g.Jornada,
-            Tipo = g.TipoGrupo,
-            Materia = g.Materia,
-            Estado = g.Activo ? "Activo" : "Inactivo",
-            EstudiantesActuales = g.CantidadEstudiantes,
-            PlazasDisponibles = g.CantidadEstudiantes,
-            Dias = string.IsNullOrWhiteSpace(g.Dias)
-                ? new ObservableCollection<string>()
-                : new ObservableCollection<string>(g.Dias.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(d => d.Trim()))
-        }).ToList();
+            return new ApiResponse<List<GrupoAcademicoItem>>
+            {
+                Success = false,
+                Message = resp.Message
+            };
+        }
 
-        return new ApiResponse<List<GrupoAcademicoItem>> { Success = true, Data = lista };
+        var lista = resp.Data
+            .Select(g => new GrupoAcademicoItem
+            {
+                IdGrupoAcademico = g.IdGrupo,
+                IdPlanAcademico = g.IdPlanAcademico,
+                NumeroSemestre = g.NumeroSemestre,
+                Codigo = g.Codigo,
+                NombreGrupo = g.Nombre,
+                Jornada = g.Jornada,
+                Tipo = g.TipoGrupo,
+                Materia = g.Materia,
+                Estado = g.Activo ? "Activo" : "Inactivo",
+                EstudiantesActuales = g.CantidadEstudiantes,
+                PlazasDisponibles = g.CantidadEstudiantes,
+                Dias = new ObservableCollection<string>()
+            })
+            .ToList();
+
+        return new ApiResponse<List<GrupoAcademicoItem>>
+        {
+            Success = true,
+            Data = lista
+        };
     }
 
-    public async Task<ApiResponse<string>> CrearGrupoAsync(GrupoAcademicoItem g)
+    public async Task<ApiResponse<string>> CrearGrupoAsync(
+        GrupoAcademicoItem grupo)
     {
-        int idPlan = g.IdPlanAcademico > 0 ? g.IdPlanAcademico : await ObtenerPrimerPlanIdAsync();
-        int semestre = g.NumeroSemestre > 0 ? g.NumeroSemestre : 1;
+        int idPlan =
+            grupo.IdPlanAcademico > 0
+                ? grupo.IdPlanAcademico
+                : await ObtenerPrimerPlanIdAsync();
+
+        int semestre =
+            grupo.NumeroSemestre > 0
+                ? grupo.NumeroSemestre
+                : 1;
 
         return await _api.PostAsync("Grupos", new
         {
-            g.Codigo,
-            Nombre = g.NombreGrupo,
-            g.Jornada,
-            TipoGrupo = g.Tipo,
+            grupo.Codigo,
+            Nombre = grupo.NombreGrupo,
+            grupo.Jornada,
+            TipoGrupo = grupo.Tipo,
             NumeroSemestre = semestre,
-            CantidadEstudiantes = g.PlazasDisponibles,
+            CantidadEstudiantes = grupo.PlazasDisponibles,
             IdPlanAcademico = idPlan,
-            Materia = g.Materia,
-            Dias = string.Join(",", g.Dias)
+            Materia = grupo.Materia,
+            Dias = string.Empty
         });
     }
 
-    public async Task<ApiResponse<string>> ActualizarGrupoAsync(GrupoAcademicoItem g)
+    public async Task<ApiResponse<string>> ActualizarGrupoAsync(
+        GrupoAcademicoItem grupo)
     {
-        int idPlan = g.IdPlanAcademico > 0 ? g.IdPlanAcademico : await ObtenerPrimerPlanIdAsync();
-        int semestre = g.NumeroSemestre > 0 ? g.NumeroSemestre : 1;
+        int idPlan =
+            grupo.IdPlanAcademico > 0
+                ? grupo.IdPlanAcademico
+                : await ObtenerPrimerPlanIdAsync();
 
-        return await _api.PutAsync($"Grupos/{g.IdGrupoAcademico}", new
+        int semestre =
+            grupo.NumeroSemestre > 0
+                ? grupo.NumeroSemestre
+                : 1;
+
+        return await _api.PutAsync($"Grupos/{grupo.IdGrupoAcademico}", new
         {
-            g.Codigo,
-            Nombre = g.NombreGrupo,
-            g.Jornada,
-            TipoGrupo = g.Tipo,
+            grupo.Codigo,
+            Nombre = grupo.NombreGrupo,
+            grupo.Jornada,
+            TipoGrupo = grupo.Tipo,
             NumeroSemestre = semestre,
-            CantidadEstudiantes = g.PlazasDisponibles,
+            CantidadEstudiantes = grupo.PlazasDisponibles,
             IdPlanAcademico = idPlan,
-            Materia = g.Materia,
-            Dias = string.Join(",", g.Dias),
-            Activo = g.Estado == "Activo"
+            Materia = grupo.Materia,
+            Dias = string.Empty,
+            Activo = grupo.Estado == "Activo"
         });
     }
 
-    public async Task<ApiResponse<string>> EliminarGrupoAsync(int id)
-        => await _api.DeleteAsync<string>($"grupos/{id}");
+    public async Task<ApiResponse<int>> EliminarGrupoAsync(int id)
+    {
+        return await _api.DeleteAsync<int>($"grupos/{id}");
+    }
+
+    public async Task<ApiResponse<int>> ActivarGrupoAsync(int id)
+    {
+        return await _api.PatchAsync<int>($"grupos/{id}/activar", new { });
+    }
 
     public async Task<ApiResponse<List<GrupoHorarioOption>>> ObtenerGruposParaHorarioAsync()
     {
-        var resp = await _api.GetAsync<List<GrupoBackendDto>>("Grupos");
+        var resp =
+            await _api.GetAsync<List<GrupoBackendDto>>("Grupos");
+
         if (!resp.Success || resp.Data == null)
-            return new ApiResponse<List<GrupoHorarioOption>> { Success = false, Message = resp.Message };
+        {
+            return new ApiResponse<List<GrupoHorarioOption>>
+            {
+                Success = false,
+                Message = resp.Message
+            };
+        }
 
         var lista = resp.Data
             .Where(g => g.Activo)
@@ -118,7 +168,10 @@ public class GruposApiService
             })
             .ToList();
 
-        return new ApiResponse<List<GrupoHorarioOption>> { Success = true, Data = lista };
+        return new ApiResponse<List<GrupoHorarioOption>>
+        {
+            Success = true,
+            Data = lista
+        };
     }
 }
-

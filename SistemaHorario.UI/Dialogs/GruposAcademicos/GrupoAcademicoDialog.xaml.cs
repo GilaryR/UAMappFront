@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
 
+
 namespace SistemaHorario.UI.Dialogs.GruposAcademicos
 {
     public enum ModoGrupoAcademicoDialog
@@ -32,6 +33,32 @@ namespace SistemaHorario.UI.Dialogs.GruposAcademicos
 
             ConfigurarModo();
             CargarDatos();
+            SeleccionarValoresPorDefecto();
+            OcultarSeleccionDias();
+        }
+
+        private void SeleccionarValoresPorDefecto()
+        {
+            if (_modo != ModoGrupoAcademicoDialog.Crear)
+            {
+                return;
+            }
+
+            if (CmbJornada.SelectedItem == null)
+            {
+                CmbJornada.SelectedIndex = 0;
+            }
+
+            if (CmbEstado.SelectedItem == null)
+            {
+                CmbEstado.SelectedIndex = 0;
+            }
+        }
+
+
+        private void OcultarSeleccionDias()
+        {
+            PanelDias.Visibility = Visibility.Collapsed;
         }
 
         private void ConfigurarModo()
@@ -88,12 +115,6 @@ namespace SistemaHorario.UI.Dialogs.GruposAcademicos
 
             CmbMateria.SelectedItem = GrupoResultado.Materia;
 
-            ChkLunes.IsChecked = GrupoResultado.Dias.Contains("Lunes");
-            ChkMartes.IsChecked = GrupoResultado.Dias.Contains("Martes");
-            ChkMiercoles.IsChecked = GrupoResultado.Dias.Contains("Miércoles");
-            ChkJueves.IsChecked = GrupoResultado.Dias.Contains("Jueves");
-            ChkViernes.IsChecked = GrupoResultado.Dias.Contains("Viernes");
-            ChkSabado.IsChecked = GrupoResultado.Dias.Contains("Sábado");
         }
 
         private void BtnCancelar_Click(object sender, RoutedEventArgs e)
@@ -113,9 +134,9 @@ namespace SistemaHorario.UI.Dialogs.GruposAcademicos
             GrupoResultado.Estado = ObtenerTextoCombo(CmbEstado);
             GrupoResultado.PlazasDisponibles = int.Parse(TxtPlazas.Text.Trim());
             GrupoResultado.NumeroSemestre = int.Parse(TxtSemestre.Text.Trim());
-            GrupoResultado.Dias = ObtenerDiasSeleccionados();
+            GrupoResultado.Dias = new System.Collections.ObjectModel.ObservableCollection<string>();
 
-            GrupoResultado.Tipo = GrupoResultado.Jornada == "Nocturno"
+            GrupoResultado.Tipo = GrupoResultado.Jornada == "Nocturna"
                 ? "TAPSI"
                 : "Regular";
 
@@ -163,12 +184,6 @@ namespace SistemaHorario.UI.Dialogs.GruposAcademicos
             if (!int.TryParse(TxtSemestre.Text.Trim(), out int semestre) || semestre <= 0)
             {
                 MessageBox.Show("⚠ Ingresa un número de semestre válido (ej: 1, 2, 3...).");
-                return false;
-            }
-
-            if (ObtenerDiasSeleccionados().Count == 0)
-            {
-                MessageBox.Show("⚠ Selecciona al menos un día.");
                 return false;
             }
 

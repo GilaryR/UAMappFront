@@ -22,8 +22,12 @@ namespace SistemaHorario.UI.Views.GruposAcademicos
 
         private void Filtrar_Click(object sender, RoutedEventArgs e)
         {
-            _viewModel.EstadoFiltro = CmbEstado.SelectedValue?.ToString() ?? "Todos";
-            _viewModel.JornadaFiltro = CmbJornada.SelectedValue?.ToString() ?? "Todas";
+            _viewModel.EstadoFiltro =
+                CmbEstado.SelectedValue?.ToString() ?? "Todos";
+
+            _viewModel.JornadaFiltro =
+                CmbJornada.SelectedValue?.ToString() ?? "Todas";
+
             _viewModel.AplicarFiltros();
             ActualizarBotonesPaginacion();
         }
@@ -31,8 +35,10 @@ namespace SistemaHorario.UI.Views.GruposAcademicos
         private void Limpiar_Click(object sender, RoutedEventArgs e)
         {
             _viewModel.LimpiarFiltros();
+
             CmbEstado.SelectedValue = "Todos";
             CmbJornada.SelectedValue = "Todas";
+
             ActualizarBotonesPaginacion();
         }
 
@@ -80,17 +86,48 @@ namespace SistemaHorario.UI.Views.GruposAcademicos
         private async void EliminarGrupo_Click(object sender, RoutedEventArgs e)
         {
             GrupoAcademicoItem? grupo = ObtenerGrupoDesdeBoton(sender);
-            if (grupo == null) return;
-            EliminarConfirmacionDialog dialog = new() { Owner = Window.GetWindow(this) };
-            if (dialog.ShowDialog() != true) return;
-            bool ok = await _viewModel.EliminarGrupoAsync(grupo.IdGrupoAcademico);
-            if (!ok)
+
+            if (grupo == null)
             {
-                MessageBox.Show("Error: " + _viewModel.MensajeEstado, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
+
+            bool estaActivo =
+                grupo.Estado.Equals("Activo", StringComparison.OrdinalIgnoreCase);
+
+            string accion = estaActivo ? "inactivar" : "reactivar";
+            string mensajeExito = estaActivo
+                ? "Grupo académico inactivado"
+                : "Grupo académico reactivado";
+
+            MessageBoxResult confirmacion = MessageBox.Show(
+                $"¿Deseas {accion} el grupo académico {grupo.Codigo}?",
+                "Confirmar cambio de estado",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question
+            );
+
+            if (confirmacion != MessageBoxResult.Yes)
+            {
+                return;
+            }
+
+            bool ok = await _viewModel.CambiarEstadoGrupoAsync(grupo);
+
+            if (!ok)
+            {
+                MessageBox.Show(
+                    "Error: " + _viewModel.MensajeEstado,
+                    "Error",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error
+                );
+
+                return;
+            }
+
             ActualizarBotonesPaginacion();
-            MostrarExito("Grupo academico eliminado");
+            MostrarExito(mensajeExito);
         }
 
         private void Anterior_Click(object sender, RoutedEventArgs e)
