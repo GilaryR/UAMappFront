@@ -48,7 +48,7 @@
 
                     <StackPanel Grid.Row="2" Grid.Column="0">
                         <TextBlock Text="Tipo de jornada *" FontWeight="Bold" Margin="0,0,0,8"/>
-                        <ComboBox x:Name="CmbJornada" Height="36" FontSize="15">
+                        <ComboBox x:Name="CmbJornada" Height="54" FontSize="16">
                             <ComboBoxItem Content="Diurna"/>
                             <ComboBoxItem Content="Nocturna"/>
                         </ComboBox>
@@ -61,7 +61,7 @@
 
                     <StackPanel Grid.Row="4" Grid.Column="0">
                         <TextBlock Text="Estado *" FontWeight="Bold" Margin="0,0,0,8"/>
-                        <ComboBox x:Name="CmbEstado" Height="36" FontSize="15">
+                        <ComboBox x:Name="CmbEstado" Height="54" FontSize="16">
                             <ComboBoxItem Content="Activo"/>
                             <ComboBoxItem Content="Inactivo"/>
                         </ComboBox>
@@ -78,8 +78,11 @@
                     </StackPanel>
                 </Grid>
 
-                <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,22,0,18">
-                    <TextBlock Text="Dias:" FontSize="15" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,14,0"/>
+                <StackPanel x:Name="PanelDias"
+            Grid.Row="2"
+            Orientation="Horizontal"
+            HorizontalAlignment="Right"
+            Margin="0,22,0,18">
                     <CheckBox x:Name="ChkLunes" Content="Lun" Margin="0,0,12,0"/>
                     <CheckBox x:Name="ChkMartes" Content="Mar" Margin="0,0,12,0"/>
                     <CheckBox x:Name="ChkMiercoles" Content="Mie" Margin="0,0,12,0"/>
