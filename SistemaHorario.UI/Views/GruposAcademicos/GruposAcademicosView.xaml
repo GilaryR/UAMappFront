@@ -135,7 +135,7 @@
 
                     <StackPanel>
 
-                        <TextBlock Text="Asignación de materias por grupo"
+                        <TextBlock Text="Secciones académicas registradas"
                                    FontSize="18"
                                    FontWeight="Bold"
                                    Foreground="#8A8F98"
@@ -173,24 +173,23 @@
                                     <Setter Property="VerticalContentAlignment" Value="Center"/>
                                 </Style>
                             </DataGrid.CellStyle>
-
                             <DataGrid.Columns>
 
                                 <DataGridTextColumn Header="Grupo"
-                                                    Binding="{Binding NombreGrupo}"
-                                                    Width="120"/>
+                        Binding="{Binding NombreGrupo}"
+                        Width="140"/>
 
                                 <DataGridTextColumn Header="Código"
-                                                    Binding="{Binding Codigo}"
-                                                    Width="90"/>
+                        Binding="{Binding Codigo}"
+                        Width="90"/>
 
                                 <DataGridTemplateColumn Header="Jornada"
-                                                        Width="105">
+                            Width="105">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <Border CornerRadius="5"
-                                                    Padding="9,5"
-                                                    HorizontalAlignment="Left">
+                        Padding="9,5"
+                        HorizontalAlignment="Left">
                                                 <Border.Style>
                                                     <Style TargetType="Border">
                                                         <Setter Property="Background" Value="#CFE8FA"/>
@@ -203,8 +202,8 @@
                                                 </Border.Style>
 
                                                 <TextBlock Text="{Binding Jornada}"
-                                                           FontWeight="Bold"
-                                                           FontSize="13">
+                               FontWeight="Bold"
+                               FontSize="13">
                                                     <TextBlock.Style>
                                                         <Style TargetType="TextBlock">
                                                             <Setter Property="Foreground" Value="#0077B6"/>
@@ -221,70 +220,87 @@
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
 
-                                <DataGridTextColumn Header="Materia"
-                                                    Binding="{Binding Materia}"
-                                                    Width="160"/>
-
-                                <DataGridTextColumn Header="Horario"
-                                                    Binding="{Binding Horario}"
-                                                    Width="150"/>
+                                <DataGridTextColumn Header="Semestre"
+                        Binding="{Binding NumeroSemestre}"
+                        Width="90"/>
 
                                 <DataGridTextColumn Header="Estudiantes"
-                                                    Binding="{Binding EstudiantesTexto}"
-                                                    Width="95"/>
+                        Binding="{Binding EstudiantesTexto}"
+                        Width="105"/>
 
                                 <DataGridTextColumn Header="Tipo"
-                                                    Binding="{Binding Tipo}"
-                                                    Width="90"/>
+                        Binding="{Binding Tipo}"
+                        Width="90"/>
 
                                 <DataGridTemplateColumn Header="Estado"
-                                                        Width="100">
+                            Width="100">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
-                                            <Border Background="#D4F8DD"
-                                                    CornerRadius="5"
-                                                    Padding="9,5"
-                                                    HorizontalAlignment="Left">
+                                            <Border CornerRadius="5"
+                        Padding="9,5"
+                        HorizontalAlignment="Left">
+                                                <Border.Style>
+                                                    <Style TargetType="Border">
+                                                        <Setter Property="Background" Value="#D4F8DD"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding Estado}" Value="Inactivo">
+                                                                <Setter Property="Background" Value="#F8D4D4"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Border.Style>
+
                                                 <TextBlock Text="{Binding Estado}"
-                                                           Foreground="#008A30"
-                                                           FontWeight="Bold"
-                                                           FontSize="13"/>
+                               FontWeight="Bold"
+                               FontSize="13">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Foreground" Value="#008A30"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding Estado}" Value="Inactivo">
+                                                                    <Setter Property="Foreground" Value="#B42318"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
                                             </Border>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
 
                                 <DataGridTemplateColumn Header="Acciones"
-                                                        Width="112">
+                            Width="112">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <StackPanel Orientation="Horizontal">
                                                 <Button Content="👁"
-                                                        Background="#E4D36C"
-                                                        Foreground="#111111"
-                                                        Style="{StaticResource BotonAccionTabla}"
-                                                        CommandParameter="{Binding}"
-                                                        Click="VerGrupo_Click"/>
+                            Background="#E4D36C"
+                            Foreground="#111111"
+                            Style="{StaticResource BotonAccionTabla}"
+                            CommandParameter="{Binding}"
+                            Click="VerGrupo_Click"/>
 
                                                 <Button Content="✎"
-                                                        Background="#78B8E6"
-                                                        Foreground="#111111"
-                                                        Style="{StaticResource BotonAccionTabla}"
-                                                        CommandParameter="{Binding}"
-                                                        Click="EditarGrupo_Click"/>
+                            Background="#78B8E6"
+                            Foreground="#111111"
+                            Style="{StaticResource BotonAccionTabla}"
+                            CommandParameter="{Binding}"
+                            Click="EditarGrupo_Click"/>
 
-                                                <Button Content="🗑"
-                                                        Background="#F0B6B6"
-                                                        Foreground="#111111"
-                                                        Style="{StaticResource BotonAccionTabla}"
-                                                        CommandParameter="{Binding}"
-                                                        Click="EliminarGrupo_Click"/>
+                                                <Button Content="↕"
+                            Background="#F0B6B6"
+                            Foreground="#111111"
+                            Style="{StaticResource BotonAccionTabla}"
+                            CommandParameter="{Binding}"
+                            Click="EliminarGrupo_Click"/>
                                             </StackPanel>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
 
                             </DataGrid.Columns>
+
                         </DataGrid>
 
                         <Grid Margin="0,18,0,0">

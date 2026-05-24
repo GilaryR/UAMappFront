@@ -1,9 +1,9 @@
 ﻿<Window x:Class="SistemaHorario.UI.Dialogs.GruposAcademicos.GrupoAcademicoDialog"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Grupo academico"
+        Title="Grupo académico"
         Width="690"
-        Height="680"
+        Height="610"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize"
         Background="#EEF0F2">
@@ -15,10 +15,15 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
-                <TextBlock x:Name="TxtTitulo" Grid.Row="0" Text="Nuevo grupo academico" FontSize="30" FontWeight="Bold" Foreground="#111111" Margin="0,0,0,24"/>
+                <TextBlock x:Name="TxtTitulo"
+                           Grid.Row="0"
+                           Text="Nuevo grupo académico"
+                           FontSize="30"
+                           FontWeight="Bold"
+                           Foreground="#111111"
+                           Margin="0,0,0,24"/>
 
                 <Grid Grid.Row="1">
                     <Grid.ColumnDefinitions>
@@ -26,6 +31,7 @@
                         <ColumnDefinition Width="28"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
+
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="22"/>
@@ -37,63 +43,112 @@
                     </Grid.RowDefinitions>
 
                     <StackPanel Grid.Row="0" Grid.Column="0">
-                        <TextBlock Text="Nombre del grupo *" FontWeight="Bold" Margin="0,0,0,8"/>
-                        <TextBox x:Name="TxtNombreGrupo" Height="34" FontSize="15" Padding="8,0" VerticalContentAlignment="Center"/>
+                        <TextBlock Text="Nombre del grupo *"
+                                   FontWeight="Bold"
+                                   Margin="0,0,0,8"/>
+                        <TextBox x:Name="TxtNombreGrupo"
+                                 Height="34"
+                                 FontSize="15"
+                                 Padding="8,0"
+                                 VerticalContentAlignment="Center"/>
                     </StackPanel>
 
                     <StackPanel Grid.Row="0" Grid.Column="2">
-                        <TextBlock Text="Codigo *" FontWeight="Bold" Margin="0,0,0,8"/>
-                        <TextBox x:Name="TxtCodigo" Height="34" FontSize="15" Padding="8,0" VerticalContentAlignment="Center"/>
+                        <TextBlock Text="Código *"
+                                   FontWeight="Bold"
+                                   Margin="0,0,0,8"/>
+                        <TextBox x:Name="TxtCodigo"
+                                 Height="34"
+                                 FontSize="15"
+                                 Padding="8,0"
+                                 VerticalContentAlignment="Center"/>
                     </StackPanel>
 
                     <StackPanel Grid.Row="2" Grid.Column="0">
-                        <TextBlock Text="Tipo de jornada *" FontWeight="Bold" Margin="0,0,0,8"/>
-                        <ComboBox x:Name="CmbJornada" Height="54" FontSize="16">
+                        <TextBlock Text="Tipo de jornada *"
+                                   FontWeight="Bold"
+                                   Margin="0,0,0,8"/>
+                        <ComboBox x:Name="CmbJornada"
+                                  Height="54"
+                                  FontSize="16">
                             <ComboBoxItem Content="Diurna"/>
                             <ComboBoxItem Content="Nocturna"/>
                         </ComboBox>
                     </StackPanel>
 
                     <StackPanel Grid.Row="2" Grid.Column="2">
-                        <TextBlock Text="Materia *" FontWeight="Bold" Margin="0,0,0,8"/>
-                        <ComboBox x:Name="CmbMateria" Height="36" FontSize="15"/>
+                        <TextBlock Text="Tipo de grupo *"
+                                   FontWeight="Bold"
+                                   Margin="0,0,0,8"/>
+                        <ComboBox x:Name="CmbTipoGrupo"
+                                  Height="54"
+                                  FontSize="16">
+                            <ComboBoxItem Content="Regular"/>
+                            <ComboBoxItem Content="TAPSI"/>
+                            <ComboBoxItem Content="Mixto"/>
+                        </ComboBox>
                     </StackPanel>
 
                     <StackPanel Grid.Row="4" Grid.Column="0">
-                        <TextBlock Text="Estado *" FontWeight="Bold" Margin="0,0,0,8"/>
-                        <ComboBox x:Name="CmbEstado" Height="54" FontSize="16">
+                        <TextBlock Text="Estado *"
+                                   FontWeight="Bold"
+                                   Margin="0,0,0,8"/>
+                        <ComboBox x:Name="CmbEstado"
+                                  Height="54"
+                                  FontSize="16">
                             <ComboBoxItem Content="Activo"/>
                             <ComboBoxItem Content="Inactivo"/>
                         </ComboBox>
                     </StackPanel>
 
                     <StackPanel Grid.Row="4" Grid.Column="2">
-                        <TextBlock Text="Plazas disponibles *" FontWeight="Bold" Margin="0,0,0,8"/>
-                        <TextBox x:Name="TxtPlazas" Height="34" FontSize="15" Padding="8,0" VerticalContentAlignment="Center"/>
+                        <TextBlock Text="Cantidad de estudiantes *"
+                                   FontWeight="Bold"
+                                   Margin="0,0,0,8"/>
+                        <TextBox x:Name="TxtPlazas"
+                                 Height="34"
+                                 FontSize="15"
+                                 Padding="8,0"
+                                 VerticalContentAlignment="Center"/>
                     </StackPanel>
 
                     <StackPanel Grid.Row="6" Grid.Column="0">
-                        <TextBlock Text="Número de semestre *" FontWeight="Bold" Margin="0,0,0,8"/>
-                        <TextBox x:Name="TxtSemestre" Height="34" FontSize="15" Padding="8,0" VerticalContentAlignment="Center"/>
+                        <TextBlock Text="Número de semestre *"
+                                   FontWeight="Bold"
+                                   Margin="0,0,0,8"/>
+                        <TextBox x:Name="TxtSemestre"
+                                 Height="34"
+                                 FontSize="15"
+                                 Padding="8,0"
+                                 VerticalContentAlignment="Center"/>
                     </StackPanel>
                 </Grid>
 
-                <StackPanel x:Name="PanelDias"
-            Grid.Row="2"
-            Orientation="Horizontal"
-            HorizontalAlignment="Right"
-            Margin="0,22,0,18">
-                    <CheckBox x:Name="ChkLunes" Content="Lun" Margin="0,0,12,0"/>
-                    <CheckBox x:Name="ChkMartes" Content="Mar" Margin="0,0,12,0"/>
-                    <CheckBox x:Name="ChkMiercoles" Content="Mie" Margin="0,0,12,0"/>
-                    <CheckBox x:Name="ChkJueves" Content="Jue" Margin="0,0,12,0"/>
-                    <CheckBox x:Name="ChkViernes" Content="Vie" Margin="0,0,12,0"/>
-                    <CheckBox x:Name="ChkSabado" Content="Sab"/>
-                </StackPanel>
+                <StackPanel Grid.Row="2"
+                            Orientation="Horizontal"
+                            HorizontalAlignment="Right"
+                            Margin="0,22,0,0">
+                    <Button Content="BtnCancelar"
+                            Width="110"
+                            Height="38"
+                            Background="#F3F4F6"
+                            Foreground="#A1A1AA"
+                            BorderThickness="0"
+                            FontWeight="Bold"
+                            Cursor="Hand"
+                            Margin="0,0,14,0"
+                            Click="BtnCancelar_Click"/>
 
-                <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right">
-                    <Button Content="Cancelar" Width="110" Height="38" Background="#F3F4F6" Foreground="#A1A1AA" BorderThickness="0" FontWeight="Bold" Cursor="Hand" Margin="0,0,14,0" Click="BtnCancelar_Click"/>
-                    <Button x:Name="BtnGuardar" Content="Crear" Width="110" Height="38" Background="#0B7FB4" Foreground="White" BorderThickness="0" FontWeight="Bold" Cursor="Hand" Click="BtnGuardar_Click"/>
+                    <Button x:Name="BtnGuardar"
+                            Content="Crear"
+                            Width="110"
+                            Height="38"
+                            Background="#0B7FB4"
+                            Foreground="White"
+                            BorderThickness="0"
+                            FontWeight="Bold"
+                            Cursor="Hand"
+                            Click="BtnGuardar_Click"/>
                 </StackPanel>
             </Grid>
         </Border>
