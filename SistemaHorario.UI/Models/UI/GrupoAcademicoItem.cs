@@ -1,19 +1,9 @@
-﻿using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Linq;
+﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
 namespace SistemaHorario.UI.Models.UI
 {
-    /// <summary>
-    /// Representa un grupo académico en la pantalla.
-    /// 
-    /// Ejemplo:
-    /// Una materia como Redes LAN puede tener varios grupos,
-    /// por ejemplo un grupo diurno y otro nocturno.
-    /// 
-    /// Este modelo queda listo para llenarse después con datos del backend.
-    /// </summary>
+    // Representa una sección de estudiantes dentro de un plan, jornada y semestre.
     public class GrupoAcademicoItem : INotifyPropertyChanged
     {
         private int _idGrupoAcademico;
@@ -22,12 +12,10 @@ namespace SistemaHorario.UI.Models.UI
         private string _nombreGrupo = string.Empty;
         private string _codigo = string.Empty;
         private string _jornada = string.Empty;
-        private string _materia = string.Empty;
         private string _tipo = string.Empty;
         private string _estado = string.Empty;
         private int _estudiantesActuales;
         private int _plazasDisponibles;
-        private ObservableCollection<string> _dias = new();
 
         public int IdGrupoAcademico
         {
@@ -50,61 +38,31 @@ namespace SistemaHorario.UI.Models.UI
         public string NombreGrupo
         {
             get => _nombreGrupo;
-            set
-            {
-                _nombreGrupo = value;
-                OnPropertyChanged();
-            }
+            set { _nombreGrupo = value; OnPropertyChanged(); }
         }
 
         public string Codigo
         {
             get => _codigo;
-            set
-            {
-                _codigo = value;
-                OnPropertyChanged();
-            }
+            set { _codigo = value; OnPropertyChanged(); }
         }
 
         public string Jornada
         {
             get => _jornada;
-            set
-            {
-                _jornada = value;
-                OnPropertyChanged();
-            }
-        }
-
-        public string Materia
-        {
-            get => _materia;
-            set
-            {
-                _materia = value;
-                OnPropertyChanged();
-            }
+            set { _jornada = value; OnPropertyChanged(); }
         }
 
         public string Tipo
         {
             get => _tipo;
-            set
-            {
-                _tipo = value;
-                OnPropertyChanged();
-            }
+            set { _tipo = value; OnPropertyChanged(); }
         }
 
         public string Estado
         {
             get => _estado;
-            set
-            {
-                _estado = value;
-                OnPropertyChanged();
-            }
+            set { _estado = value; OnPropertyChanged(); }
         }
 
         public int EstudiantesActuales
@@ -129,21 +87,6 @@ namespace SistemaHorario.UI.Models.UI
             }
         }
 
-        public ObservableCollection<string> Dias
-        {
-            get => _dias;
-            set
-            {
-                _dias = value;
-                OnPropertyChanged();
-                OnPropertyChanged(nameof(Horario));
-            }
-        }
-
-        public string Horario => Dias.Count == 0
-            ? "Sin horario"
-            : string.Join(", ", Dias);
-
         public string EstudiantesTexto => $"{EstudiantesActuales}/{PlazasDisponibles}";
 
         public event PropertyChangedEventHandler? PropertyChanged;
@@ -158,12 +101,10 @@ namespace SistemaHorario.UI.Models.UI
                 NombreGrupo = NombreGrupo,
                 Codigo = Codigo,
                 Jornada = Jornada,
-                Materia = Materia,
                 Tipo = Tipo,
                 Estado = Estado,
                 EstudiantesActuales = EstudiantesActuales,
-                PlazasDisponibles = PlazasDisponibles,
-                Dias = new ObservableCollection<string>(Dias.ToList())
+                PlazasDisponibles = PlazasDisponibles
             };
         }
 
@@ -175,14 +116,11 @@ namespace SistemaHorario.UI.Models.UI
             NombreGrupo = grupo.NombreGrupo;
             Codigo = grupo.Codigo;
             Jornada = grupo.Jornada;
-            Materia = grupo.Materia;
             Tipo = grupo.Tipo;
             Estado = grupo.Estado;
             EstudiantesActuales = grupo.EstudiantesActuales;
             PlazasDisponibles = grupo.PlazasDisponibles;
-            Dias = new ObservableCollection<string>(grupo.Dias.ToList());
 
-            OnPropertyChanged(nameof(Horario));
             OnPropertyChanged(nameof(EstudiantesTexto));
         }
 

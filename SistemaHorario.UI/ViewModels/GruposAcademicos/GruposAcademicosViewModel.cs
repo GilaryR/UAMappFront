@@ -27,8 +27,6 @@ namespace SistemaHorario.UI.ViewModels.GruposAcademicos
             get => _gruposPaginaActual;
             set { _gruposPaginaActual = value; OnPropertyChanged(); }
         }
-
-        public ObservableCollection<string> MateriasDisponibles { get; private set; } = new();
         public string CodigoGrupoFiltro { get => _codigoGrupoFiltro; set { _codigoGrupoFiltro = value; OnPropertyChanged(); } }
         public string EstadoFiltro { get => _estadoFiltro; set { _estadoFiltro = value; OnPropertyChanged(); } }
         public string JornadaFiltro { get => _jornadaFiltro; set { _jornadaFiltro = value; OnPropertyChanged(); } }
@@ -43,18 +41,16 @@ namespace SistemaHorario.UI.ViewModels.GruposAcademicos
 
         public async Task CargarDatosAsync()
         {
-            var resp = await _api.ObtenerGruposAsync();
-            if (resp.Success && resp.Data != null)
-                _todosLosGrupos = new ObservableCollection<GrupoAcademicoItem>(resp.Data);
-            else MensajeEstado = resp.Message;
+            var respuesta = await _api.ObtenerGruposAsync();
 
-            var matApi = new MateriasApiService();
-            var respM = await matApi.ObtenerMateriasAsync();
-            if (respM.Success && respM.Data != null)
+            if (!respuesta.Success || respuesta.Data == null)
             {
-                MateriasDisponibles = new ObservableCollection<string>(respM.Data.Select(m => m.Nombre));
-                OnPropertyChanged(nameof(MateriasDisponibles));
+                MensajeEstado = respuesta.Message ?? "No se pudieron cargar los grupos académicos.";
+                return;
             }
+
+            _todosLosGrupos = new ObservableCollection<GrupoAcademicoItem>(respuesta.Data);
+
             AplicarFiltros();
         }
 

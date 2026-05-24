@@ -1,22 +1,31 @@
 ﻿using SistemaHorario.UI.Models.UI;
 using SistemaHorarios.Application.Common;
-using System.Collections.ObjectModel;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace SistemaHorario.UI.Services;
 
 public class GrupoBackendDto
 {
     public int IdGrupo { get; set; }
+
     public string Codigo { get; set; } = string.Empty;
+
     public string Nombre { get; set; } = string.Empty;
+
     public string Jornada { get; set; } = string.Empty;
+
     public string TipoGrupo { get; set; } = string.Empty;
+
     public int NumeroSemestre { get; set; }
+
     public int CantidadEstudiantes { get; set; }
+
     public int IdPlanAcademico { get; set; }
-    public string Materia { get; set; } = string.Empty;
-    public string Dias { get; set; } = string.Empty;
+
     public bool Activo { get; set; }
+
     public string EstadoTexto { get; set; } = string.Empty;
 }
 
@@ -63,11 +72,9 @@ public class GruposApiService
                 NombreGrupo = g.Nombre,
                 Jornada = g.Jornada,
                 Tipo = g.TipoGrupo,
-                Materia = g.Materia,
                 Estado = g.Activo ? "Activo" : "Inactivo",
                 EstudiantesActuales = g.CantidadEstudiantes,
-                PlazasDisponibles = g.CantidadEstudiantes,
-                Dias = new ObservableCollection<string>()
+                PlazasDisponibles = g.CantidadEstudiantes
             })
             .ToList();
 
@@ -99,9 +106,7 @@ public class GruposApiService
             TipoGrupo = grupo.Tipo,
             NumeroSemestre = semestre,
             CantidadEstudiantes = grupo.PlazasDisponibles,
-            IdPlanAcademico = idPlan,
-            Materia = grupo.Materia,
-            Dias = string.Empty
+            IdPlanAcademico = idPlan
         });
     }
 
@@ -127,20 +132,18 @@ public class GruposApiService
             NumeroSemestre = semestre,
             CantidadEstudiantes = grupo.PlazasDisponibles,
             IdPlanAcademico = idPlan,
-            Materia = grupo.Materia,
-            Dias = string.Empty,
             Activo = grupo.Estado == "Activo"
         });
     }
 
     public async Task<ApiResponse<int>> EliminarGrupoAsync(int id)
     {
-        return await _api.DeleteAsync<int>($"grupos/{id}");
+        return await _api.DeleteAsync<int>($"Grupos/{id}");
     }
 
     public async Task<ApiResponse<int>> ActivarGrupoAsync(int id)
     {
-        return await _api.PatchAsync<int>($"grupos/{id}/activar", new { });
+        return await _api.PatchAsync<int>($"Grupos/{id}/activar", new { });
     }
 
     public async Task<ApiResponse<List<GrupoHorarioOption>>> ObtenerGruposParaHorarioAsync()
