@@ -21,7 +21,7 @@ namespace SistemaHorario.UI.ViewModels.Perfil
                 Rol = string.Empty,
                 Telefono = string.Empty,
                 FacultadPrograma = "Universidad Autónoma de Manizales",
-                RutaImagen = "/Assets/Images/ImgUsuario.png"
+                RutaImagen = "pack://application:,,,/Assets/Images/ImgUsuario.png"
             };
         }
 

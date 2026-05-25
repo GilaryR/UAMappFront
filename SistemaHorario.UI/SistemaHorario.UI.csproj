@@ -119,7 +119,9 @@
     <Resource Include="Assets\Icons\IcX.png" />
     <Resource Include="Assets\Icons\OpcUsua.png" />
     <Resource Include="Assets\Images\ImgCupula.png" />
-    <Resource Include="Assets\Images\ImgUsuario.png" />
+    <Resource Include="Assets\Images\ImgUsuario.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
     <Resource Include="Assets\Images\LogosUam.png" />
     <Resource Include="Assets\Images\LogoU.png" />
   </ItemGroup>
