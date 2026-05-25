@@ -99,10 +99,10 @@ namespace SistemaHorario.UI.ViewModels.Dashboard
                 UltimosHorarios.Add(new HorarioGeneradoItem
                 {
                     Nombre = h.Nombre,
-                    Fecha = h.FechaGeneracion,
+                    Fecha = h.BloquesTexto,
                     Jornada = h.Jornada,
                     Grupos = h.Grupo,
-                    Semestre = "-",
+                    Semestre = h.SemestreTexto,
                     Estado = h.Estado,
                     JornadaFondo = ObtenerFondoJornada(h.Jornada),
                     JornadaColorTexto = ObtenerTextoJornada(h.Jornada)

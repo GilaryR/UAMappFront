@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="SistemaHorario.UI.Views.PlanAcademico.PlanAcademicoView"
+<UserControl x:Class="SistemaHorario.UI.Views.PlanAcademico.PlanAcademicoView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -12,277 +12,243 @@
     </UserControl.Resources>
 
     <Grid Background="#EEF0F2">
-        <ScrollViewer VerticalScrollBarVisibility="Auto"
-                      HorizontalScrollBarVisibility="Disabled">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
             <StackPanel Margin="28">
 
-                <TextBlock Text="Plan Académico"
-                           FontSize="32"
-                           FontWeight="Bold"
-                           Foreground="#111111"
-                           Margin="0,0,0,14"/>
-
-                <ScrollViewer HorizontalScrollBarVisibility="Auto"
-                              VerticalScrollBarVisibility="Disabled"
-                              Margin="0,0,0,16"
-                              Padding="0,0,0,8">
-                    <ItemsControl ItemsSource="{Binding Planes, Mode=OneWay}">
-                        <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <StackPanel Orientation="Horizontal"/>
-                            </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
-
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <StackPanel Orientation="Horizontal"
-                                            VerticalAlignment="Center">
-
-                                    <TextBlock Text="-&gt;"
-                                               FontSize="24"
-                                               FontWeight="Bold"
-                                               Foreground="#67A734"
-                                               VerticalAlignment="Center"
-                                               Margin="0,0,8,0"
-                                               Visibility="{Binding EsNuevo, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"/>
-
-                                    <Border Width="300"
-                                            MinHeight="240"
-                                            Background="White"
-                                            CornerRadius="9"
-                                            Padding="22"
-                                            Margin="0,0,14,0">
-
-                                        <StackPanel>
-
-                                            <Border Background="#0878B4"
-                                                    CornerRadius="6"
-                                                    Padding="14,7"
-                                                    HorizontalAlignment="Center"
-                                                    Margin="0,0,0,14">
-                                                <TextBlock Text="{Binding Nombre, Mode=OneWay}"
-                                                           Foreground="White"
-                                                           FontSize="15"
-                                                           FontWeight="Bold"/>
-                                            </Border>
-
-                                            <TextBlock FontSize="16"
-                                                       FontWeight="SemiBold"
-                                                       Foreground="#111111"
-                                                       Margin="0,0,0,2">
-                                                <Run Text="{Binding TotalSemestres, Mode=OneWay}"/>
-                                                <Run Text=" Semestres"/>
-                                                                                </TextBlock>
-
-                                            <TextBlock FontSize="16"
-                                                       FontWeight="SemiBold"
-                                                       Foreground="#111111"
-                                                       Margin="0,0,0,2">
-                                                <Run Text="{Binding TotalMaterias, Mode=OneWay}"/>
-                                                <Run Text=" Materias"/>
-                                            </TextBlock>
-
-                                            <TextBlock FontSize="16"
-                                                       FontWeight="SemiBold"
-                                                       Foreground="#111111"
-                                                       Margin="0,0,0,2">
-                                                <Run Text="{Binding TotalCreditos, Mode=OneWay}"/>
-                                                <Run Text=" Créditos"/>
-                                            </TextBlock>
-
-                                            <TextBlock FontSize="15"
-                                                       FontWeight="SemiBold"
-                                                       Foreground="#111111"
-                                                       TextWrapping="Wrap"
-                                                       LineHeight="21"
-                                                       Margin="0,0,0,6">
-                                                <Run Text="Carga por Semestre: "/>
-                                                <Run Text="{Binding CargaPorSemestre, Mode=OneWay}"/>
-                                            </TextBlock>
-
-                                            <TextBlock FontSize="14"
-                                                       FontWeight="SemiBold"
-                                                       Foreground="#536679"
-                                                       Text="{Binding Jornada, Mode=OneWay}"
-                                                       Margin="0,0,0,14"/>
-
-                                            <Grid>
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="*"/>
-                                                    <ColumnDefinition Width="10"/>
-                                                    <ColumnDefinition Width="*"/>
-                                                </Grid.ColumnDefinitions>
-
-                                                <Button Grid.Column="0"
-            Content="Ver Malla"
-            Height="34"
-            Background="#67A734"
-            Foreground="White"
-            BorderThickness="0"
-            FontWeight="Bold"
-            FontSize="14"
-            Cursor="Hand"
-            CommandParameter="{Binding}"
-            Click="VerMalla_Click"/>
-
-                                                <Button Grid.Column="2"
-            Content="Eliminar"
-            Height="34"
-            Background="#C70F1A"
-            Foreground="White"
-            BorderThickness="0"
-            FontWeight="Bold"
-            FontSize="14"
-            Cursor="Hand"
-            CommandParameter="{Binding}"
-            Click="EliminarPlan_Click"/>
-                                            </Grid>
-                                        </StackPanel>
-                                    </Border>
-                                </StackPanel>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </ScrollViewer>
-
-                <Button Height="52"
-                        Width="144"
-                        Background="#67A734"
-                        Foreground="White"
-                        BorderThickness="0"
-                        FontSize="16"
-                        FontWeight="Bold"
-                        Cursor="Hand"
-                        HorizontalAlignment="Center"
-                        Margin="0,0,0,18"
-                        Click="NuevoPlan_Click">
-                    <Grid>
-                        <TextBlock Text="Nuevo Plan"
-                                   HorizontalAlignment="Left"
-                                   VerticalAlignment="Center"
-                                   Margin="22,0,0,0"/>
-                        <TextBlock Text="+"
-                                   HorizontalAlignment="Right"
-                                   VerticalAlignment="Top"
-                                   Margin="0,-7,91,0"
-                                   FontSize="34"
-                                   FontWeight="Light"/>
-                    </Grid>
-                </Button>
-
-                <Border Width="720"
-                        Background="White"
-                        CornerRadius="7"
-                        Padding="20"
-                        HorizontalAlignment="Left"
-                        Margin="0,0,0,22">
+                <Grid Margin="0,0,0,18">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
 
                     <StackPanel>
-                        <DockPanel Margin="0,0,0,12">
-                            <Border Width="34"
-                                    Height="34"
-                                    CornerRadius="17"
-                                    Background="#22A447"
-                                    DockPanel.Dock="Left"
-                                    Margin="0,0,14,0">
-                                <TextBlock Text="✓"
-                                           Foreground="White"
-                                           FontSize="20"
-                                           FontWeight="Bold"
-                                           HorizontalAlignment="Center"
-                                           VerticalAlignment="Center"/>
-                            </Border>
-
-                            <TextBlock Text="Comparación General"
-                                       FontSize="16"
-                                       FontWeight="Bold"
-                                       Foreground="#111111"
-                                       VerticalAlignment="Center"/>
-                        </DockPanel>
-
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="1.15*"/>
-                                <ColumnDefinition Width="1*"/>
-                                <ColumnDefinition Width="1*"/>
-                            </Grid.ColumnDefinitions>
-
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="32"/>
-                                <RowDefinition Height="26"/>
-                                <RowDefinition Height="26"/>
-                                <RowDefinition Height="26"/>
-                                <RowDefinition Height="26"/>
-                                <RowDefinition Height="26"/>
-                            </Grid.RowDefinitions>
-
-                            <Border Grid.Row="0" Grid.ColumnSpan="3" Background="#E8E8EA"/>
-
-                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Característica" FontWeight="Bold" FontSize="14" VerticalAlignment="Center" Margin="16,0,0,0"/>
-                            <TextBlock Grid.Row="0" Grid.Column="1" Text="Plan Diurno" FontWeight="Bold" FontSize="14" VerticalAlignment="Center"/>
-                            <TextBlock Grid.Row="0" Grid.Column="2" Text="Plan Nocturno" FontWeight="Bold" FontSize="14" VerticalAlignment="Center"/>
-
-                            <TextBlock Grid.Row="1" Grid.Column="0" Text="Duración" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center" Margin="16,0,0,0"/>
-                            <TextBlock Grid.Row="1" Grid.Column="1" Text="10 Semestres" Foreground="#777777" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center"/>
-                            <TextBlock Grid.Row="1" Grid.Column="2" Text="12 Semestres" Foreground="#777777" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center"/>
-
-                            <TextBlock Grid.Row="2" Grid.Column="0" Text="Materias" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center" Margin="16,0,0,0"/>
-                            <TextBlock Grid.Row="2" Grid.Column="1" Foreground="#777777" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center"><Run Language="es-co" Text="59"/><Run Text=" Materias"/></TextBlock>
-                            <TextBlock Grid.Row="2" Grid.Column="2" Foreground="#777777" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center"><Run Language="es-co" Text="59"/><Run Text=" Materias"/></TextBlock>
-
-                            <TextBlock Grid.Row="3" Grid.Column="0" Text="Créditos" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center" Margin="16,0,0,0"/>
-                            <TextBlock Grid.Row="3" Grid.Column="1" Text="175 Créditos" Foreground="#777777" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center"/>
-                            <TextBlock Grid.Row="3" Grid.Column="2" Text="175 Créditos" Foreground="#777777" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center"/>
-
-                            <TextBlock Grid.Row="4" Grid.Column="0" Text="Carga académica" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center" Margin="16,0,0,0"/>
-                            <TextBlock Grid.Row="4" Grid.Column="1" Text="Mayor por Semestre" Foreground="#777777" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center"/>
-                            <TextBlock Grid.Row="4" Grid.Column="2" Text="Menor por Semestre" Foreground="#777777" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center"/>
-
-                            <TextBlock Grid.Row="5" Grid.Column="0" Text="Jornada" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center" Margin="16,0,0,0"/>
-                            <TextBlock Grid.Row="5" Grid.Column="1" Text="Diurna" Foreground="#777777" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center"/>
-                            <TextBlock Grid.Row="5" Grid.Column="2" Text="Nocturna" Foreground="#777777" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center"/>
-                        </Grid>
-                    </StackPanel>
-                </Border>
-
-                <Border Width="660"
-                        Background="White"
-                        CornerRadius="7"
-                        Padding="16"
-                        HorizontalAlignment="Left">
-
-                    <DockPanel>
-                        <Border Width="30"
-                                Height="30"
-                                CornerRadius="15"
-                                Background="#C70F1A"
-                                DockPanel.Dock="Left"
-                                Margin="0,0,12,0">
-                            <TextBlock Text="!"
-                                       Foreground="White"
-                                       FontSize="19"
-                                       FontWeight="Bold"
-                                       HorizontalAlignment="Center"
-                                       VerticalAlignment="Center"/>
-                        </Border>
-
-                        <TextBlock Text="Nota:"
-                                   FontSize="15"
+                        <TextBlock Text="Plan Académico"
+                                   FontSize="30"
                                    FontWeight="Bold"
-                                   Foreground="#111111"
-                                   DockPanel.Dock="Left"
-                                   Margin="0,0,12,0"
-                                   VerticalAlignment="Top"/>
-
-                        <TextBlock Text="{Binding NotaComparativa, Mode=OneWay}"
-                                   FontSize="13"
+                                   Foreground="#111111"/>
+                        <TextBlock Text="Consulta los planes por jornada y revisa su malla curricular."
+                                   FontSize="14"
                                    FontWeight="SemiBold"
-                                   Foreground="#8A8A8A"
-                                   TextWrapping="Wrap"
-                                   LineHeight="19"/>
-                    </DockPanel>
-                </Border>
+                                   Foreground="#8A8F98"
+                                   Margin="0,4,0,0"/>
+                    </StackPanel>
 
+                    <Button Grid.Column="1"
+                            Width="150"
+                            Height="42"
+                            Background="#67A734"
+                            Foreground="White"
+                            BorderThickness="0"
+                            FontSize="15"
+                            FontWeight="Bold"
+                            Cursor="Hand"
+                            VerticalAlignment="Center"
+                            Click="NuevoPlan_Click">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <TextBlock Text="Nuevo Plan" Margin="0,0,8,0"/>
+                            <TextBlock Text="+" FontSize="22" FontWeight="Bold"/>
+                        </StackPanel>
+                    </Button>
+                </Grid>
+
+                <ItemsControl ItemsSource="{Binding Planes, Mode=OneWay}" Margin="0,0,0,20">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Top" Margin="0,0,16,16">
+                                <TextBlock Text="-&gt;"
+                                           FontSize="22"
+                                           FontWeight="Bold"
+                                           Foreground="#67A734"
+                                           VerticalAlignment="Center"
+                                           Margin="0,0,8,0"
+                                           Visibility="{Binding EsNuevo, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"/>
+
+                                <Border Width="320"
+                                        MinHeight="220"
+                                        Background="White"
+                                        CornerRadius="12"
+                                        Padding="20">
+                                    <StackPanel>
+                                        <Border Background="#0878B4"
+                                                CornerRadius="8"
+                                                Padding="12,7"
+                                                HorizontalAlignment="Left"
+                                                Margin="0,0,0,14">
+                                            <TextBlock Text="{Binding Nombre, Mode=OneWay}"
+                                                       Foreground="White"
+                                                       FontSize="14"
+                                                       FontWeight="Bold"
+                                                       TextWrapping="Wrap"/>
+                                        </Border>
+
+                                        <UniformGrid Columns="3" Margin="0,0,0,12">
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding TotalSemestres, Mode=OneWay}"
+                                                           FontSize="24"
+                                                           FontWeight="Bold"
+                                                           Foreground="#111111"/>
+                                                <TextBlock Text="Semestres" FontSize="12" FontWeight="SemiBold" Foreground="#536679"/>
+                                            </StackPanel>
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding TotalMaterias, Mode=OneWay}"
+                                                           FontSize="24"
+                                                           FontWeight="Bold"
+                                                           Foreground="#111111"/>
+                                                <TextBlock Text="Materias" FontSize="12" FontWeight="SemiBold" Foreground="#536679"/>
+                                            </StackPanel>
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding TotalCreditos, Mode=OneWay}"
+                                                           FontSize="24"
+                                                           FontWeight="Bold"
+                                                           Foreground="#111111"/>
+                                                <TextBlock Text="Créditos" FontSize="12" FontWeight="SemiBold" Foreground="#536679"/>
+                                            </StackPanel>
+                                        </UniformGrid>
+
+                                        <TextBlock FontSize="13"
+                                                   FontWeight="SemiBold"
+                                                   Foreground="#111111"
+                                                   TextWrapping="Wrap"
+                                                   LineHeight="19"
+                                                   Margin="0,0,0,8">
+                                            <Run Text="Carga por semestre: "/>
+                                            <Run Text="{Binding CargaPorSemestre, Mode=OneWay}"/>
+                                        </TextBlock>
+
+                                        <TextBlock FontSize="13"
+                                                   FontWeight="SemiBold"
+                                                   Foreground="#536679"
+                                                   Text="{Binding Jornada, Mode=OneWay}"
+                                                   Margin="0,0,0,14"/>
+
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="10"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <Button Grid.Column="0"
+                                                    Content="Ver Malla"
+                                                    Height="34"
+                                                    Background="#67A734"
+                                                    Foreground="White"
+                                                    BorderThickness="0"
+                                                    FontWeight="Bold"
+                                                    FontSize="13"
+                                                    Cursor="Hand"
+                                                    CommandParameter="{Binding}"
+                                                    Click="VerMalla_Click"/>
+
+                                            <Button Grid.Column="2"
+                                                    Content="Eliminar"
+                                                    Height="34"
+                                                    Background="#C70F1A"
+                                                    Foreground="White"
+                                                    BorderThickness="0"
+                                                    FontWeight="Bold"
+                                                    FontSize="13"
+                                                    Cursor="Hand"
+                                                    CommandParameter="{Binding}"
+                                                    Click="EliminarPlan_Click"/>
+                                        </Grid>
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1.25*"/>
+                        <ColumnDefinition Width="18"/>
+                        <ColumnDefinition Width="1*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Border Grid.Column="0"
+                            Background="White"
+                            CornerRadius="12"
+                            Padding="18"
+                            Margin="0,0,0,18">
+                        <StackPanel>
+                            <DockPanel Margin="0,0,0,12">
+                                <Border Width="34" Height="34" CornerRadius="17" Background="#22A447" DockPanel.Dock="Left" Margin="0,0,14,0">
+                                    <TextBlock Text="✓" Foreground="White" FontSize="20" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <TextBlock Text="Comparación General" FontSize="16" FontWeight="Bold" Foreground="#111111" VerticalAlignment="Center"/>
+                            </DockPanel>
+
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="1.2*"/>
+                                    <ColumnDefinition Width="1*"/>
+                                    <ColumnDefinition Width="1*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="32"/>
+                                    <RowDefinition Height="28"/>
+                                    <RowDefinition Height="28"/>
+                                    <RowDefinition Height="28"/>
+                                    <RowDefinition Height="28"/>
+                                    <RowDefinition Height="28"/>
+                                </Grid.RowDefinitions>
+
+                                <Border Grid.Row="0" Grid.ColumnSpan="3" Background="#E8E8EA"/>
+                                <TextBlock Grid.Row="0" Grid.Column="0" Text="Característica" FontWeight="Bold" FontSize="13" VerticalAlignment="Center" Margin="12,0,0,0"/>
+                                <TextBlock Grid.Row="0" Grid.Column="1" Text="Plan Diurno" FontWeight="Bold" FontSize="13" VerticalAlignment="Center"/>
+                                <TextBlock Grid.Row="0" Grid.Column="2" Text="Plan Nocturno" FontWeight="Bold" FontSize="13" VerticalAlignment="Center"/>
+
+                                <TextBlock Grid.Row="1" Grid.Column="0" Text="Duración" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center" Margin="12,0,0,0"/>
+                                <TextBlock Grid.Row="1" Grid.Column="1" Text="10 Semestres" Foreground="#777777" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center"/>
+                                <TextBlock Grid.Row="1" Grid.Column="2" Text="12 Semestres" Foreground="#777777" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center"/>
+
+                                <TextBlock Grid.Row="2" Grid.Column="0" Text="Materias" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center" Margin="12,0,0,0"/>
+                                <TextBlock Grid.Row="2" Grid.Column="1" Text="59 Materias" Foreground="#777777" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center"/>
+                                <TextBlock Grid.Row="2" Grid.Column="2" Text="59 Materias" Foreground="#777777" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center"/>
+
+                                <TextBlock Grid.Row="3" Grid.Column="0" Text="Créditos" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center" Margin="12,0,0,0"/>
+                                <TextBlock Grid.Row="3" Grid.Column="1" Text="175 Créditos" Foreground="#777777" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center"/>
+                                <TextBlock Grid.Row="3" Grid.Column="2" Text="175 Créditos" Foreground="#777777" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center"/>
+
+                                <TextBlock Grid.Row="4" Grid.Column="0" Text="Carga académica" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center" Margin="12,0,0,0"/>
+                                <TextBlock Grid.Row="4" Grid.Column="1" Text="Mayor por Semestre" Foreground="#777777" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center"/>
+                                <TextBlock Grid.Row="4" Grid.Column="2" Text="Menor por Semestre" Foreground="#777777" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center"/>
+
+                                <TextBlock Grid.Row="5" Grid.Column="0" Text="Jornada" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center" Margin="12,0,0,0"/>
+                                <TextBlock Grid.Row="5" Grid.Column="1" Text="Diurna" Foreground="#777777" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center"/>
+                                <TextBlock Grid.Row="5" Grid.Column="2" Text="Nocturna" Foreground="#777777" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center"/>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Grid.Column="2"
+                            Background="White"
+                            CornerRadius="12"
+                            Padding="16"
+                            Margin="0,0,0,18">
+                        <DockPanel>
+                            <Border Width="30" Height="30" CornerRadius="15" Background="#C70F1A" DockPanel.Dock="Left" Margin="0,0,12,0">
+                                <TextBlock Text="!" Foreground="White" FontSize="19" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <StackPanel>
+                                <TextBlock Text="Nota:" FontSize="15" FontWeight="Bold" Foreground="#111111" Margin="0,0,0,4"/>
+                                <TextBlock Text="{Binding NotaComparativa, Mode=OneWay}"
+                                           FontSize="13"
+                                           FontWeight="SemiBold"
+                                           Foreground="#8A8A8A"
+                                           TextWrapping="Wrap"
+                                           LineHeight="19"/>
+                            </StackPanel>
+                        </DockPanel>
+                    </Border>
+                </Grid>
             </StackPanel>
         </ScrollViewer>
     </Grid>

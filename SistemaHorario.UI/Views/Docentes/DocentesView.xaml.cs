@@ -1,8 +1,9 @@
-using SistemaHorario.UI.Controls;
+﻿using SistemaHorario.UI.Controls;
 using SistemaHorario.UI.Dialogs.Docentes;
 using SistemaHorario.UI.Dialogs.Shared;
 using SistemaHorario.UI.Models.UI;
 using SistemaHorario.UI.ViewModels.Docentes;
+using SistemaHorario.UI.Views.Horarios;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -83,6 +84,11 @@ namespace SistemaHorario.UI.Views.Docentes
                 {
                     Nombre = "ver",
                     Texto = "👁"
+                },
+                new TableActionDefinition
+                {
+                    Nombre = "horario",
+                    Texto = "🕒"
                 }
             ]);
 
@@ -191,7 +197,40 @@ namespace SistemaHorario.UI.Views.Docentes
                 case "ver":
                     VerDocente(docente);
                     break;
+
+                case "horario":
+                    VerHorarioDocente(docente);
+                    break;
             }
+        }
+
+        private void VerHorarioDocente(DocenteItem docente)
+        {
+            ContentControl? contentArea = BuscarContentArea();
+
+            if (contentArea == null)
+            {
+                return;
+            }
+
+            contentArea.Content = new VistaPreviaHorarioView(docente);
+        }
+
+        private ContentControl? BuscarContentArea()
+        {
+            DependencyObject? actual = this;
+
+            while (actual != null)
+            {
+                if (actual is ContentControl content && content.Name == "ContentArea")
+                {
+                    return content;
+                }
+
+                actual = System.Windows.Media.VisualTreeHelper.GetParent(actual);
+            }
+
+            return null;
         }
 
         private void VerDocente(

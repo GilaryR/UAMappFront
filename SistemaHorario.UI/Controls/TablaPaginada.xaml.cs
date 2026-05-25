@@ -186,6 +186,11 @@ namespace SistemaHorario.UI.Controls
                             new SolidColorBrush((Color)ColorConverter.ConvertFromString("#DDCE73")));
                         break;
 
+                    case "estado":
+                        boton.SetValue(Button.BackgroundProperty,
+                            new SolidColorBrush((Color)ColorConverter.ConvertFromString("#D1D5DB")));
+                        break;
+
                     default:
                         boton.SetValue(Button.BackgroundProperty,
                             new SolidColorBrush((Color)ColorConverter.ConvertFromString("#E5E7EB")));
@@ -308,11 +313,23 @@ namespace SistemaHorario.UI.Controls
     {
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
-            string estado = value?.ToString()?.ToLower() ?? "";
+            string estado = value?.ToString()?.Trim() ?? string.Empty;
 
-            return estado.Contains("act")
-                ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#B9EFC2"))
-                : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FECACA"));
+            if (string.Equals(estado, "Activo", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(estado, "Aprobado", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(estado, "Disponible", StringComparison.OrdinalIgnoreCase))
+            {
+                return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#B9EFC2"));
+            }
+
+            if (string.Equals(estado, "Inactivo", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(estado, "Rechazado", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(estado, "No disponible", StringComparison.OrdinalIgnoreCase))
+            {
+                return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FECACA"));
+            }
+
+            return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FEF3C7"));
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
@@ -328,11 +345,23 @@ namespace SistemaHorario.UI.Controls
     {
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
-            string estado = value?.ToString()?.ToLower() ?? "";
+            string estado = value?.ToString()?.Trim() ?? string.Empty;
 
-            return estado.Contains("act")
-                ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#1A9E3B"))
-                : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#DC2626"));
+            if (string.Equals(estado, "Activo", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(estado, "Aprobado", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(estado, "Disponible", StringComparison.OrdinalIgnoreCase))
+            {
+                return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#1A9E3B"));
+            }
+
+            if (string.Equals(estado, "Inactivo", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(estado, "Rechazado", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(estado, "No disponible", StringComparison.OrdinalIgnoreCase))
+            {
+                return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#DC2626"));
+            }
+
+            return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#92400E"));
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)

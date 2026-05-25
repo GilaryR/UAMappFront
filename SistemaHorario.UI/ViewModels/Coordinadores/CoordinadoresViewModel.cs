@@ -1,4 +1,4 @@
-﻿using SistemaHorario.UI.Models.UI;
+using SistemaHorario.UI.Models.UI;
 using SistemaHorario.UI.Services;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +9,6 @@ namespace SistemaHorario.UI.ViewModels.Coordinadores
     public class CoordinadoresViewModel
     {
         private readonly CoordinadoresApiService _api = new();
-
         private List<CoordinadorItem> _coordinadoresBase = new();
 
         public List<CoordinadorItem> Coordinadores { get; private set; } = new();
@@ -37,9 +36,7 @@ namespace SistemaHorario.UI.ViewModels.Coordinadores
 
             _coordinadoresBase = resp.Data;
             Coordinadores = _coordinadoresBase.ToList();
-
             MensajeEstado = string.Empty;
-
             CalcularResumen();
         }
 
@@ -87,29 +84,50 @@ namespace SistemaHorario.UI.ViewModels.Coordinadores
             }
 
             Coordinadores = query.ToList();
-
             CalcularResumen();
         }
 
-        public async Task<bool> EliminarCoordinadorAsync(
+        public async Task<bool> CambiarEstadoCoordinadorAsync(
             CoordinadorItem coordinador)
         {
-            var resp = await _api.EliminarCoordinadorAsync(
-                coordinador.IdCoordinador);
+            string nuevoEstado = coordinador.EstaActivo
+                ? "Inactivo"
+                : "Activo";
+
+            var resp = await _api.CambiarEstadoCoordinadorAsync(
+                coordinador.IdCoordinador,
+                nuevoEstado);
 
             if (!resp.Success)
             {
                 MensajeEstado = string.IsNullOrWhiteSpace(resp.Message)
-                    ? "No se pudo eliminar el coordinador."
+                    ? "No se pudo cambiar el estado del coordinador."
                     : resp.Message;
 
                 return false;
             }
 
             await CargarDatosAsync();
-
             MensajeEstado = string.Empty;
+            return true;
+        }
 
+        public async Task<bool> EliminarCoordinadorAsync(CoordinadorItem coordinador)
+        {
+            // Eliminar en el módulo equivale a inactivar, no borrar físicamente.
+            var resp = await _api.InactivarCoordinadorAsync(coordinador.IdCoordinador);
+
+            if (!resp.Success)
+            {
+                MensajeEstado = string.IsNullOrWhiteSpace(resp.Message)
+                    ? "No se pudo inactivar el coordinador."
+                    : resp.Message;
+
+                return false;
+            }
+
+            await CargarDatosAsync();
+            MensajeEstado = string.Empty;
             return true;
         }
 

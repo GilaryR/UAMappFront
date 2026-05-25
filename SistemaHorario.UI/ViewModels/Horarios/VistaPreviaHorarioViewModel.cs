@@ -14,6 +14,7 @@ namespace SistemaHorario.UI.ViewModels.Horarios
         public bool ModoEdicion { get; set; }
         public ObservableCollection<BloqueHorarioItem> Bloques { get; set; }
         public Dictionary<string, int> FranjasLookup { get; private set; } = new();
+        public string MensajeEstado { get; private set; } = string.Empty;
 
         public VistaPreviaHorarioViewModel(HorarioItem horario, bool modoEdicion)
         {
@@ -24,15 +25,65 @@ namespace SistemaHorario.UI.ViewModels.Horarios
 
         public async Task CargarBloquesAsync()
         {
-            if (Horario.IdGrupo <= 0) return;
+            Bloques.Clear();
+
+            if (Horario.EsHorarioDocente)
+            {
+                await CargarBloquesDocenteAsync();
+                return;
+            }
+
+            await CargarBloquesGrupoAsync();
+        }
+
+        private async Task CargarBloquesGrupoAsync()
+        {
+            if (Horario.IdGrupo <= 0)
+            {
+                MensajeEstado = "No se encontró el grupo asociado al horario.";
+                return;
+            }
 
             var resp = await _api.ObtenerBloquesPorGrupoAsync(Horario.IdGrupo);
-            if (resp.Success && resp.Data != null)
+            if (!resp.Success || resp.Data == null)
             {
-                Bloques.Clear();
-                foreach (var bloque in resp.Data)
-                    Bloques.Add(bloque);
+                MensajeEstado = string.IsNullOrWhiteSpace(resp.Message)
+                    ? "No se pudieron cargar los bloques del grupo."
+                    : resp.Message;
+                return;
             }
+
+            foreach (BloqueHorarioItem bloque in resp.Data)
+            {
+                Bloques.Add(bloque);
+            }
+
+            MensajeEstado = string.Empty;
+        }
+
+        private async Task CargarBloquesDocenteAsync()
+        {
+            if (Horario.IdDocente <= 0)
+            {
+                MensajeEstado = "No se encontró el docente asociado al horario.";
+                return;
+            }
+
+            var resp = await _api.ObtenerBloquesPorDocenteAsync(Horario.IdDocente);
+            if (!resp.Success || resp.Data == null)
+            {
+                MensajeEstado = string.IsNullOrWhiteSpace(resp.Message)
+                    ? "No se pudo cargar el horario del docente."
+                    : resp.Message;
+                return;
+            }
+
+            foreach (BloqueHorarioItem bloque in resp.Data)
+            {
+                Bloques.Add(bloque);
+            }
+
+            MensajeEstado = string.Empty;
         }
 
         public async Task CargarFranjasAsync()
@@ -43,13 +94,31 @@ namespace SistemaHorario.UI.ViewModels.Horarios
         public async Task<bool> GuardarBloqueAsync(BloqueHorarioItem bloque)
         {
             string key = $"{bloque.Dia}_{bloque.HoraInicio}";
+
             if (!FranjasLookup.TryGetValue(key, out int idFranja))
+            {
+                MensajeEstado = "No existe una franja activa para el día y la hora seleccionados.";
                 return false;
+            }
 
             bloque.IdFranjaHoraria = idFranja;
+
             var resp = await _api.ActualizarBloqueAsync(
-                bloque.IdHorario, bloque.IdMateria, bloque.IdDocente, idFranja);
-            return resp.Success;
+                bloque.IdHorario,
+                bloque.IdMateria,
+                bloque.IdDocente,
+                idFranja);
+
+            if (!resp.Success)
+            {
+                MensajeEstado = string.IsNullOrWhiteSpace(resp.Message)
+                    ? "No se pudo guardar el cambio."
+                    : resp.Message;
+                return false;
+            }
+
+            MensajeEstado = string.Empty;
+            return true;
         }
     }
 }

@@ -22,7 +22,7 @@
                                FontWeight="Bold"
                                Foreground="#111827"/>
 
-                    <TextBlock Text="Consulta y administración de horarios generados"
+                    <TextBlock Text="Consulta el horario de cada grupo académico y su estado"
                                Margin="0,5,0,0"
                                FontSize="14"
                                Foreground="#6B7280"/>
@@ -102,9 +102,11 @@
                             <ComboBoxItem Content="Todos"
                                           IsSelected="True"/>
 
-                            <ComboBoxItem Content="Activo"/>
+                            <ComboBoxItem Content="Pendiente"/>
 
-                            <ComboBoxItem Content="Inactivo"/>
+                            <ComboBoxItem Content="Aprobado"/>
+
+                            <ComboBoxItem Content="Rechazado"/>
                         </ComboBox>
                     </StackPanel>
 

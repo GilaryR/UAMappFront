@@ -1,4 +1,4 @@
-﻿using SistemaHorario.UI.Dialogs.Shared;
+using SistemaHorario.UI.Dialogs.Shared;
 using SistemaHorario.UI.Models.UI;
 using SistemaHorario.UI.ViewModels.Coordinadores;
 using System.Windows;
@@ -10,8 +10,7 @@ namespace SistemaHorario.UI.Views.Coordinadores
     {
         private readonly AgregarEditarCoordinadorViewModel _viewModel;
 
-        public AgregarEditarCoordinadorView(
-            CoordinadorItem? coordinador = null)
+        public AgregarEditarCoordinadorView(CoordinadorItem? coordinador = null)
         {
             InitializeComponent();
 
@@ -35,6 +34,16 @@ namespace SistemaHorario.UI.Views.Coordinadores
             TxtRol.Text = "Coordinador";
 
             SeleccionarEstado(_viewModel.Coordinador.Estado);
+
+            if (_viewModel.EsEdicion)
+            {
+                PnlContrasena.Visibility = Visibility.Collapsed;
+                PnlAyudaContrasena.Visibility = Visibility.Collapsed;
+            }
+            else
+            {
+                PwdContrasena.Password = _viewModel.Coordinador.ContrasenaInicial;
+            }
         }
 
         private void SeleccionarEstado(string estado)
@@ -51,9 +60,7 @@ namespace SistemaHorario.UI.Views.Coordinadores
             CmbEstado.SelectedIndex = 0;
         }
 
-        private async void BtnGuardar_Click(
-            object sender,
-            RoutedEventArgs e)
+        private async void BtnGuardar_Click(object sender, RoutedEventArgs e)
         {
             if (!FormularioEsValido())
             {
@@ -65,6 +72,12 @@ namespace SistemaHorario.UI.Views.Coordinadores
             _viewModel.Coordinador.CorreoInstitucional = TxtCorreo.Text.Trim();
             _viewModel.Coordinador.Celular = TxtCelular.Text.Trim();
             _viewModel.Coordinador.Rol = "Coordinador";
+
+            if (!_viewModel.EsEdicion)
+            {
+                _viewModel.Coordinador.ContrasenaInicial =
+                    PwdContrasena.Password.Trim();
+            }
 
             if (CmbEstado.SelectedItem is ComboBoxItem item)
             {
@@ -94,7 +107,11 @@ namespace SistemaHorario.UI.Views.Coordinadores
             };
 
             dialog.ShowDialog();
+            VolverAPrincipal();
+        }
 
+        private void BtnCancelar_Click(object sender, RoutedEventArgs e)
+        {
             VolverAPrincipal();
         }
 
@@ -121,6 +138,18 @@ namespace SistemaHorario.UI.Views.Coordinadores
             if (!TxtCorreo.Text.Contains("@"))
             {
                 MostrarValidacion("El correo institucional no tiene un formato válido.");
+                return false;
+            }
+
+            if (!_viewModel.EsEdicion && string.IsNullOrWhiteSpace(PwdContrasena.Password))
+            {
+                MostrarValidacion("La contraseña inicial es obligatoria.");
+                return false;
+            }
+
+            if (!_viewModel.EsEdicion && PwdContrasena.Password.Length < 6)
+            {
+                MostrarValidacion("La contraseña inicial debe tener al menos 6 caracteres.");
                 return false;
             }
 
@@ -160,8 +189,7 @@ namespace SistemaHorario.UI.Views.Coordinadores
                     return content;
                 }
 
-                actual =
-                    System.Windows.Media.VisualTreeHelper.GetParent(actual);
+                actual = System.Windows.Media.VisualTreeHelper.GetParent(actual);
             }
 
             return null;

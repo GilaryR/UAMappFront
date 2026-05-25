@@ -1,4 +1,4 @@
-﻿using SistemaHorario.UI.Models.UI;
+using SistemaHorario.UI.Models.UI;
 using SistemaHorario.UI.Services;
 using SistemaHorarios.Application.Common;
 using System.Threading.Tasks;
@@ -26,12 +26,12 @@ namespace SistemaHorario.UI.ViewModels.Coordinadores
                 CorreoInstitucional = string.Empty,
                 Celular = string.Empty,
                 Rol = "Coordinador",
-                Estado = "Activo"
+                Estado = "Activo",
+                ContrasenaInicial = "Coordinador123!"
             };
         }
 
-        public AgregarEditarCoordinadorViewModel(
-            CoordinadorItem coordinador)
+        public AgregarEditarCoordinadorViewModel(CoordinadorItem coordinador)
         {
             EsEdicion = true;
 

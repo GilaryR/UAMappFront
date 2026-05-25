@@ -65,7 +65,7 @@ namespace SistemaHorario.UI.ViewModels.Horarios
 
         public void AplicarFiltros()
         {
-            var resultado = Horarios.AsEnumerable();
+            IEnumerable<HorarioItem> resultado = Horarios.AsEnumerable();
 
             if (!string.IsNullOrWhiteSpace(Busqueda))
             {
@@ -81,24 +81,19 @@ namespace SistemaHorario.UI.ViewModels.Horarios
 
             if (JornadaSeleccionada != "Todas")
             {
-                resultado = resultado.Where(h =>
-                    h.Jornada == JornadaSeleccionada);
+                resultado = resultado.Where(h => h.Jornada == JornadaSeleccionada);
             }
 
             if (EstadoSeleccionado != "Todos")
             {
-                resultado = resultado.Where(h =>
-                    h.Estado == EstadoSeleccionado);
+                resultado = resultado.Where(h => h.Estado == EstadoSeleccionado);
             }
 
             List<HorarioItem> listaFiltrada = resultado.ToList();
 
-            TotalPaginas =
-                listaFiltrada.Count == 0
-                    ? 1
-                    : (int)Math.Ceiling(
-                        listaFiltrada.Count / (double)RegistrosPorPagina
-                    );
+            TotalPaginas = listaFiltrada.Count == 0
+                ? 1
+                : (int)Math.Ceiling(listaFiltrada.Count / (double)RegistrosPorPagina);
 
             if (PaginaActual > TotalPaginas)
             {
@@ -125,36 +120,14 @@ namespace SistemaHorario.UI.ViewModels.Horarios
             AplicarFiltros();
         }
 
-        public void SiguientePagina()
+        public async Task<bool> EliminarHorarioGrupoAsync(HorarioItem horario)
         {
-            if (PaginaActual >= TotalPaginas)
-            {
-                return;
-            }
-
-            PaginaActual++;
-            AplicarFiltros();
-        }
-
-        public void PaginaAnterior()
-        {
-            if (PaginaActual <= 1)
-            {
-                return;
-            }
-
-            PaginaActual--;
-            AplicarFiltros();
-        }
-
-        public async Task<bool> EliminarHorarioAsync(HorarioItem horario)
-        {
-            var resp = await _api.EliminarHorarioAsync(horario.IdHorario);
+            var resp = await _api.EliminarHorarioGrupoAsync(horario.IdGrupo);
 
             if (!resp.Success)
             {
                 MensajeEstado = string.IsNullOrWhiteSpace(resp.Message)
-                    ? "No se pudo eliminar el horario."
+                    ? "No se pudo eliminar el horario del grupo."
                     : resp.Message;
 
                 return false;
@@ -162,7 +135,6 @@ namespace SistemaHorario.UI.ViewModels.Horarios
 
             Horarios.Remove(horario);
             AplicarFiltros();
-
             MensajeEstado = string.Empty;
             return true;
         }

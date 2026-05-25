@@ -1,97 +1,57 @@
-﻿<Window x:Class="SistemaHorario.UI.Dialogs.Reportes.ReporteAcademicoDialog"
+<Window x:Class="SistemaHorario.UI.Dialogs.Reportes.ReporteAcademicoDialog"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Reporte académico"
-        Width="760"
-        Height="650"
+        Title="Vista previa del reporte"
+        Width="900"
+        Height="720"
         WindowStartupLocation="CenterOwner"
-        ResizeMode="NoResize"
+        ResizeMode="CanResize"
         Background="White">
 
-	<Grid Margin="26">
-		<Grid.RowDefinitions>
-			<RowDefinition Height="Auto"/>
-			<RowDefinition Height="*"/>
-			<RowDefinition Height="Auto"/>
-		</Grid.RowDefinitions>
+    <Grid Margin="26">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
 
-		<StackPanel Grid.Row="0" Margin="0,0,0,24">
-			<TextBlock Text="Reportes Académicos"
-                       FontSize="30"
+        <StackPanel Grid.Row="0" Margin="0,0,0,18">
+            <TextBlock x:Name="TxtTitulo"
+                       Text="Vista previa del reporte"
+                       FontSize="28"
                        FontWeight="Bold"
                        Foreground="#111111"/>
 
-			<TextBlock x:Name="TxtSubtitulo"
-                       Text="Crear Nuevo Reporte"
-                       FontSize="16"
-                       FontWeight="Bold"
-                       Foreground="#111111"
-                       Margin="0,10,0,0"/>
-		</StackPanel>
+            <TextBlock x:Name="TxtSubtitulo"
+                       Text="Información consultada desde la API"
+                       FontSize="14"
+                       Foreground="#6B7280"
+                       Margin="0,8,0,0"/>
+        </StackPanel>
 
-		<StackPanel Grid.Row="1"
-                    Width="560"
-                    HorizontalAlignment="Left">
-
-			<TextBlock Text="Tipo de reporte"
-                       FontWeight="Bold"
-                       Margin="0,0,0,6"/>
-
-			<ComboBox x:Name="CmbTipoReporte"
-                      Height="34"
-                      Margin="0,0,0,16"/>
-
-			<TextBlock Text="Periodo"
-                       FontWeight="Bold"
-                       Margin="0,0,0,6"/>
-
-			<ComboBox x:Name="CmbPeriodo"
-                      Height="34"
-                      Margin="0,0,0,16"/>
-
-			<TextBlock Text="Fecha"
-                       FontWeight="Bold"
-                       Margin="0,0,0,6"/>
-
-			<DatePicker x:Name="DpFecha"
-                        Height="34"
-                        Margin="0,0,0,16"/>
-
-			<TextBlock Text="Formato Inicial"
-                       FontWeight="Bold"
-                       Margin="0,0,0,6"/>
-
-			<ComboBox x:Name="CmbFormato"
-                      Height="34"
-                      Margin="0,0,0,16">
-				<ComboBoxItem Content="PDF"/>
-				<ComboBoxItem Content="CSV"/>
-			</ComboBox>
-
-			<TextBlock Text="Descripción del reporte"
-                       FontWeight="Bold"
-                       Margin="0,0,0,6"/>
-
-			<TextBox x:Name="TxtDescripcion"
-                     Height="110"
-                     AcceptsReturn="True"
-                     TextWrapping="Wrap"
+        <Border Grid.Row="1"
+                Background="#F9FAFB"
+                BorderBrush="#E5E7EB"
+                BorderThickness="1"
+                CornerRadius="12"
+                Padding="16">
+            <TextBox x:Name="TxtContenido"
+                     TextWrapping="NoWrap"
+                     FontFamily="Consolas"
+                     FontSize="13"
+                     IsReadOnly="True"
+                     BorderThickness="0"
+                     Background="#F9FAFB"
                      VerticalScrollBarVisibility="Auto"
-                     Padding="8"/>
-		</StackPanel>
+                     HorizontalScrollBarVisibility="Auto"/>
+        </Border>
 
-		<Grid Grid.Row="2" Margin="0,26,0,0">
-			<Grid.ColumnDefinitions>
-				<ColumnDefinition Width="*"/>
-				<ColumnDefinition Width="Auto"/>
-				<ColumnDefinition Width="80"/>
-				<ColumnDefinition Width="Auto"/>
-			</Grid.ColumnDefinitions>
-
-			<Button x:Name="BtnGuardar"
-                    Grid.Column="1"
-                    Content="Generar Reporte"
-                    Width="190"
+        <StackPanel Grid.Row="2"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    Margin="0,22,0,0">
+            <Button Content="Cerrar"
+                    Width="160"
                     Height="38"
                     Background="White"
                     Foreground="#006AA6"
@@ -99,19 +59,7 @@
                     BorderThickness="1"
                     FontWeight="Bold"
                     Cursor="Hand"
-                    Click="BtnGuardar_Click"/>
-
-			<Button Grid.Column="3"
-                    Content="Cancelar"
-                    Width="190"
-                    Height="38"
-                    Background="White"
-                    Foreground="#006AA6"
-                    BorderBrush="#006AA6"
-                    BorderThickness="1"
-                    FontWeight="Bold"
-                    Cursor="Hand"
-                    Click="BtnCancelar_Click"/>
-		</Grid>
-	</Grid>
+                    Click="BtnCerrar_Click"/>
+        </StackPanel>
+    </Grid>
 </Window>

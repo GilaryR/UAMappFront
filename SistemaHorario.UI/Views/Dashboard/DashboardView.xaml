@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="SistemaHorario.UI.Views.Dashboard.DashboardView"
+<UserControl x:Class="SistemaHorario.UI.Views.Dashboard.DashboardView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:controls="clr-namespace:SistemaHorario.UI.Controls">
@@ -134,7 +134,7 @@
                                                     Width="*"/>
 
 								<!-- Fecha -->
-								<DataGridTextColumn Header="Fecha"
+								<DataGridTextColumn Header="Bloques"
                                                     Binding="{Binding Fecha}"
                                                     Width="*"/>
 
@@ -164,7 +164,7 @@
 								</DataGridTemplateColumn>
 
 								<!-- Grupos -->
-								<DataGridTextColumn Header="Grupos"
+								<DataGridTextColumn Header="Grupo"
                                                     Binding="{Binding Grupos}"
                                                     Width="*"/>
 

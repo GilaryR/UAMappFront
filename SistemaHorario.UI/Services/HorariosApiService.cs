@@ -15,6 +15,7 @@ public class HorarioBackendDto
     public string NombreGrupo { get; set; } = string.Empty;
     public string Jornada { get; set; } = string.Empty;
     public string TipoGrupo { get; set; } = string.Empty;
+    public int NumeroSemestre { get; set; }
     public int IdMateria { get; set; }
     public string CodigoMateria { get; set; } = string.Empty;
     public string NombreMateria { get; set; } = string.Empty;
@@ -28,6 +29,7 @@ public class HorarioBackendDto
     public string Observacion { get; set; } = string.Empty;
     public bool Activo { get; set; }
     public string EstadoTexto { get; set; } = string.Empty;
+    public string MotivoRechazo { get; set; } = string.Empty;
 }
 
 public class HorariosApiService
@@ -49,8 +51,11 @@ public class HorariosApiService
             };
         }
 
-        List<HorarioItem> lista =
-            resp.Data.Select(MapearHorario).ToList();
+        List<HorarioItem> lista = resp.Data
+            .GroupBy(h => h.IdGrupo)
+            .Select(MapearHorarioGrupo)
+            .OrderBy(h => h.Grupo)
+            .ToList();
 
         return new ApiResponse<List<HorarioItem>>
         {
@@ -60,13 +65,10 @@ public class HorariosApiService
         };
     }
 
-    public async Task<ApiResponse<List<BloqueHorarioItem>>> ObtenerBloquesPorGrupoAsync(
-        int idGrupo)
+    public async Task<ApiResponse<List<BloqueHorarioItem>>> ObtenerBloquesPorGrupoAsync(int idGrupo)
     {
         ApiResponse<List<HorarioBackendDto>> resp =
-            await _api.GetAsync<List<HorarioBackendDto>>(
-                $"horarios/grupo/{idGrupo}"
-            );
+            await _api.GetAsync<List<HorarioBackendDto>>($"horarios/grupo/{idGrupo}");
 
         if (!resp.Success || resp.Data == null)
         {
@@ -78,8 +80,9 @@ public class HorariosApiService
             };
         }
 
-        List<BloqueHorarioItem> bloques =
-            resp.Data.Select(MapearBloque).ToList();
+        List<BloqueHorarioItem> bloques = resp.Data
+            .Select(MapearBloque)
+            .ToList();
 
         return new ApiResponse<List<BloqueHorarioItem>>
         {
@@ -89,33 +92,55 @@ public class HorariosApiService
         };
     }
 
-    public async Task<ApiResponse<string>> GenerarHorariosAsync(int idGrupo)
+    public async Task<ApiResponse<List<BloqueHorarioItem>>> ObtenerBloquesPorDocenteAsync(int idDocente)
     {
-        return await _api.PostAsync(
-            $"horarios/generar/{idGrupo}",
-            new { }
-        );
+        ApiResponse<List<HorarioBackendDto>> resp =
+            await _api.GetAsync<List<HorarioBackendDto>>($"horarios/docente/{idDocente}");
+
+        if (!resp.Success || resp.Data == null)
+        {
+            return new ApiResponse<List<BloqueHorarioItem>>
+            {
+                Success = false,
+                Message = resp.Message,
+                Data = new List<BloqueHorarioItem>()
+            };
+        }
+
+        List<BloqueHorarioItem> bloques = resp.Data
+            .Select(MapearBloque)
+            .ToList();
+
+        return new ApiResponse<List<BloqueHorarioItem>>
+        {
+            Success = true,
+            Message = "Horario docente obtenido correctamente.",
+            Data = bloques
+        };
     }
 
-    public async Task<ApiResponse<string>> EliminarHorarioAsync(int idHorario)
+    public async Task<ApiResponse<string>> GenerarHorariosAsync(int idGrupo)
     {
-        return await _api.DeleteAsync<string>($"horarios/{idHorario}");
+        return await _api.PostAsync($"horarios/generar/{idGrupo}?reemplazar=true", new { });
+    }
+
+    public async Task<ApiResponse<string>> EliminarHorarioGrupoAsync(int idGrupo)
+    {
+        return await _api.DeleteAsync<string>($"horarios/grupo/{idGrupo}");
     }
 
     public async Task<ApiResponse<string>> AprobarHorarioAsync(int idHorario)
     {
-        return await _api.PostAsync(
-            $"horarios/{idHorario}/aprobar",
-            new { }
-        );
+        return await _api.PostAsync($"horarios/{idHorario}/aprobar", new { });
     }
 
-    public async Task<ApiResponse<string>> RechazarHorarioAsync(int idHorario)
+    public async Task<ApiResponse<string>> RechazarHorarioAsync(int idHorario, string motivoRechazo)
     {
-        return await _api.PostAsync(
-            $"horarios/{idHorario}/rechazar",
-            new { }
-        );
+        return await _api.PostAsync($"horarios/{idHorario}/rechazar", new
+        {
+            IdHorario = idHorario,
+            MotivoRechazo = motivoRechazo
+        });
     }
 
     public async Task<ApiResponse<string>> ActualizarBloqueAsync(
@@ -129,7 +154,7 @@ public class HorariosApiService
             IdMateria = idMateria,
             IdDocente = idDocente,
             IdFranjaHoraria = idFranjaHoraria,
-            Observacion = string.Empty
+            Observacion = "Editado desde la interfaz"
         });
     }
 
@@ -138,8 +163,7 @@ public class HorariosApiService
         ApiResponse<List<FranjaSimpleDto>> resp =
             await _api.GetAsync<List<FranjaSimpleDto>>("franjas-horarias");
 
-        Dictionary<string, int> lookup =
-            new(StringComparer.OrdinalIgnoreCase);
+        Dictionary<string, int> lookup = new(StringComparer.OrdinalIgnoreCase);
 
         if (!resp.Success || resp.Data == null)
         {
@@ -148,34 +172,53 @@ public class HorariosApiService
 
         foreach (FranjaSimpleDto franja in resp.Data)
         {
-            string horaKey = TimeSpan.TryParse(
-                franja.HoraInicio,
-                out TimeSpan horaInicio)
-                    ? FormatearHora(horaInicio)
-                    : franja.HoraInicio;
+            string horaKey = TimeSpan.TryParse(franja.HoraInicio, out TimeSpan horaInicio)
+                ? FormatearHora(horaInicio)
+                : NormalizarHoraTexto(franja.HoraInicio);
 
-            lookup[$"{franja.DiaSemana}_{horaKey}"] =
-                franja.IdFranjaHoraria;
+            lookup[$"{franja.DiaSemana}_{horaKey}"] = franja.IdFranjaHoraria;
         }
 
         return lookup;
     }
 
-    private static HorarioItem MapearHorario(HorarioBackendDto dto)
+    private static HorarioItem MapearHorarioGrupo(IGrouping<int, HorarioBackendDto> grupo)
     {
+        HorarioBackendDto primero = grupo.First();
+        string codigoGrupo = string.IsNullOrWhiteSpace(primero.CodigoGrupo)
+            ? primero.NombreGrupo
+            : primero.CodigoGrupo;
+
         return new HorarioItem
         {
-            IdHorario = dto.IdHorario,
-            IdGrupo = dto.IdGrupo,
-            Nombre = $"{dto.NombreMateria} â€“ {dto.NombreDocente}",
-            Grupo = dto.NombreGrupo,
-            Tipo = dto.TipoGrupo,
-            Jornada = dto.Jornada,
-            FechaGeneracion = dto.HorarioTexto,
-            Estado = string.IsNullOrWhiteSpace(dto.EstadoTexto)
-                ? (dto.Activo ? "Activo" : "Inactivo")
-                : dto.EstadoTexto
+            IdHorario = primero.IdHorario,
+            IdGrupo = primero.IdGrupo,
+            Nombre = $"Horario del grupo {codigoGrupo}",
+            Grupo = codigoGrupo,
+            Tipo = primero.TipoGrupo,
+            Jornada = primero.Jornada,
+            FechaGeneracion = $"{grupo.Count()} bloques",
+            NumeroSemestre = primero.NumeroSemestre,
+            CantidadBloques = grupo.Count(),
+            Estado = ObtenerEstadoGrupo(grupo.ToList()),
+            MotivoRechazo = grupo.Select(h => h.MotivoRechazo).FirstOrDefault(m => !string.IsNullOrWhiteSpace(m)) ?? string.Empty,
+            EsHorarioDocente = false
         };
+    }
+
+    private static string ObtenerEstadoGrupo(List<HorarioBackendDto> horarios)
+    {
+        if (horarios.Any(h => string.Equals(h.EstadoTexto, "Rechazado", StringComparison.OrdinalIgnoreCase)))
+        {
+            return "Rechazado";
+        }
+
+        if (horarios.Count > 0 && horarios.All(h => string.Equals(h.EstadoTexto, "Aprobado", StringComparison.OrdinalIgnoreCase)))
+        {
+            return "Aprobado";
+        }
+
+        return "Pendiente";
     }
 
     private static BloqueHorarioItem MapearBloque(HorarioBackendDto dto)
@@ -183,6 +226,7 @@ public class HorariosApiService
         return new BloqueHorarioItem
         {
             IdHorario = dto.IdHorario,
+            IdGrupo = dto.IdGrupo,
             IdMateria = dto.IdMateria,
             IdDocente = dto.IdDocente,
             IdFranjaHoraria = dto.IdFranjaHoraria,
@@ -191,6 +235,7 @@ public class HorariosApiService
             HoraFinal = FormatearHora(dto.HoraFin),
             Materia = dto.NombreMateria,
             Docente = dto.NombreDocente,
+            Grupo = string.IsNullOrWhiteSpace(dto.CodigoGrupo) ? dto.NombreGrupo : dto.CodigoGrupo,
             Aula = string.Empty,
             Modalidad = string.Empty,
             ColorVisual = GenerarColor(dto.NombreMateria)
@@ -199,9 +244,14 @@ public class HorariosApiService
 
     private static string FormatearHora(TimeSpan hora)
     {
-        int hora12 = hora.Hours > 12 ? hora.Hours - 12 : hora.Hours;
+        return $"{hora.Hours:D2}:{hora.Minutes:D2}";
+    }
 
-        return $"{hora12}:{hora.Minutes:D2}";
+    private static string NormalizarHoraTexto(string texto)
+    {
+        return TimeSpan.TryParse(texto, out TimeSpan hora)
+            ? FormatearHora(hora)
+            : texto.Trim();
     }
 
     private static readonly string[] _colores =
@@ -218,9 +268,12 @@ public class HorariosApiService
 
     private static string GenerarColor(string materia)
     {
-        return _colores[
-            Math.Abs(materia.GetHashCode()) % _colores.Length
-        ];
+        if (string.IsNullOrWhiteSpace(materia))
+        {
+            return _colores[0];
+        }
+
+        return _colores[Math.Abs(materia.GetHashCode()) % _colores.Length];
     }
 
     private class FranjaSimpleDto

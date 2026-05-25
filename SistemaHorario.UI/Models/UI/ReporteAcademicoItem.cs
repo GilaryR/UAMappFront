@@ -1,32 +1,34 @@
-﻿using System;
+using System;
 
 namespace SistemaHorario.UI.Models.UI
 {
-	/// <summary>
-	/// Representa un reporte académico dentro de la interfaz.
-	/// 
-	/// Por ahora se usa con datos temporales.
-	/// Cuando backend esté listo, este modelo puede llenarse
-	/// con la respuesta del endpoint de reportes.
-	/// </summary>
-	public class ReporteAcademicoItem
-	{
-		public int IdReporte { get; set; }
+    // Representa una opción de reporte visible en la tabla del módulo.
+    public class ReporteAcademicoItem
+    {
+        public int IdReporte { get; set; }
 
-		public DateTime Fecha { get; set; }
+        public DateTime Fecha { get; set; } = DateTime.Now;
 
-		public string FechaTexto => Fecha.ToString("dd/MM/yyyy");
+        public string FechaTexto => Fecha.ToString("dd/MM/yyyy");
 
-		public string TipoReporte { get; set; } = string.Empty;
+        public string TipoCodigo { get; set; } = string.Empty;
 
-		public string Usuario { get; set; } = string.Empty;
+        public string TipoReporte { get; set; } = string.Empty;
 
-		public string Detalle { get; set; } = string.Empty;
+        public string Usuario { get; set; } = "Sistema";
 
-		public string Periodo { get; set; } = string.Empty;
+        public string Detalle { get; set; } = string.Empty;
 
-		public string FormatoInicial { get; set; } = string.Empty;
+        public string Periodo { get; set; } = string.Empty;
 
-		public string Descripcion { get; set; } = string.Empty;
-	}
+        public string FormatoInicial { get; set; } = "CSV";
+
+        public string Descripcion { get; set; } = string.Empty;
+
+        public int? IdGrupo { get; set; }
+
+        public int? IdDocente { get; set; }
+
+        public string Estado { get; set; } = string.Empty;
+    }
 }

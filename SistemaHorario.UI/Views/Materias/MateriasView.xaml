@@ -1,351 +1,234 @@
-﻿<UserControl x:Class="SistemaHorario.UI.Views.Materias.MateriasView"
+<UserControl x:Class="SistemaHorario.UI.Views.Materias.MateriasView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:controls="clr-namespace:SistemaHorario.UI.Controls">
 
+    <UserControl.Resources>
+        <Style x:Key="BotonAccionTabla" TargetType="Button">
+            <Setter Property="Width" Value="32"/>
+            <Setter Property="Height" Value="28"/>
+            <Setter Property="Margin" Value="3,0"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+    </UserControl.Resources>
+
     <Grid Background="#F4F7FA">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <StackPanel Margin="24">
 
-        <StackPanel>
+                <Grid Margin="0,0,0,18">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
 
-            <!-- Encabezado -->
-            <Grid Margin="0,0,0,20">
+                    <StackPanel>
+                        <TextBlock Text="Gestión de materias"
+                                   FontSize="30"
+                                   FontWeight="Bold"
+                                   Foreground="#111111"/>
+                        <TextBlock Text="Consulta, filtra y administra materias del plan académico."
+                                   FontSize="14"
+                                   FontWeight="SemiBold"
+                                   Foreground="#8A8F98"
+                                   Margin="0,4,0,0"/>
+                    </StackPanel>
 
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="180"/>
-                </Grid.ColumnDefinitions>
+                    <Button Grid.Column="1"
+                            Content="+  Agregar materia"
+                            Width="190"
+                            Height="38"
+                            Background="#006AA6"
+                            Foreground="White"
+                            BorderThickness="0"
+                            FontWeight="Bold"
+                            Cursor="Hand"
+                            VerticalAlignment="Center"
+                            Click="BtnAgregarMateria_Click"/>
+                </Grid>
 
-                <TextBlock Text="Gestión de materias"
-                           FontSize="30"
-                           FontWeight="Bold"
-                           Foreground="#111111"
-                           VerticalAlignment="Center"/>
+                <Border Background="White" CornerRadius="14" Padding="18">
+                    <StackPanel>
+                        <Grid Margin="0,0,0,16">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="2*"/>
+                                <ColumnDefinition Width="16"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="16"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="16"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
 
-                <Button Grid.Column="1"
-                        Content="+  Agregar materia"
-                        Height="38"
-                        Background="#006AA6"
-                        Foreground="White"
-                        BorderThickness="0"
-                        FontWeight="Bold"
-                        Cursor="Hand"
-                        Click="BtnAgregarMateria_Click"/>
-            </Grid>
+                            <controls:SearchBox x:Name="SearchBoxMaterias"
+                                                Grid.Column="0"
+                                                Placeholder="Buscar por código o nombre"
+                                                BusquedaCambiada="SearchBoxMaterias_BusquedaCambiada"/>
 
-            <!-- Contenedor -->
-            <Border Background="White"
-                    CornerRadius="12"
-                    Padding="18">
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="Semestre" FontSize="12" FontWeight="Bold" Margin="0,0,0,5"/>
+                                <ComboBox x:Name="CmbSemestre" Height="38" SelectionChanged="CmbSemestre_SelectionChanged">
+                                    <ComboBoxItem Content="Todos" IsSelected="True"/>
+                                    <ComboBoxItem Content="1"/>
+                                    <ComboBoxItem Content="2"/>
+                                    <ComboBoxItem Content="3"/>
+                                    <ComboBoxItem Content="4"/>
+                                    <ComboBoxItem Content="5"/>
+                                    <ComboBoxItem Content="6"/>
+                                    <ComboBoxItem Content="7"/>
+                                    <ComboBoxItem Content="8"/>
+                                    <ComboBoxItem Content="9"/>
+                                    <ComboBoxItem Content="10"/>
+                                    <ComboBoxItem Content="11"/>
+                                    <ComboBoxItem Content="12"/>
+                                </ComboBox>
+                            </StackPanel>
 
-                <StackPanel>
+                            <StackPanel Grid.Column="4">
+                                <TextBlock Text="Estado" FontSize="12" FontWeight="Bold" Margin="0,0,0,5"/>
+                                <ComboBox x:Name="CmbEstado" Height="38" SelectionChanged="CmbEstado_SelectionChanged">
+                                    <ComboBoxItem Content="Todos" IsSelected="True"/>
+                                    <ComboBoxItem Content="Activa"/>
+                                    <ComboBoxItem Content="Inactiva"/>
+                                </ComboBox>
+                            </StackPanel>
 
-                    <!-- Filtros -->
-                    <Grid Margin="0,0,0,16">
+                            <Button Grid.Column="6"
+                                    Content="Limpiar filtros"
+                                    Width="140"
+                                    Height="38"
+                                    Background="#006AA6"
+                                    Foreground="White"
+                                    BorderThickness="0"
+                                    FontWeight="Bold"
+                                    Cursor="Hand"
+                                    VerticalAlignment="Bottom"
+                                    Click="BtnLimpiarFiltros_Click"/>
+                        </Grid>
 
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="260"/>
-                            <ColumnDefinition Width="20"/>
-                            <ColumnDefinition Width="170"/>
-                            <ColumnDefinition Width="20"/>
-                            <ColumnDefinition Width="170"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="140"/>
-                        </Grid.ColumnDefinitions>
+                        <DataGrid x:Name="TablaMaterias"
+                                  ItemsSource="{Binding MateriasFiltradas}"
+                                  AutoGenerateColumns="False"
+                                  HeadersVisibility="Column"
+                                  GridLinesVisibility="None"
+                                  CanUserAddRows="False"
+                                  IsReadOnly="True"
+                                  BorderThickness="0"
+                                  RowHeight="46"
+                                  ColumnHeaderHeight="44"
+                                  FontSize="13"
+                                  MaxHeight="540"
+                                  AlternatingRowBackground="#FAFBFC"
+                                  ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                  ScrollViewer.HorizontalScrollBarVisibility="Auto">
 
-                        <controls:SearchBox x:Name="SearchBoxMaterias"
-                                            Grid.Column="0"
-                                            Placeholder="Buscar por código o nombre"
-                                            BusquedaCambiada="SearchBoxMaterias_BusquedaCambiada"/>
+                            <DataGrid.Resources>
+                                <Style TargetType="DataGridColumnHeader">
+                                    <Setter Property="Background" Value="#F4F7FA"/>
+                                    <Setter Property="Foreground" Value="#374151"/>
+                                    <Setter Property="FontWeight" Value="Bold"/>
+                                    <Setter Property="BorderThickness" Value="0"/>
+                                    <Setter Property="Padding" Value="10,0"/>
+                                </Style>
+                                <Style TargetType="DataGridCell">
+                                    <Setter Property="BorderThickness" Value="0"/>
+                                    <Setter Property="Padding" Value="8,0"/>
+                                    <Setter Property="VerticalContentAlignment" Value="Center"/>
+                                </Style>
+                            </DataGrid.Resources>
 
-                        <StackPanel Grid.Column="2">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Código" Binding="{Binding Codigo}" Width="1*"/>
+                                <DataGridTextColumn Header="Nombre" Binding="{Binding Nombre}" Width="2.4*"/>
+                                <DataGridTextColumn Header="Créditos" Binding="{Binding Creditos}" Width="0.8*"/>
+                                <DataGridTextColumn Header="Intensidad" Binding="{Binding IntensidadHorariaSemanal}" Width="0.9*"/>
+                                <DataGridTextColumn Header="Semestre" Binding="{Binding Semestre}" Width="0.9*"/>
+                                <DataGridTextColumn Header="Grupos" Binding="{Binding CantidadGrupos}" Width="0.8*"/>
 
-                            <TextBlock Text="Semestre"
-                                       FontSize="12"
-                                       FontWeight="Bold"
-                                       Margin="0,0,0,4"/>
-
-                            <ComboBox x:Name="CmbSemestre"
-                                      Height="34"
-                                      SelectionChanged="CmbSemestre_SelectionChanged">
-
-                                <ComboBoxItem Content="Todos"
-                                              IsSelected="True"/>
-
-                                <ComboBoxItem Content="1"/>
-                                <ComboBoxItem Content="2"/>
-                                <ComboBoxItem Content="3"/>
-                                <ComboBoxItem Content="4"/>
-                                <ComboBoxItem Content="5"/>
-                                <ComboBoxItem Content="6"/>
-                                <ComboBoxItem Content="7"/>
-                                <ComboBoxItem Content="8"/>
-                                <ComboBoxItem Content="9"/>
-                                <ComboBoxItem Content="10"/>
-                            </ComboBox>
-                        </StackPanel>
-
-                        <StackPanel Grid.Column="4">
-
-                            <TextBlock Text="Estado"
-                                       FontSize="12"
-                                       FontWeight="Bold"
-                                       Margin="0,0,0,4"/>
-
-                            <ComboBox x:Name="CmbEstado"
-                                      Height="34"
-                                      SelectionChanged="CmbEstado_SelectionChanged">
-
-                                <ComboBoxItem Content="Todos"
-                                              IsSelected="True"/>
-
-                                <ComboBoxItem Content="Activa"/>
-                                <ComboBoxItem Content="Inactiva"/>
-                            </ComboBox>
-                        </StackPanel>
-
-                        <Button Grid.Column="6"
-                                Content="Limpiar filtros"
-                                Height="34"
-                                Background="#006AA6"
-                                Foreground="White"
-                                BorderThickness="0"
-                                FontWeight="Bold"
-                                Cursor="Hand"
-                                VerticalAlignment="Bottom"
-                                Click="BtnLimpiarFiltros_Click"/>
-                    </Grid>
-
-                    <!-- Tabla -->
-                    <DataGrid x:Name="TablaMaterias"
-                              ItemsSource="{Binding MateriasFiltradas}"
-                              AutoGenerateColumns="False"
-                              HeadersVisibility="Column"
-                              GridLinesVisibility="Horizontal"
-                              CanUserAddRows="False"
-                              IsReadOnly="True"
-                              BorderThickness="0"
-                              RowHeight="42"
-                              ColumnHeaderHeight="38"
-                              FontSize="13"
-                              MaxHeight="520"
-                              ScrollViewer.VerticalScrollBarVisibility="Auto"
-                              ScrollViewer.HorizontalScrollBarVisibility="Auto">
-
-                        <DataGrid.Resources>
-
-                            <Style TargetType="DataGridColumnHeader">
-                                <Setter Property="Background"
-                                        Value="#F1F1F1"/>
-
-                                <Setter Property="FontWeight"
-                                        Value="Bold"/>
-
-                                <Setter Property="BorderThickness"
-                                        Value="0"/>
-
-                                <Setter Property="HorizontalContentAlignment"
-                                        Value="Center"/>
-                            </Style>
-
-                            <Style TargetType="DataGridCell">
-                                <Setter Property="BorderThickness"
-                                        Value="0"/>
-
-                                <Setter Property="Padding"
-                                        Value="4"/>
-
-                                <Setter Property="HorizontalContentAlignment"
-                                        Value="Center"/>
-                            </Style>
-
-                        </DataGrid.Resources>
-
-                        <DataGrid.Columns>
-
-                            <DataGridTextColumn Header="Código"
-                                                Binding="{Binding Codigo}"
-                                                Width="*"/>
-
-                            <DataGridTextColumn Header="Nombre"
-                                                Binding="{Binding Nombre}"
-                                                Width="2*"/>
-
-                            <DataGridTextColumn Header="Créditos"
-                                                Binding="{Binding Creditos}"
-                                                Width="*"/>
-
-                            <DataGridTextColumn Header="Intensidad"
-                                                Binding="{Binding IntensidadHorariaSemanal}"
-                                                Width="*"/>
-
-                            <DataGridTextColumn Header="Semestre"
-                                                Binding="{Binding Semestre}"
-                                                Width="*"/>
-
-                            <DataGridTextColumn Header="Can grupos"
-                                                Binding="{Binding CantidadGrupos}"
-                                                Width="*"/>
-
-                            <!-- Estado -->
-                            <DataGridTemplateColumn Header="Estado"
-                                                    Width="*">
-
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-
-                                        <Border CornerRadius="6"
-                                                Padding="8,3"
-                                                HorizontalAlignment="Center">
-
-                                            <Border.Style>
-                                                <Style TargetType="Border">
-
-                                                    <Setter Property="Background"
-                                                            Value="#B9EFC2"/>
-
-                                                    <Style.Triggers>
-
-                                                        <DataTrigger Binding="{Binding Activa}"
-                                                                     Value="False">
-
-                                                            <Setter Property="Background"
-                                                                    Value="#FED227"/>
-                                                        </DataTrigger>
-
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </Border.Style>
-
-                                            <TextBlock Text="{Binding EstadoTexto}"
-                                                       FontWeight="Bold"
-                                                       FontSize="12">
-
-                                                <TextBlock.Style>
-                                                    <Style TargetType="TextBlock">
-
-                                                        <Setter Property="Foreground"
-                                                                Value="#1A9E3B"/>
-
+                                <DataGridTemplateColumn Header="Estado" Width="1*">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Border CornerRadius="8" Padding="8,4" HorizontalAlignment="Center">
+                                                <Border.Style>
+                                                    <Style TargetType="Border">
+                                                        <Setter Property="Background" Value="#B9EFC2"/>
                                                         <Style.Triggers>
-
-                                                            <DataTrigger Binding="{Binding Activa}"
-                                                                         Value="False">
-
-                                                                <Setter Property="Foreground"
-                                                                        Value="#D6AB05"/>
-                                                            </DataTrigger>
-
-                                                        </Style.Triggers>
-                                                    </Style>
-                                                </TextBlock.Style>
-
-                                            </TextBlock>
-                                        </Border>
-
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
-
-                            <!-- Acciones -->
-                            <DataGridTemplateColumn Header="Acciones"
-                                                    Width="150">
-
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-
-                                        <StackPanel Orientation="Horizontal"
-                                                    HorizontalAlignment="Center">
-
-                                            <Button Content="✎"
-                                                    Width="26"
-                                                    Height="24"
-                                                    Margin="2"
-                                                    Background="#73AFE0"
-                                                    BorderThickness="0"
-                                                    Cursor="Hand"
-                                                    ToolTip="Editar"
-                                                    Click="BtnEditar_Click"/>
-
-                                            <!-- Inactivar: solo aparece cuando la materia está activa -->
-                                            <Button Content="⛔"
-                                                    Width="26"
-                                                    Height="24"
-                                                    Margin="2"
-                                                    Background="#EBB6B6"
-                                                    BorderThickness="0"
-                                                    Cursor="Hand"
-                                                    ToolTip="Inactivar"
-                                                    Click="BtnInactivar_Click">
-
-                                                <Button.Style>
-                                                    <Style TargetType="Button">
-                                                        <Setter Property="Visibility"
-                                                                Value="Visible"/>
-
-                                                        <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding Activa}"
-                                                                         Value="False">
-                                                                <Setter Property="Visibility"
-                                                                        Value="Collapsed"/>
+                                                            <DataTrigger Binding="{Binding Activa}" Value="False">
+                                                                <Setter Property="Background" Value="#FED227"/>
                                                             </DataTrigger>
                                                         </Style.Triggers>
                                                     </Style>
-                                                </Button.Style>
-                                            </Button>
+                                                </Border.Style>
+                                                <TextBlock Text="{Binding EstadoTexto}" FontWeight="Bold" FontSize="12">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Foreground" Value="#1A9E3B"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding Activa}" Value="False">
+                                                                    <Setter Property="Foreground" Value="#D6AB05"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                            </Border>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
 
-                                            <!-- Reactivar: solo aparece cuando la materia está inactiva -->
-                                            <Button Content="↻"
-                                                    Width="26"
-                                                    Height="24"
-                                                    Margin="2"
-                                                    Background="#B9EFC2"
-                                                    BorderThickness="0"
-                                                    Cursor="Hand"
-                                                    ToolTip="Reactivar"
-                                                    Click="BtnReactivar_Click">
+                                <DataGridTemplateColumn Header="Acciones" Width="150">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                                <Button Content="✎" Background="#73AFE0" ToolTip="Editar"
+                                                        Style="{StaticResource BotonAccionTabla}"
+                                                        Click="BtnEditar_Click"/>
+                                                <Button Content="⛔" Background="#EBB6B6" ToolTip="Inactivar"
+                                                        Click="BtnInactivar_Click">
+                                                    <Button.Style>
+                                                        <Style TargetType="Button" BasedOn="{StaticResource BotonAccionTabla}">
+                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding Activa}" Value="False">
+                                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Button.Style>
+                                                </Button>
+                                                <Button Content="↻" Background="#B9EFC2" ToolTip="Reactivar"
+                                                        Click="BtnReactivar_Click">
+                                                    <Button.Style>
+                                                        <Style TargetType="Button" BasedOn="{StaticResource BotonAccionTabla}">
+                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding Activa}" Value="False">
+                                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Button.Style>
+                                                </Button>
+                                                <Button Content="👁" Background="#DDCE73" ToolTip="Ver"
+                                                        Style="{StaticResource BotonAccionTabla}"
+                                                        Click="BtnVer_Click"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
 
-                                                <Button.Style>
-                                                    <Style TargetType="Button">
-                                                        <Setter Property="Visibility"
-                                                                Value="Collapsed"/>
-
-                                                        <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding Activa}"
-                                                                         Value="False">
-                                                                <Setter Property="Visibility"
-                                                                        Value="Visible"/>
-                                                            </DataTrigger>
-                                                        </Style.Triggers>
-                                                    </Style>
-                                                </Button.Style>
-                                            </Button>
-
-                                            <Button Content="👁"
-                                                    Width="26"
-                                                    Height="24"
-                                                    Margin="2"
-                                                    Background="#DDCE73"
-                                                    BorderThickness="0"
-                                                    Cursor="Hand"
-                                                    ToolTip="Ver"
-                                                    Click="BtnVer_Click"/>
-                                        </StackPanel>
-
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
-
-                        </DataGrid.Columns>
-                    </DataGrid>
-
-                    <!-- Resumen -->
-                    <TextBlock x:Name="TxtResumen"
-                               Margin="4,14,0,0"
-                               FontSize="12"
-                               FontWeight="SemiBold"
-                               Foreground="#7A7A7A"/>
-                </StackPanel>
-            </Border>
-        </StackPanel>
+                        <TextBlock x:Name="TxtResumen"
+                                   Margin="4,14,0,0"
+                                   FontSize="12"
+                                   FontWeight="SemiBold"
+                                   Foreground="#7A7A7A"/>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
     </Grid>
 </UserControl>

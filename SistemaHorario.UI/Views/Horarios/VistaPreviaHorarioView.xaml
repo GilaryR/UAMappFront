@@ -3,21 +3,21 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <ScrollViewer VerticalScrollBarVisibility="Auto"
-                  HorizontalScrollBarVisibility="Disabled">
+                  HorizontalScrollBarVisibility="Auto">
 
         <Grid Background="#F4F7FA">
 
             <StackPanel>
 
                 <TextBlock x:Name="TxtTitulo"
-                       Text="Vista previa para aprobación"
-                       FontSize="30"
-                       FontWeight="Bold"
-                       Margin="0,0,0,18"/>
+                           Text="Vista previa para aprobación"
+                           FontSize="30"
+                           FontWeight="Bold"
+                           Margin="0,0,0,18"/>
 
                 <Border Background="White"
-                    CornerRadius="14"
-                    Padding="18">
+                        CornerRadius="14"
+                        Padding="18">
 
                     <StackPanel>
 
@@ -25,31 +25,40 @@
 
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="180"/>
+                                <ColumnDefinition Width="220"/>
                             </Grid.ColumnDefinitions>
 
                             <StackPanel>
                                 <TextBlock x:Name="TxtNombreHorario"
-                                       FontSize="16"
-                                       FontWeight="Bold"/>
+                                           FontSize="16"
+                                           FontWeight="Bold"/>
 
                                 <TextBlock x:Name="TxtDetalleHorario"
-                                       FontSize="13"
-                                       Foreground="#6B7280"
-                                       Margin="0,4,0,0"/>
+                                           FontSize="13"
+                                           Foreground="#6B7280"
+                                           Margin="0,4,0,0"/>
                             </StackPanel>
 
-                            <Border Grid.Column="1"
-                                Background="#D8F8DD"
-                                CornerRadius="6"
-                                Padding="10"
-                                HorizontalAlignment="Right">
+                            <Border x:Name="BordeEstado"
+                                    Grid.Column="1"
+                                    Background="#FFF3CD"
+                                    CornerRadius="6"
+                                    Padding="10"
+                                    HorizontalAlignment="Right">
 
-                                <TextBlock Text="Sin solapes"
-                                       Foreground="Green"
-                                       FontWeight="Bold"/>
+                                <TextBlock x:Name="TxtEstadoHorario"
+                                           Text="Pendiente"
+                                           Foreground="#7A5A00"
+                                           FontWeight="Bold"/>
                             </Border>
                         </Grid>
+
+                        <TextBlock x:Name="TxtAyudaEdicion"
+                                   Text="Arrastre un bloque hacia otra franja disponible para editarlo. El backend validará disponibilidad docente, materia permitida y solapes."
+                                   Visibility="Collapsed"
+                                   Margin="0,0,0,12"
+                                   Foreground="#6B7280"
+                                   TextWrapping="Wrap"/>
 
                         <Grid x:Name="GridHorario"/>
 

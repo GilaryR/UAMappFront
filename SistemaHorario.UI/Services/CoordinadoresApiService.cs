@@ -1,4 +1,4 @@
-﻿using SistemaHorario.UI.Models.UI;
+using SistemaHorario.UI.Models.UI;
 using SistemaHorarios.Application.Common;
 
 namespace SistemaHorario.UI.Services;
@@ -15,6 +15,14 @@ public class UsuarioBackendDto
     public string Celular { get; set; } = string.Empty;
 }
 
+public class RolBackendDto
+{
+    public int IdRol { get; set; }
+    public string Nombre { get; set; } = string.Empty;
+    public string Descripcion { get; set; } = string.Empty;
+    public bool Activo { get; set; }
+}
+
 public class CoordinadoresApiService
 {
     private readonly ApiClient _api = new();
@@ -22,7 +30,7 @@ public class CoordinadoresApiService
     public async Task<ApiResponse<List<CoordinadorItem>>> ObtenerCoordinadoresAsync()
     {
         ApiResponse<List<UsuarioBackendDto>> resp =
-            await _api.GetAsync<List<UsuarioBackendDto>>("usuarios");
+            await _api.GetAsync<List<UsuarioBackendDto>>("usuarios/coordinadores");
 
         if (!resp.Success || resp.Data == null)
         {
@@ -30,17 +38,16 @@ public class CoordinadoresApiService
             {
                 Success = false,
                 Message = string.IsNullOrWhiteSpace(resp.Message)
-                    ? "No se pudieron consultar los usuarios."
+                    ? "No se pudieron consultar los coordinadores."
                     : resp.Message,
                 Data = new List<CoordinadorItem>()
             };
         }
 
         List<CoordinadorItem> lista = resp.Data
-            .Where(u => u.Rol.Contains(
-                "Coordinador",
-                StringComparison.OrdinalIgnoreCase))
             .Select(MapearCoordinador)
+            .OrderBy(x => x.Estado == "Inactivo")
+            .ThenBy(x => x.NombreCompleto)
             .ToList();
 
         return new ApiResponse<List<CoordinadorItem>>
@@ -54,13 +61,19 @@ public class CoordinadoresApiService
     public async Task<ApiResponse<string>> CrearCoordinadorAsync(
         CoordinadorItem coordinador)
     {
+        int idRolCoordinador = await ObtenerIdRolCoordinadorAsync();
+
+        string contrasena = string.IsNullOrWhiteSpace(coordinador.ContrasenaInicial)
+            ? "Coordinador123!"
+            : coordinador.ContrasenaInicial.Trim();
+
         return await _api.PostAsync("usuarios", new
         {
             NombreCompleto = coordinador.NombreCompleto,
             Cedula = coordinador.Cedula,
             CorreoInstitucional = coordinador.CorreoInstitucional,
-            Contrasena = "Coordinador123!",
-            IdRol = 2,
+            Contrasena = contrasena,
+            IdRol = idRolCoordinador,
             Estado = coordinador.Estado,
             Celular = coordinador.Celular
         });
@@ -69,20 +82,58 @@ public class CoordinadoresApiService
     public async Task<ApiResponse<string>> ActualizarCoordinadorAsync(
         CoordinadorItem coordinador)
     {
+        int idRolCoordinador = await ObtenerIdRolCoordinadorAsync();
+
         return await _api.PutAsync($"usuarios/{coordinador.IdCoordinador}", new
         {
             NombreCompleto = coordinador.NombreCompleto,
             Cedula = coordinador.Cedula,
             CorreoInstitucional = coordinador.CorreoInstitucional,
-            IdRol = 2,
+            IdRol = idRolCoordinador,
             Estado = coordinador.Estado,
             Celular = coordinador.Celular
         });
     }
 
+    public async Task<ApiResponse<string>> CambiarEstadoCoordinadorAsync(
+        int id,
+        string estado)
+    {
+        return await _api.PutAsync($"usuarios/{id}/estado", new
+        {
+            Estado = estado
+        });
+    }
+
+    public async Task<ApiResponse<string>> InactivarCoordinadorAsync(int id)
+    {
+        return await CambiarEstadoCoordinadorAsync(id, "Inactivo");
+    }
+
+    public async Task<ApiResponse<string>> ActivarCoordinadorAsync(int id)
+    {
+        return await CambiarEstadoCoordinadorAsync(id, "Activo");
+    }
+
     public async Task<ApiResponse<string>> EliminarCoordinadorAsync(int id)
     {
-        return await _api.DeleteAsync<string>($"usuarios/{id}");
+        // Se conserva por compatibilidad: eliminar equivale a inactivar.
+        return await InactivarCoordinadorAsync(id);
+    }
+
+    private async Task<int> ObtenerIdRolCoordinadorAsync()
+    {
+        ApiResponse<List<RolBackendDto>> resp =
+            await _api.GetAsync<List<RolBackendDto>>("roles");
+
+        RolBackendDto? rolCoordinador = resp.Data?
+            .FirstOrDefault(rol =>
+                string.Equals(
+                    rol.Nombre,
+                    "Coordinador",
+                    StringComparison.OrdinalIgnoreCase));
+
+        return rolCoordinador?.IdRol ?? 2;
     }
 
     private static CoordinadorItem MapearCoordinador(UsuarioBackendDto usuario)
@@ -94,8 +145,18 @@ public class CoordinadoresApiService
             Cedula = usuario.Cedula,
             CorreoInstitucional = usuario.CorreoInstitucional,
             Rol = usuario.Rol,
-            Estado = usuario.Estado,
+            Estado = NormalizarEstado(usuario.Estado),
             Celular = usuario.Celular
         };
+    }
+
+    private static string NormalizarEstado(string estado)
+    {
+        return string.Equals(
+            estado?.Trim(),
+            "Inactivo",
+            StringComparison.OrdinalIgnoreCase)
+                ? "Inactivo"
+                : "Activo";
     }
 }
