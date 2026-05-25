@@ -169,6 +169,7 @@ namespace SistemaHorario.UI.Controls
                 boton.SetValue(Button.CursorProperty, System.Windows.Input.Cursors.Hand);
 
                 // COLORES BOTONES
+                // COLORES BOTONES
                 switch (accion.Nombre.ToLower())
                 {
                     case "editar":
@@ -179,6 +180,18 @@ namespace SistemaHorario.UI.Controls
                     case "eliminar":
                         boton.SetValue(Button.BackgroundProperty,
                             new SolidColorBrush((Color)ColorConverter.ConvertFromString("#EBB6B6")));
+                        break;
+
+                    case "estado":
+                        boton.SetBinding(Button.BackgroundProperty, new Binding
+                        {
+                            Converter = new EstadoAccionBackgroundConverter()
+                        });
+
+                        boton.SetBinding(Button.ContentProperty, new Binding
+                        {
+                            Converter = new EstadoAccionTextoConverter()
+                        });
                         break;
 
                     case "ver":
@@ -308,11 +321,15 @@ namespace SistemaHorario.UI.Controls
     {
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
-            string estado = value?.ToString()?.ToLower() ?? "";
+            string estado = value?.ToString()?.Trim().ToLower() ?? "";
 
-            return estado.Contains("act")
+            bool activo =
+                estado == "activo" ||
+                estado == "activa";
+
+            return activo
                 ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#B9EFC2"))
-                : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FECACA"));
+                : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FDD12D"));
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
@@ -328,11 +345,63 @@ namespace SistemaHorario.UI.Controls
     {
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
-            string estado = value?.ToString()?.ToLower() ?? "";
+            string estado = value?.ToString()?.Trim().ToLower() ?? "";
 
-            return estado.Contains("act")
+            bool activo =
+                estado == "activo" ||
+                estado == "activa";
+
+            return activo
                 ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#1A9E3B"))
-                : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#DC2626"));
+                : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#D6A800"));
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+    public class EstadoAccionBackgroundConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            string estado = value?.GetType()
+                .GetProperty("Estado")
+                ?.GetValue(value)
+                ?.ToString()
+                ?.Trim()
+                .ToLower() ?? "";
+
+            bool activo =
+                estado == "activo" ||
+                estado == "activa";
+
+            return activo
+                ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#EBB6B6"))
+                : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#B9EFC2"));
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+    public class EstadoAccionTextoConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            string estado = value?.GetType()
+                .GetProperty("Estado")
+                ?.GetValue(value)
+                ?.ToString()
+                ?.Trim()
+                .ToLower() ?? "";
+
+            bool activo =
+                estado == "activo" ||
+                estado == "activa";
+
+            return activo ? "⛔" : "↻";
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
