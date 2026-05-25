@@ -90,16 +90,6 @@
                                                 <Run Text=" Créditos"/>
                                             </TextBlock>
 
-                                            <TextBlock FontSize="15"
-                                                       FontWeight="SemiBold"
-                                                       Foreground="#111111"
-                                                       TextWrapping="Wrap"
-                                                       LineHeight="21"
-                                                       Margin="0,0,0,6">
-                                                <Run Text="Carga por Semestre: "/>
-                                                <Run Text="{Binding CargaPorSemestre, Mode=OneWay}"/>
-                                            </TextBlock>
-
                                             <TextBlock FontSize="14"
                                                        FontWeight="SemiBold"
                                                        Foreground="#536679"

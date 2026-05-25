@@ -120,14 +120,16 @@ namespace SistemaHorario.UI.Views.PlanAcademico
                 return;
             }
 
-            MessageBoxResult confirmacion =
-                MessageBox.Show(
-                    $"¿Deseas eliminar el plan académico {plan.Nombre}?\n\nEl plan no se borrará de la base de datos, solo quedará inactivo.",
-                    "Eliminar plan académico",
-                    MessageBoxButton.YesNo,
-                    MessageBoxImage.Warning);
+            EliminarConfirmacionDialog dialog =
+                new(
+                    "ELIMINAR",
+                    $"¿Desea eliminar este plan académico?\nDebes escribir la palabra eliminar.",
+                    "eliminar")
+                {
+                    Owner = Window.GetWindow(this)
+                };
 
-            if (confirmacion != MessageBoxResult.Yes)
+            if (dialog.ShowDialog() != true)
             {
                 return;
             }
