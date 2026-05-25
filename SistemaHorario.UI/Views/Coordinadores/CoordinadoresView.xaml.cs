@@ -122,10 +122,10 @@ namespace SistemaHorario.UI.Views.Coordinadores
 
 				new TableActionDefinition
 				{
-					Nombre = "eliminar",
-					Texto = "🗑"
+					Nombre = "estado",
+					Texto = "↻"
 				}
-			]);
+            ]);
 
 			TablaCoordinadores.AccionEjecutada +=
 				TablaCoordinadores_AccionEjecutada;
@@ -215,10 +215,10 @@ namespace SistemaHorario.UI.Views.Coordinadores
 					EditarCoordinador(coordinador);
 					break;
 
-				case "eliminar":
-					EliminarCoordinador(coordinador);
-					break;
-			}
+                case "estado":
+                    CambiarEstadoCoordinador(coordinador);
+                    break;
+            }
 		}
 
         /// <summary>
@@ -241,31 +241,54 @@ namespace SistemaHorario.UI.Views.Coordinadores
 			NavegarAFormulario(coordinador);
 		}
 
-        /// <summary>
-        /// Elimina un coordinador usando diálogo de confirmación.
-        /// </summary>
-        private async void EliminarCoordinador(
-			CoordinadorItem coordinador)
+        private async void CambiarEstadoCoordinador(
+            CoordinadorItem coordinador)
         {
-            EliminarConfirmacionDialog dialog =
-                new($"¿Deseas eliminar al coordinador {coordinador.NombreCompleto}?\nDebes escribir la palabra eliminar.")
-                {
-                    Owner = Window.GetWindow(this)
-                };
+            bool estaActivo =
+                coordinador.Estado.Equals(
+                    "Activo",
+                    StringComparison.OrdinalIgnoreCase);
 
-            if (dialog.ShowDialog() != true)
+            if (estaActivo)
             {
-                return;
+                EliminarConfirmacionDialog dialog =
+                    new(
+                        "DESACTIVAR",
+                        $"¿Desea desactivar el coordinador {coordinador.NombreCompleto}?\nDebes escribir la palabra desactivar.",
+                        "desactivar")
+                    {
+                        Owner = Window.GetWindow(this)
+                    };
+
+                if (dialog.ShowDialog() != true)
+                {
+                    return;
+                }
+            }
+            else
+            {
+                ConfirmacionDialog dialog =
+                    new(
+                        "Reactivar coordinador",
+                        $"¿Está seguro que desea reactivar al coordinador {coordinador.NombreCompleto}?")
+                    {
+                        Owner = Window.GetWindow(this)
+                    };
+
+                if (dialog.ShowDialog() != true)
+                {
+                    return;
+                }
             }
 
-            bool eliminado =
+            bool ok =
                 await _viewModel.EliminarCoordinadorAsync(coordinador);
 
-            if (!eliminado)
+            if (!ok)
             {
                 MessageBox.Show(
                     _viewModel.MensajeEstado,
-                    "Error al eliminar",
+                    "Error al cambiar estado",
                     MessageBoxButton.OK,
                     MessageBoxImage.Error);
 
@@ -275,7 +298,10 @@ namespace SistemaHorario.UI.Views.Coordinadores
             CargarDatos();
 
             MensajeExitoDialog exito =
-                new("Coordinador eliminado correctamente.")
+                new(
+                    estaActivo
+                        ? "Coordinador desactivado correctamente."
+                        : "Coordinador reactivado correctamente.")
                 {
                     Owner = Window.GetWindow(this)
                 };
