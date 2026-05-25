@@ -18,16 +18,26 @@ namespace SistemaHorario.UI.Views.Shell
 
             ConfigurarUsuario(
                 UsuarioSesion.NombreCompleto,
-                UsuarioSesion.CorreoInstitucional
+                UsuarioSesion.CorreoInstitucional,
+                UsuarioSesion.Rol
             );
         }
 
+        /// <summary>
+        /// Configura los datos visibles del usuario en el menú superior.
+        /// También muestra el rol del usuario autenticado:
+        /// Administrador o Coordinador.
+        /// </summary>
         public void ConfigurarUsuario(
             string nombreCompleto,
-            string correoInstitucional)
+            string correoInstitucional,
+            string rol)
         {
             TxtNombreUsuario.Text = ObtenerNombreCorto(nombreCompleto);
             TxtCorreoUsuario.Text = correoInstitucional;
+            TxtRolUsuario.Text = string.IsNullOrWhiteSpace(rol)
+                ? "Sin rol"
+                : rol;
         }
 
         public void Mostrar()

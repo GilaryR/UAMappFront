@@ -40,7 +40,8 @@ namespace SistemaHorario.UI.Views.Shell
 
             userMenuView.ConfigurarUsuario(
                 UsuarioSesion.NombreCompleto,
-                UsuarioSesion.CorreoInstitucional
+                UsuarioSesion.CorreoInstitucional,
+                UsuarioSesion.Rol
             );
 
             sidebarView.ConfigurarMenu(UsuarioSesion.Rol);

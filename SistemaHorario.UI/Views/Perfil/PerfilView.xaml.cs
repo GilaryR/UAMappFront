@@ -118,8 +118,8 @@ namespace SistemaHorario.UI.Views.Perfil
         }
 
         private async void BtnCambiarFoto_Click(
-            object sender,
-            RoutedEventArgs e)
+    object sender,
+    RoutedEventArgs e)
         {
             OpenFileDialog dialog = new()
             {
@@ -127,6 +127,20 @@ namespace SistemaHorario.UI.Views.Perfil
             };
 
             if (dialog.ShowDialog() != true)
+            {
+                return;
+            }
+
+            ConfirmacionDialog confirmacion =
+                new(
+                    "Modificar foto",
+                    "¿Desea modificar la foto de perfil?"
+                )
+                {
+                    Owner = Window.GetWindow(this)
+                };
+
+            if (confirmacion.ShowDialog() != true)
             {
                 return;
             }
@@ -203,9 +217,23 @@ namespace SistemaHorario.UI.Views.Perfil
         }
 
         private async void BtnCambiarContrasena_Click(
-            object sender,
-            RoutedEventArgs e)
+    object sender,
+    RoutedEventArgs e)
         {
+            ConfirmacionDialog confirmacion =
+                new(
+                    "Cambiar contraseña",
+                    "¿Está seguro de cambiar su contraseña?"
+                )
+                {
+                    Owner = Window.GetWindow(this)
+                };
+
+            if (confirmacion.ShowDialog() != true)
+            {
+                return;
+            }
+
             CambiarContrasenaDialog dialog = new()
             {
                 Owner = Window.GetWindow(this)
