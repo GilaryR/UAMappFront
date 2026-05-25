@@ -95,26 +95,73 @@ namespace SistemaHorario.UI.ViewModels.Perfil
 
         public async Task<bool> ActualizarFotoAsync(string rutaArchivo)
         {
-            ApiResponse<string> resp =
-                await _api.ActualizarFotoPerfilAsync(rutaArchivo);
-
-            if (!resp.Success || string.IsNullOrWhiteSpace(resp.Data))
+            try
             {
-                MensajeEstado = string.IsNullOrWhiteSpace(resp.Message)
-                    ? "No se pudo actualizar la foto de perfil."
-                    : resp.Message;
+                if (string.IsNullOrWhiteSpace(rutaArchivo) ||
+                    !System.IO.File.Exists(rutaArchivo))
+                {
+                    MensajeEstado = "La imagen seleccionada no existe.";
+                    return false;
+                }
 
+                /*
+                 * Se copia la imagen seleccionada a una carpeta propia de la aplicación.
+                 * Así no dependemos de la ruta original del computador del usuario.
+                 */
+                string carpetaPerfil = System.IO.Path.Combine(
+                    System.Environment.GetFolderPath(
+                        System.Environment.SpecialFolder.ApplicationData),
+                    "SistemaHorarios",
+                    "Perfil"
+                );
+
+                System.IO.Directory.CreateDirectory(carpetaPerfil);
+
+                string extension = System.IO.Path.GetExtension(rutaArchivo);
+
+                string nombreArchivo = "foto_perfil" + extension;
+
+                string rutaDestino = System.IO.Path.Combine(
+                    carpetaPerfil,
+                    nombreArchivo
+                );
+
+                System.IO.File.Copy(
+                    rutaArchivo,
+                    rutaDestino,
+                    overwrite: true
+                );
+
+                /*
+                 * Aquí se manda a la API la copia local, no la ruta original
+                 * de Descargas, Escritorio o Imágenes.
+                 */
+                ApiResponse<string> resp =
+                    await _api.ActualizarFotoPerfilAsync(rutaDestino);
+
+                if (!resp.Success || string.IsNullOrWhiteSpace(resp.Data))
+                {
+                    MensajeEstado = string.IsNullOrWhiteSpace(resp.Message)
+                        ? "No se pudo actualizar la foto de perfil."
+                        : resp.Message;
+
+                    return false;
+                }
+
+                string rutaFoto = resp.Data.StartsWith("http")
+                    ? resp.Data
+                    : "http://localhost:5023" + resp.Data;
+
+                Perfil.RutaImagen = rutaFoto;
+
+                MensajeEstado = string.Empty;
+                return true;
+            }
+            catch (System.Exception ex)
+            {
+                MensajeEstado = ex.Message;
                 return false;
             }
-
-            string rutaFoto = resp.Data.StartsWith("http")
-                ? resp.Data
-                : "http://localhost:5023" + resp.Data;
-
-            Perfil.RutaImagen = rutaFoto;
-
-            MensajeEstado = string.Empty;
-            return true;
         }
     }
 }
