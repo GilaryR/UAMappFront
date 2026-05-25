@@ -74,9 +74,9 @@ namespace SistemaHorario.UI.ViewModels.PlanAcademico
                 : $"{Semestre.TotalMaterias} materias · {Semestre.TotalCreditos} créditos";
 
         public string JornadaSemestre =>
-            string.IsNullOrWhiteSpace(Semestre?.Jornada)
+            string.IsNullOrWhiteSpace(Plan?.Jornada)
                 ? "Jornada: Por definir"
-                : $"Jornada: {Semestre.Jornada}";
+                : $"Jornada: {Plan.Jornada}";
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
