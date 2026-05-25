@@ -158,9 +158,7 @@ namespace SistemaHorario.UI.Views.Materias
             dialog.ShowDialog();
         }
 
-        private async void BtnInactivar_Click(
-    object sender,
-    RoutedEventArgs e)
+        private async void BtnInactivar_Click(object sender, RoutedEventArgs e)
         {
             MateriaItem? materia =
                 ObtenerMateriaDesdeBoton(sender);
@@ -170,13 +168,16 @@ namespace SistemaHorario.UI.Views.Materias
                 return;
             }
 
-            EliminarConfirmacionDialog dialogEliminar =
-                new()
+            EliminarConfirmacionDialog dialogDesactivar =
+                new(
+                    "DESACTIVAR",
+                    "¿Estás seguro que deseas desactivar?\nDebes escribir la palabra desactivar.",
+                    "desactivar")
                 {
                     Owner = Window.GetWindow(this)
                 };
 
-            if (dialogEliminar.ShowDialog() != true)
+            if (dialogDesactivar.ShowDialog() != true)
             {
                 return;
             }
@@ -201,14 +202,25 @@ namespace SistemaHorario.UI.Views.Materias
             exito.ShowDialog();
         }
 
-        private async void BtnReactivar_Click(
-            object sender,
-            RoutedEventArgs e)
+        private async void BtnReactivar_Click(object sender, RoutedEventArgs e)
         {
             MateriaItem? materia =
                 ObtenerMateriaDesdeBoton(sender);
 
             if (materia == null)
+            {
+                return;
+            }
+
+            ConfirmacionDialog confirmacion =
+                new(
+                    "Reactivar materia",
+                    "¿Está seguro que desea reactivar esta materia?")
+                {
+                    Owner = Window.GetWindow(this)
+                };
+
+            if (confirmacion.ShowDialog() != true)
             {
                 return;
             }
