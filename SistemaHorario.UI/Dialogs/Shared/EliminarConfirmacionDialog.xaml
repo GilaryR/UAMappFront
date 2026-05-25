@@ -22,8 +22,8 @@
                    Stretch="Uniform"
                    HorizontalAlignment="Center"
                    Margin="0,0,0,12"/>
-
-            <TextBlock Text="ELIMINAR"
+            <TextBlock x:Name="TxtTitulo"
+                       Text="ELIMINAR"
                        FontSize="26"
                        FontWeight="Bold"
                        Foreground="Black"
