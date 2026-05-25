@@ -194,7 +194,64 @@ private static string ObtenerContentType(string rutaArchivo)
         {
             HttpResponseMessage response = await _http.GetAsync(url);
 
-            return await ProcesarRespuestaAsync<T>(response);
+            string contenido = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                return new ApiResponse<T>
+                {
+                    Success = false,
+                    Message = string.IsNullOrWhiteSpace(contenido)
+                        ? "Error al consultar la información."
+                        : contenido
+                };
+            }
+
+            if (string.IsNullOrWhiteSpace(contenido))
+            {
+                return new ApiResponse<T>
+                {
+                    Success = false,
+                    Message = "La respuesta del servidor está vacía."
+                };
+            }
+
+            try
+            {
+                ApiResponse<T>? apiResponse =
+                    JsonSerializer.Deserialize<ApiResponse<T>>(
+                        contenido,
+                        new JsonSerializerOptions
+                        {
+                            PropertyNameCaseInsensitive = true
+                        });
+
+                if (apiResponse != null &&
+                    (apiResponse.Success ||
+                     apiResponse.Data != null ||
+                     !string.IsNullOrWhiteSpace(apiResponse.Message)))
+                {
+                    return apiResponse;
+                }
+            }
+            catch
+            {
+                // Si no viene como ApiResponse<T>, se intenta leer como respuesta directa.
+            }
+
+            T? data = JsonSerializer.Deserialize<T>(
+                contenido,
+                new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+
+            return new ApiResponse<T>
+            {
+                Success = true,
+                Message = "Consulta realizada correctamente.",
+                Data = data
+            };
         }
         catch (Exception ex)
         {
