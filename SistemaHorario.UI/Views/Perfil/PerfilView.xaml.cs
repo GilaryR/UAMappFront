@@ -55,7 +55,7 @@ namespace SistemaHorario.UI.Views.Perfil
 
                 if (string.IsNullOrWhiteSpace(rutaImagen))
                 {
-                    rutaImagen = "/Assets/Images/ImgUsuario.png";
+                    rutaImagen = "pack://application:,,,/Assets/Images/ImgUsuario.png";
                 }
 
                 if (rutaImagen.StartsWith(
@@ -70,7 +70,7 @@ namespace SistemaHorario.UI.Views.Perfil
             }
             catch
             {
-                CargarImagenLocal("/Assets/Images/ImgUsuario.png");
+                CargarImagenLocal("pack://application:,,,/Assets/Images/ImgUsuario.png");
             }
         }
 
