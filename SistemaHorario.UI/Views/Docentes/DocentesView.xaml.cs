@@ -236,12 +236,13 @@ namespace SistemaHorario.UI.Views.Docentes
             ReactivarDocente(docente);
         }
 
-        private async void InactivarDocente(
-            DocenteItem docente)
+        private async void InactivarDocente(DocenteItem docente)
         {
             EliminarConfirmacionDialog dialog =
                 new(
-                    $"¿Deseas inactivar al docente {docente.NombreCompleto}?\nDebes escribir la palabra eliminar.")
+                    "DESACTIVAR",
+                    $"¿Estás seguro que deseas desactivar al docente {docente.NombreCompleto}?\nDebes escribir la palabra desactivar.",
+                    "desactivar")
                 {
                     Owner = Window.GetWindow(this)
                 };
@@ -258,7 +259,7 @@ namespace SistemaHorario.UI.Views.Docentes
             if (!ok)
             {
                 MessageBox.Show(
-                    "Error al inactivar: " + _viewModel.MensajeEstado,
+                    "Error al desactivar: " + _viewModel.MensajeEstado,
                     "Error",
                     MessageBoxButton.OK,
                     MessageBoxImage.Error);
@@ -269,7 +270,7 @@ namespace SistemaHorario.UI.Views.Docentes
             await RecargarDocentesAsync();
 
             MensajeExitoDialog exito =
-                new("Docente inactivado correctamente.")
+                new("Docente desactivado correctamente.")
                 {
                     Owner = Window.GetWindow(this)
                 };
@@ -277,9 +278,21 @@ namespace SistemaHorario.UI.Views.Docentes
             exito.ShowDialog();
         }
 
-        private async void ReactivarDocente(
-            DocenteItem docente)
+        private async void ReactivarDocente(DocenteItem docente)
         {
+            ConfirmacionDialog confirmacion =
+                new(
+                    "Reactivar docente",
+                    $"¿Está seguro que desea reactivar al docente {docente.NombreCompleto}?")
+                {
+                    Owner = Window.GetWindow(this)
+                };
+
+            if (confirmacion.ShowDialog() != true)
+            {
+                return;
+            }
+
             bool ok =
                 await _viewModel.ActivarDocenteAsync(
                     docente.IdDocente);
