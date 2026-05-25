@@ -152,25 +152,36 @@ namespace SistemaHorario.UI.Views.GruposAcademicos
                     StringComparison.OrdinalIgnoreCase
                 );
 
-            string accion =
-                estaActivo ? "inactivar" : "reactivar";
-
-            string mensajeExito =
-                estaActivo
-                    ? "Grupo académico inactivado"
-                    : "Grupo académico reactivado";
-
-            MessageBoxResult confirmacion =
-                MessageBox.Show(
-                    $"¿Deseas {accion} el grupo académico {grupo.Codigo}?",
-                    "Confirmar cambio de estado",
-                    MessageBoxButton.YesNo,
-                    MessageBoxImage.Question
-                );
-
-            if (confirmacion != MessageBoxResult.Yes)
+            if (estaActivo)
             {
-                return;
+                EliminarConfirmacionDialog dialog =
+                    new(
+                        "DESACTIVAR",
+                        $"¿Desea desactivar el grupo académico {grupo.Codigo}?\nDebes escribir la palabra desactivar.",
+                        "desactivar")
+                    {
+                        Owner = Window.GetWindow(this)
+                    };
+
+                if (dialog.ShowDialog() != true)
+                {
+                    return;
+                }
+            }
+            else
+            {
+                ConfirmacionDialog dialog =
+                    new(
+                        "Reactivar grupo académico",
+                        $"¿Está seguro que desea reactivar el grupo académico {grupo.Codigo}?")
+                    {
+                        Owner = Window.GetWindow(this)
+                    };
+
+                if (dialog.ShowDialog() != true)
+                {
+                    return;
+                }
             }
 
             bool ok =
@@ -189,6 +200,12 @@ namespace SistemaHorario.UI.Views.GruposAcademicos
             }
 
             ActualizarBotonesPaginacion();
+
+            string mensajeExito =
+                estaActivo
+                    ? "Grupo académico desactivado correctamente."
+                    : "Grupo académico reactivado correctamente.";
+
             MostrarExito(mensajeExito);
         }
 

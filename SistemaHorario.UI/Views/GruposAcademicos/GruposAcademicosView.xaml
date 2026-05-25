@@ -44,6 +44,19 @@
             <Setter Property="Padding" Value="14,0"/>
         </Style>
 
+        <Style x:Key="BotonEstadoGrupo" TargetType="Button" BasedOn="{StaticResource BotonAccionTabla}">
+            <Setter Property="Content" Value="⛔"/>
+            <Setter Property="Background" Value="#EBB6B6"/>
+            <Setter Property="Foreground" Value="#111111"/>
+
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Estado}" Value="Inactivo">
+                    <Setter Property="Content" Value="↻"/>
+                    <Setter Property="Background" Value="#B9EFC2"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
     </UserControl.Resources>
 
     <Grid Background="#EEF0F2">
@@ -94,24 +107,24 @@
                                  Text="{Binding CodigoGrupoFiltro, UpdateSourceTrigger=PropertyChanged}"/>
 
                         <ComboBox x:Name="CmbEstado"
-                              Width="170"
-                              Height="34"
-                              FontSize="14"
-                              Margin="12,0,0,0"
-                              SelectedValuePath="Content"
-                              SelectedValue="{Binding EstadoFiltro, Mode=TwoWay}">      
+                                  Width="170"
+                                  Height="34"
+                                  FontSize="14"
+                                  Margin="12,0,0,0"
+                                  SelectedValuePath="Content"
+                                  SelectedValue="{Binding EstadoFiltro, Mode=TwoWay}">
                             <ComboBoxItem Content="Todos"/>
                             <ComboBoxItem Content="Activo"/>
                             <ComboBoxItem Content="Inactivo"/>
                         </ComboBox>
 
                         <ComboBox x:Name="CmbJornada"
-                              Width="170"
-                              Height="34"
-                              FontSize="14"
-                              Margin="12,0,0,0"
-                              SelectedValuePath="Content"
-                              SelectedValue="{Binding JornadaFiltro, Mode=TwoWay}">     
+                                  Width="170"
+                                  Height="34"
+                                  FontSize="14"
+                                  Margin="12,0,0,0"
+                                  SelectedValuePath="Content"
+                                  SelectedValue="{Binding JornadaFiltro, Mode=TwoWay}">
                             <ComboBoxItem Content="Todas"/>
                             <ComboBoxItem Content="Diurna"/>
                             <ComboBoxItem Content="Nocturna"/>
@@ -173,23 +186,23 @@
                                     <Setter Property="VerticalContentAlignment" Value="Center"/>
                                 </Style>
                             </DataGrid.CellStyle>
+
                             <DataGrid.Columns>
 
                                 <DataGridTextColumn Header="Grupo"
-                        Binding="{Binding NombreGrupo}"
-                        Width="140"/>
+                                                    Binding="{Binding NombreGrupo}"
+                                                    Width="140"/>
 
                                 <DataGridTextColumn Header="Código"
-                        Binding="{Binding Codigo}"
-                        Width="90"/>
+                                                    Binding="{Binding Codigo}"
+                                                    Width="90"/>
 
-                                <DataGridTemplateColumn Header="Jornada"
-                            Width="105">
+                                <DataGridTemplateColumn Header="Jornada" Width="105">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <Border CornerRadius="5"
-                        Padding="9,5"
-                        HorizontalAlignment="Left">
+                                                    Padding="9,5"
+                                                    HorizontalAlignment="Left">
                                                 <Border.Style>
                                                     <Style TargetType="Border">
                                                         <Setter Property="Background" Value="#CFE8FA"/>
@@ -202,8 +215,8 @@
                                                 </Border.Style>
 
                                                 <TextBlock Text="{Binding Jornada}"
-                               FontWeight="Bold"
-                               FontSize="13">
+                                                           FontWeight="Bold"
+                                                           FontSize="13">
                                                     <TextBlock.Style>
                                                         <Style TargetType="TextBlock">
                                                             <Setter Property="Foreground" Value="#0077B6"/>
@@ -221,44 +234,43 @@
                                 </DataGridTemplateColumn>
 
                                 <DataGridTextColumn Header="Semestre"
-                        Binding="{Binding NumeroSemestre}"
-                        Width="90"/>
+                                                    Binding="{Binding NumeroSemestre}"
+                                                    Width="90"/>
 
                                 <DataGridTextColumn Header="Estudiantes"
-                        Binding="{Binding EstudiantesTexto}"
-                        Width="105"/>
+                                                    Binding="{Binding EstudiantesTexto}"
+                                                    Width="105"/>
 
                                 <DataGridTextColumn Header="Tipo"
-                        Binding="{Binding Tipo}"
-                        Width="90"/>
+                                                    Binding="{Binding Tipo}"
+                                                    Width="90"/>
 
-                                <DataGridTemplateColumn Header="Estado"
-                            Width="100">
+                                <DataGridTemplateColumn Header="Estado" Width="100">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <Border CornerRadius="5"
-                        Padding="9,5"
-                        HorizontalAlignment="Left">
+                                                    Padding="9,5"
+                                                    HorizontalAlignment="Left">
                                                 <Border.Style>
                                                     <Style TargetType="Border">
                                                         <Setter Property="Background" Value="#D4F8DD"/>
                                                         <Style.Triggers>
                                                             <DataTrigger Binding="{Binding Estado}" Value="Inactivo">
-                                                                <Setter Property="Background" Value="#F8D4D4"/>
+                                                                <Setter Property="Background" Value="#FDD12D"/>
                                                             </DataTrigger>
                                                         </Style.Triggers>
                                                     </Style>
                                                 </Border.Style>
 
                                                 <TextBlock Text="{Binding Estado}"
-                               FontWeight="Bold"
-                               FontSize="13">
+                                                           FontWeight="Bold"
+                                                           FontSize="13">
                                                     <TextBlock.Style>
                                                         <Style TargetType="TextBlock">
                                                             <Setter Property="Foreground" Value="#008A30"/>
                                                             <Style.Triggers>
                                                                 <DataTrigger Binding="{Binding Estado}" Value="Inactivo">
-                                                                    <Setter Property="Foreground" Value="#B42318"/>
+                                                                    <Setter Property="Foreground" Value="#D6A800"/>
                                                                 </DataTrigger>
                                                             </Style.Triggers>
                                                         </Style>
@@ -269,31 +281,29 @@
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
 
-                                <DataGridTemplateColumn Header="Acciones"
-                            Width="112">
+                                <DataGridTemplateColumn Header="Acciones" Width="112">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <StackPanel Orientation="Horizontal">
-                                                <Button Content="👁"
-                            Background="#E4D36C"
-                            Foreground="#111111"
-                            Style="{StaticResource BotonAccionTabla}"
-                            CommandParameter="{Binding}"
-                            Click="VerGrupo_Click"/>
 
                                                 <Button Content="✎"
-                            Background="#78B8E6"
-                            Foreground="#111111"
-                            Style="{StaticResource BotonAccionTabla}"
-                            CommandParameter="{Binding}"
-                            Click="EditarGrupo_Click"/>
+                                                        Background="#78B8E6"
+                                                        Foreground="#111111"
+                                                        Style="{StaticResource BotonAccionTabla}"
+                                                        CommandParameter="{Binding}"
+                                                        Click="EditarGrupo_Click"/>
 
-                                                <Button Content="↕"
-                            Background="#F0B6B6"
-                            Foreground="#111111"
-                            Style="{StaticResource BotonAccionTabla}"
-                            CommandParameter="{Binding}"
-                            Click="EliminarGrupo_Click"/>
+                                                <Button Style="{StaticResource BotonEstadoGrupo}"
+                                                        CommandParameter="{Binding}"
+                                                        Click="EliminarGrupo_Click"/>
+
+                                                <Button Content="👁"
+                                                        Background="#E4D36C"
+                                                        Foreground="#111111"
+                                                        Style="{StaticResource BotonAccionTabla}"
+                                                        CommandParameter="{Binding}"
+                                                        Click="VerGrupo_Click"/>
+
                                             </StackPanel>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
